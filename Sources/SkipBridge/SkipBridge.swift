@@ -1,48 +1,75 @@
 #if !SKIP
-import Foundation
+@_exported import Foundation
 import SkipJNI
 #else
 public protocol JConvertible { }
 public protocol JObjectConvertible { }
 #endif
 
-// TODO: constructors/initializers
-// TODO: static functions
-// TODO: async/coroutine bridging
-// TODO: error/exception translation
-
-
 public protocol SkipBridgable: JConvertible {
 }
 
-public protocol SkipBridge : AnyObject, JObjectConvertible {
-    static var javaClassName: String { get }
-    
+public protocol SkipReferenceBridgable : AnyObject, SkipBridgable, JObjectConvertible {
     #if !SKIP
     var javaPeer: JavaObject { get throws }
-    #endif
 
-    #if !SKIP
-    func invokeJava<T: SkipBridgable>(functionName: String, _ args: SkipBridgable..., implementation: () -> ()) throws -> T
+    func invokeJava<T: SkipBridgable>(functionName: String, _ args: SkipBridgable..., implementation: () throws -> ()) throws -> T
 
     func invokeSwift<T: SkipBridgable>(_ args: SkipBridgable..., implementation: () throws -> T) rethrows -> T
     #endif
 }
 
-public extension SkipBridge {
-    #if !SKIP
-    static var javaClass: JClass {
-        try! JClass(name: javaClassName)
+public protocol SkipBridgeInstance {
+
+}
+
+open class SkipBridge : SkipBridgeInstance {
+    #if SKIP // added by skipstone
+    /// The pointer to the Swift side of MathBridge associated with this Java instance, used by `lookupSwiftPeerFromJavaObject`
+    public var _swiftPeer: Long = 0
+    #endif
+
+
+    // FIXME: how to do this in the subclass?
+    
+    /// The name of the Java class for this Swift peer
+
+    public init() {
     }
 
-    static func fromJavaObject(_ obj: JavaObject?) throws -> Self {
+
+    /// Cleanup JNI peer.
+    ///
+    /// Cleanup should only happen if this instance was constructed from the Swift side.
+    /// It if was created from the Java side, then cleanup will happen when the instance is finalized in the owning Java peer, like:
+    ///
+    /// ```
+    /// fun finalize() {
+    ///     JNI_call_cleanupSkipBridge(this)
+    /// }
+    /// ```
+    deinit {
+        if /* createdFromSwift */ true {
+            cleanupSkipBridge()
+        }
+    }
+}
+
+public extension SkipBridgeInstance {
+    #if !SKIP
+    /// The pointer value of the this Swift object
+    var swiftPointerValue: Int64 {
+        let ptr = unsafeBitCast(self, to: Int.self)
+        return Int64(ptr)
+        // alternatively:
+        // let ptr: UnsafeMutableRawPointer = Unmanaged.passUnretained(self).toOpaque()
+        //return Int64(Int(bitPattern: ptr))
+    }
+
+    static func fromJavaObject(_ obj: JavaObject?) throws -> Self where Self : SkipBridge {
         try lookupSwiftPeerFromJavaObject(obj)
     }
-
-    func toJavaObject() -> JavaObject? {
-        try? javaPeer
-    }
-
+    
     func invokeJava<T: SkipBridgable>(functionName: String = #function, _ args: SkipBridgable..., implementation: () -> ()) throws -> T {
         throw SkipBridgeError(description: "invokeJava should be have been added by the transpiler via an extension on the owning type")
     }
@@ -97,32 +124,6 @@ public extension SkipBridge {
         function()
         if let error = SwiftBridge.shared.popSwiftErrorMessage() {
             throw RuntimeException(error) // ### TODO: should we try to convert the exception type?
-        }
-    }
-    #endif
-
-    #if !SKIP
-    /// The pointer value of the this Swift object
-    var swiftPointerValue: Int64 {
-        let ptr = unsafeBitCast(self, to: Int.self)
-        return Int64(ptr)
-        // alternatively:
-        // let ptr: UnsafeMutableRawPointer = Unmanaged.passUnretained(self).toOpaque()
-        //return Int64(Int(bitPattern: ptr))
-    }
-
-    var javaPeer: JavaObject {
-        get throws {
-            let swiftPointer = self.swiftPointerValue
-            if let existingPeer = swiftJavaPeerMap[swiftPointer] {
-                return existingPeer
-            }
-
-            let clazz = Self.javaClass
-            let constructor = clazz.getMethodID(name: "<init>", sig: "()V")!
-            let obj: JavaObject = try! clazz.create(ctor: constructor, [])
-            swiftJavaPeerMap[swiftPointer] = obj
-            return obj
         }
     }
     #endif
@@ -241,46 +242,3 @@ final class SwiftBridge {
 }
 
 #endif
-
-
-
-#if !SKIP
-//func getPeerFromJavaObject(javaObject: JavaObject) -> SkipBridgable? {
-//    if let ptr_field = javaObject.cls.getFieldID(name: "_ptr", sig: "J") {
-//        let ptr = unsafeBitCast(self, to: Int.self)
-//        javaObject.set(field: ptr_field, value: Int64(ptr))
-//    }
-//
-//}
-
-//open class ObjectBase: ObjectProtocol {
-//    public let javaObject: JObject
-//
-//    open class var javaClass: JClass {
-//        return try! getJavaClass(from: self)
-//    }
-//
-//    public required init(_ obj: JavaObject) {
-//        javaObject = JObject(obj)
-//    }
-//
-//    public required init(ctor: JavaMethodID, _ args: [JavaParameter]) throws {
-//        let obj = try type(of: self).javaClass.create(ctor: ctor, args)
-//        javaObject = JObject(obj)
-//
-//        if let ptr_field = javaObject.cls.getFieldID(name: "_ptr", sig: "J") {
-//            let ptr = unsafeBitCast(self, to: Int.self)
-//            javaObject.set(field: ptr_field, value: Int64(ptr))
-//        }
-//    }
-//}
-//
-//
-//extension ObjectBase: Equatable {
-//    public static func == (lhs: ObjectBase, rhs: ObjectBase) -> Bool {
-//        return jni.withEnv { $0.IsSameObject($1, lhs.javaObject.ptr, rhs.javaObject.ptr) != 0 }
-//    }
-//}
-
-#endif
-

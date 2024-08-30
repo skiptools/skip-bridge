@@ -65,6 +65,8 @@ final class SkipBridgeSamplesTests: XCTestCase {
         #else
         // Swift -> Swift
         XCTAssertEqual(16.0, math.callSwiftPOW(2.0, power: 4.0))
+
+        //math.thisFunctionWasAddedByTheTranspiler2()
         #endif
 
         // Java+Swift -> Swift
