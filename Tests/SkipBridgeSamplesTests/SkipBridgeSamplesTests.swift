@@ -1,4 +1,5 @@
 import XCTest
+import Foundation
 import SkipBridge
 import SkipBridgeSamples
 #if os(macOS)
@@ -53,7 +54,22 @@ final class SkipBridgeSamplesTests: XCTestCase {
         #endif
     }
 
-    func testSimpleBridging() throws {
+    func testJavaFileBridge() throws {
+        let tmpName = "/tmp/" + UUID().uuidString
+        let file = try JavaFileBridge(filePath: tmpName)
+        XCTAssertFalse(try file.exists())
+        XCTAssertTrue(try file.createNewFile())
+        XCTAssertTrue(try file.exists())
+        XCTAssertTrue(try file.delete())
+        XCTAssertFalse(try file.exists())
+    }
+
+    func testSwiftURLBridge() throws {
+        let url = try SwiftURLBridge(urlString: "https://skip.tools")
+        XCTAssertFalse(url.isFileURL())
+    }
+
+    func testMathBridge() throws {
         let math = MathBridge()
         XCTAssertEqual(4.0, math.callPurePOW(2.0, power: 2.0))
 

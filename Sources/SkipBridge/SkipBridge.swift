@@ -14,8 +14,10 @@ public protocol SkipReferenceBridgable : AnyObject, SkipBridgable, JObjectConver
     var javaPeer: JavaObject { get throws }
 
     func invokeJava<T: SkipBridgable>(functionName: String, _ args: SkipBridgable..., implementation: () throws -> ()) throws -> T
+    func invokeJavaVoid(functionName: String, _ args: SkipBridgable..., implementation: () throws -> ()) throws
 
     func invokeSwift<T: SkipBridgable>(_ args: SkipBridgable..., implementation: () throws -> T) rethrows -> T
+    func invokeSwiftVoid(_ args: SkipBridgable..., implementation: () throws -> ()) rethrows
     #endif
 }
 
@@ -139,6 +141,40 @@ public extension SkipBridgeInstance {
     }
 }
 
+#if !SKIP
+extension SkipReferenceBridgable {
+    public func callJavaT<T: SkipBridgable>(functionName: String, signature: String, arguments args: [SkipBridgable]) throws -> T {
+        try callJ(functionName: functionName, signature: signature, arguments: args) { jobj, mid, jargs in
+            try jobj.call(method: mid, jargs)
+        }
+    }
+
+    public func callJavaV(functionName: String, signature: String, arguments args: [SkipBridgable]) throws {
+        try callJ(functionName: functionName, signature: signature, arguments: args) { jobj, mid, jargs in
+            try jobj.call(method: mid, jargs)
+        }
+    }
+
+    /// Java invocation that can return either `Void` or a `SkipBridgable` instance.
+    private func callJ<T>(functionName: String, signature: String, arguments args: [SkipBridgable], invoke: (JObject, JavaMethodID, [JavaParameter]) throws -> T) throws -> T {
+        let javaObject: JavaObject = try self.javaPeer
+
+        // 1. Get the Java peer of this Swift instance via the pointer value
+        let jobj = JObject(javaObject)
+        let jcls = jobj.cls
+
+        // 2. Look up the callJavaPOW function using JNI with the specified arguments
+        guard let mid = jcls.getMethodID(name: functionName, sig: signature) else {
+            fatalError("could not lookup method id")
+        }
+
+        // 3. Invoke the JNI method with the given arguments
+        let jargs = args.map({ $0.toJavaParameter() })
+        return try invoke(jobj, mid, jargs)
+    }
+}
+#endif
+
 /// An error with the bridging between Swift and Java instances
 public struct SkipBridgeError: Error, CustomStringConvertible {
     public var description: String
@@ -188,6 +224,23 @@ public func lookupSwiftPeerFromJavaObject<T: SkipBridge>(_ obj: JavaObject?) thr
     return Unmanaged<T>.fromOpaque(pointer).takeUnretainedValue()
 }
 
+extension SkipReferenceBridgable where Self : SkipBridgeInstance {
+    public var javaPeer: JavaObject {
+        get throws {
+            let swiftPointer = self.swiftPointerValue
+            if let existingPeer = swiftJavaPeerMap[swiftPointer] {
+                return existingPeer
+            }
+
+            let clazz = Self.javaClass
+            // bridge classes always must have an accessable no-arg constructor
+            let constructor = clazz.getMethodID(name: "<init>", sig: "()V")!
+            let obj: JavaObject = try clazz.create(ctor: constructor, [])
+            swiftJavaPeerMap[swiftPointer] = obj
+            return obj
+        }
+    }
+}
 #endif
 
 #if !SKIP
