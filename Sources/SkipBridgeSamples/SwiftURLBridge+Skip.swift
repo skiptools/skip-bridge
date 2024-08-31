@@ -96,7 +96,7 @@ public extension SwiftURLBridge {
 }
 #else
 @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_00024Companion_invokeSwift_1fromJavaFileBridge__Lskip_bridge_samples_JavaFileBridge_2")
-internal func Java_skip_bridge_samples_SwiftURLBridge_00024Companion_invokeSwift_1fromJavaFileBridge__J(_ env: JNIEnvPointer, _ obj: JavaObject?, _ fileBridge: JavaObject?) -> JavaObject? {
+internal func Java_skip_bridge_samples_SwiftURLBridge_00024Companion_invokeSwift_1fromJavaFileBridge__J(_ env: JNIEnvPointer, _ cls: JavaClass?, _ fileBridge: JavaObject?) -> JavaObject? {
     handleSwiftError {
         try JavaFileBridge.fromJavaObject(fileBridge).toSwiftURLBridge().toJavaObject()
     } ?? nil

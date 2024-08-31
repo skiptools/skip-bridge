@@ -2,11 +2,20 @@ import XCTest
 import Foundation
 import SkipBridge
 import SkipBridgeSamples
-#if os(macOS)
-import SkipJNI
-#endif
 
 final class SkipBridgeSamplesTests: XCTestCase {
+    func testMathBridge() throws {
+        let math = MathBridge()
+        XCTAssertEqual(4.0, math.callPurePOW(2.0, power: 2.0)) // Java -> Java + Swift -> Swift
+        XCTAssertEqual(64.0, math.callSwiftPOW(2.0, power: 6.0)) // Java+Swift -> Swift
+        XCTAssertEqual(32.0, try math.callJavaPOW(2.0, power: 5.0)) // Swift+Java -> Java
+    }
+
+    func testSwiftURLBridge() throws {
+        let url = try SwiftURLBridge(urlString: "https://skip.tools")
+        XCTAssertFalse(url.isFileURL())
+    }
+
     func testJavaFileBridge() throws {
         let tmpName = "/tmp/" + UUID().uuidString
         let file = try JavaFileBridge(filePath: tmpName)
@@ -24,24 +33,15 @@ final class SkipBridgeSamplesTests: XCTestCase {
     }
 
     func testStaticFunctions() throws {
-        throw XCTSkip("TODO: fix peer setup for static functions")
-
         let tmpName = "/tmp/" + UUID().uuidString
         let file = try JavaFileBridge(filePath: tmpName)
-        // FIXME: java.lang.RuntimeException: kotlin.UninitializedPropertyAccessException: lateinit property filestorage has not been initialized
-        XCTAssertTrue(try SwiftURLBridge.fromJavaFileBridge(file).isFileURL())
-    }
-
-    func testSwiftURLBridge() throws {
-        let url = try SwiftURLBridge(urlString: "https://skip.tools")
-        XCTAssertFalse(url.isFileURL())
-    }
-
-    func testMathBridge() throws {
-        let math = MathBridge()
-        XCTAssertEqual(4.0, math.callPurePOW(2.0, power: 2.0)) // Java -> Java + Swift -> Swift
-        XCTAssertEqual(64.0, math.callSwiftPOW(2.0, power: 6.0)) // Java+Swift -> Swift
-        XCTAssertEqual(32.0, try math.callJavaPOW(2.0, power: 5.0)) // Swift+Java -> Java
+        do {
+            let result = try SwiftURLBridge.fromJavaFileBridge(file).isFileURL()
+            XCTAssertTrue(result)
+        } catch {
+            // FIXME: java.lang.RuntimeException: kotlin.UninitializedPropertyAccessException: lateinit property filestorage has not been initialized
+            throw XCTSkip("TODO: fix peer setup for static functions")
+        }
     }
 
     func testThrowingSwiftFunctions() throws {
@@ -72,13 +72,20 @@ final class SkipBridgeSamplesTests: XCTestCase {
         throw XCTSkip("TODO")
     }
 
-    func testClosureFunctions() throws {
+    func testClosureParameters() throws {
         throw XCTSkip("TODO")
     }
+}
 
+#if os(macOS)
+import SkipJNI
+
+extension SkipBridgeSamplesTests {
     /// On macOS, start up an embedded JVM so we can test the Swift side of the SkipJNI bridge.
+    ///
+    /// This setup is very delicate, because it relies on the assumed paths of the dependent jars in the `~/.gradle/caches/` folder, among other things.
+    /// One potential solution might be to try to get the runtime classpath by forking `gradle` with a custom task that prints out the classpath for the transpiled project, and then using that classpath directly.
     override func setUp() {
-        #if os(macOS)
         if jni == nil {
 
             //print("env: " + ProcessInfo.processInfo.environment.map({ $0 + "=" + $1 }).joined(separator: "\n").description)
@@ -120,6 +127,6 @@ final class SkipBridgeSamplesTests: XCTestCase {
             try! launchJavaVM(options: opts)
             XCTAssertNotNil(jni, "jni context should have been created")
         }
-        #endif
     }
 }
+#endif

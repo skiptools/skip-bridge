@@ -319,7 +319,7 @@ public func popSwiftError() -> Error? {
 ///
 /// See: https://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/design.html#wp615
 @_cdecl("Java_skip_bridge_SkipBridge_00024Companion_popSwiftErrorMessageFromStack")
-internal func Java_skip_bridge_SkipBridge_00024Companion_popSwiftErrorMessageFromStack(_ env: JNIEnvPointer, _ obj: JavaObject?) -> JavaString? {
+internal func Java_skip_bridge_SkipBridge_00024Companion_popSwiftErrorMessageFromStack(_ env: JNIEnvPointer, _ cls: JavaClass?) -> JavaString? {
     if let error = popSwiftError() {
         return "\(error)".toJavaObject()
     } else {
@@ -329,7 +329,7 @@ internal func Java_skip_bridge_SkipBridge_00024Companion_popSwiftErrorMessageFro
 #else
 public extension SkipBridge {
     /* SKIP EXTERN */ public static func popSwiftErrorMessageFromStack() -> String? {
-        // this will invoke @_cdecl("Java_skip_bridge_SkipBridge_popSwiftErrorMessageFromStack")
+        // this will invoke @_cdecl("Java_skip_bridge_SkipBridge_00024Companion_popSwiftErrorMessageFromStack")
     }
 }
 
