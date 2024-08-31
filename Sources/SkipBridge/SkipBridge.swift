@@ -1,6 +1,7 @@
 #if !SKIP
 @_exported import Foundation
 import SkipJNI
+import os
 #else
 public protocol JConvertible { }
 public protocol JObjectConvertible { }
@@ -12,6 +13,7 @@ public protocol SkipBridgable: JConvertible {
 public protocol SkipReferenceBridgable : AnyObject, SkipBridgable, JObjectConvertible {
     #if !SKIP
     var javaPeer: JavaObject { get throws }
+    var _javaPeer: JavaObject? { get set }
 
     func invokeJava<T: SkipBridgable>(functionName: String, _ args: SkipBridgable..., implementation: () throws -> ()) throws -> T
     func invokeJavaVoid(functionName: String, _ args: SkipBridgable..., implementation: () throws -> ()) throws
@@ -26,8 +28,9 @@ public protocol SkipBridgeInstance : AnyObject {
 }
 
 open class SkipBridge : SkipBridgeInstance {
-    #if SKIP // added by skipstone
-    /// The pointer to the Swift side of MathBridge associated with this Java instance, used by `lookupSwiftPeerFromJavaObject`
+    #if !SKIP
+    public var _javaPeer: JavaObject?
+    #else
     public var _swiftPeer: Long = 0
     #endif
 
@@ -37,15 +40,23 @@ open class SkipBridge : SkipBridgeInstance {
     /// Cleanup Swift/Java peers.
     deinit {
         #if !SKIP
-        swiftJavaPeerMap.removeValue(forKey: self.swiftPointerValue)
+        // release the Java instance when the Swift peer is dealloced, freeing it for garbage collection
+        if let javaPeer = _javaPeer {
+            // FIXME: this winds up deallocating the Swift instance too soon, but without we have a reference cycle between the Swift and Java peers
+            // https://developer.android.com/training/articles/perf-jni#local-and-global-references
+            //jni.deleteGlobalRef(javaPeer)
+        }
         #else
-        finalizeJava(_swiftPeer)
+        // finalize the Java instance, which will remove the Swift peer from the swiftPeerRegistry
+        if _swiftPeer != Long(0) {
+            releaseSkipBridge(_swiftPeer)
+        }
         #endif
     }
 
     #if SKIP
-    /* SKIP EXTERN */ public func finalizeJava(_ swiftPointer: Long) {
-        // this will invoke @_cdecl("Java_skip_bridge_SkipBridge_finalizeJava")
+    /* SKIP EXTERN */ internal func releaseSkipBridge(_ swiftPointer: Long) {
+        // this will invoke @_cdecl("Java_skip_bridge_SkipBridge_releaseSkipBridge")
     }
     #endif
 }
@@ -53,9 +64,9 @@ open class SkipBridge : SkipBridgeInstance {
 public extension SkipBridgeInstance {
     #if !SKIP
     static func fromJavaObject(_ obj: JavaObject?) throws -> Self where Self : SkipBridge {
-        try lookupSwiftPeerFromJavaObject(obj)
+        try swiftPeerReflective(for: obj)
     }
-    
+
     func invokeJava<T: SkipBridgable>(functionName: String = #function, _ args: SkipBridgable..., implementation: () -> ()) throws -> T {
         throw SkipBridgeError(description: "invokeJava should be have been added by the transpiler via an extension on the owning type")
     }
@@ -99,7 +110,26 @@ public extension SkipBridgeInstance {
 }
 
 #if !SKIP
+
 extension SkipReferenceBridgable {
+    /// Returns the Java peer instance for this `SkipBridgeInstance`. It will lazily create the instance if it doesn't already exist.
+    /// 
+    public var javaPeer: JavaObject {
+        get throws {
+            if let peer = _javaPeer {
+                return peer
+            }
+
+            let clazz = Self.javaClass
+            // bridge classes always must have an accessable no-arg constructor
+            let constructor = clazz.getMethodID(name: "<init>", sig: "()V")!
+            let obj: JavaObject = try clazz.create(ctor: constructor, [])
+            let peer = jni.newGlobalRef(obj)!
+            self._javaPeer = peer
+            return peer
+        }
+    }
+
     public func callJavaT<T: SkipBridgable>(functionName: String, signature: String, arguments args: [SkipBridgable]) throws -> T {
         try callJ(functionName: functionName, signature: signature, arguments: args) { jobj, mid, jargs in
             try jobj.call(method: mid, jargs)
@@ -130,18 +160,37 @@ extension SkipReferenceBridgable {
         return try invoke(jobj, mid, jargs)
     }
 }
-#endif
 
-/// An error with the bridging between Swift and Java instances
-public struct SkipBridgeError: Error, CustomStringConvertible {
-    public var description: String
+public extension JClass {
+    /// Converts the Swift type name into a Java class name, following the convention of de-camel-casing the module name as the package name.
+    /// - Parameter fromSwiftType: the type of the class
+    convenience init<T: SkipBridgeInstance>(fromSwiftType: T.Type) throws {
+        let swiftName = String(reflecting: fromSwiftType).split(separator: ".")
+        let packageName = Self.packageName(forModule: swiftName.first ?? "")
+        let fqn = packageName + "." + (swiftName.last ?? "")
+        try self.init(name: fqn)
+    }
 
-    public init(description: String) {
-        self.description = description
+    /// Turn module name ModuleName package name module.name
+    private static func packageName(forModule moduleName: any StringProtocol) -> String {
+        var lastLower = false
+        var packageName = ""
+        for c in moduleName {
+            let lower = c.lowercased()
+            if lower == String(c) {
+                lastLower = true
+            } else {
+                if lastLower == true {
+                    packageName += "."
+                }
+                lastLower = false
+            }
+            packageName += lower
+        }
+
+        return packageName
     }
 }
-
-#if !SKIP
 
 extension Bool : SkipBridgable { } // boolean (Z)
 extension Int : SkipBridgable { } // long (J)
@@ -155,31 +204,38 @@ extension Double : SkipBridgable { } // double (D)
 extension String : SkipBridgable { } // java.lang.String
 
 
-// FIXME: there is a reference cycle here: the Swift instance will create an instance in the `swiftJavaPeerMap` which is only ever removed on `deinit`, but the Java instance will have added the bridge to `swiftPeerRegistry`, which is only removed on finalized()
-
-/// Bookkeeping for Swift/Java peers
-private var swiftJavaPeerMap: [Int64: JavaObject] = [:] // TODO: locking for exclusive access
-
 /// The `swiftPeerRegistry` exists simply to retain a bridge instance that is held by the Java peer on memory.
 /// On `finalize()`, the Java peer will remove the instance from the registry, releasing it for deallocation.
-private var swiftPeerRegistry: [Int64: SkipBridge] = [:] // TODO: locking for exclusive access
+//private var swiftPeerRegistry: [Int64: SkipBridge] = [:]
+//private let swiftPeerRegistryLock = OSAllocatedUnfairLock()
 
 /// Adds a newly-created Swift bridge and registers the pointer value of the instance globally so it is retained until the Java side is finalized
 public func registerSwiftBridge<T : SkipBridge>(_ bridge: T) -> Int64 {
-    let ptr = bridge.swiftPointerValue
-    swiftPeerRegistry[ptr] = bridge // need to retain the peer instance so it is not released until the owning Java instance finalizes
-    return ptr
+    // The pointer value of the this Swift object, which is how the Swift reference can be stored in the Java object.
+    // Note that this `retain` will need to be manually balanced by a `release` when the Java instance is finalized.
+    let ptr: UnsafeMutableRawPointer = Unmanaged.passRetained(bridge).toOpaque()
+    return Int64(Int(bitPattern: ptr))
 }
 
 /// Called when a Java peer finalizes, this will de-register the Swift peer's pointer from the global map so the Swift side can be deinit'd.
-@_cdecl("Java_skip_bridge_SkipBridge_finalizeJava")
-internal func Java_skip_bridge_SkipBridge_finalizeJava(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong) {
-    swiftPeerRegistry[swiftPointer] = nil
+@_cdecl("Java_skip_bridge_SkipBridge_releaseSkipBridge")
+internal func Java_skip_bridge_SkipBridge_releaseSkipBridge(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong) {
+    if swiftPointer != 0, let pointer = UnsafeMutableRawPointer(bitPattern: Int(swiftPointer)) {
+        let bridge = Unmanaged<SkipBridge>.fromOpaque(pointer)
+        bridge.release() // release the Swift instance
+    }
 }
 
-public func lookupSwiftPeerFromJavaObject<T: SkipBridge>(_ obj: JavaObject?) throws -> T {
+/// Takes the pointer to the Swift instance and converts it into the expected `SkipBridge` type
+public func swiftPeer<T: SkipBridge>(for swiftPointer: JavaLong) -> T {
+    let pointer = UnsafeMutableRawPointer(bitPattern: Int(swiftPointer))!
+    return Unmanaged<T>.fromOpaque(pointer).takeUnretainedValue()
+}
+
+// TODO: @available(*, deprecated, message: "no need for the overhead of reflective field lookup of _swiftPeer when we can just pass the pointer directly")
+public func swiftPeerReflective<T: SkipBridge>(for obj: JavaObject?) throws -> T {
     guard let obj = obj else {
-        throw SkipBridgeError(description: "Unable to call lookupSwiftPeerFromJavaObject for a nil JavaObject")
+        throw SkipBridgeError(description: "Unable to call swiftPeer for a nil JavaObject")
     }
 
     let javaObject = JObject(obj)
@@ -195,38 +251,22 @@ public func lookupSwiftPeerFromJavaObject<T: SkipBridge>(_ obj: JavaObject?) thr
         throw SkipBridgeError(description: "Value of _swiftPeer was unset for JavaObject")
     }
 
-    let pointer = UnsafeMutableRawPointer(bitPattern: Int(swiftPointer))!
-    return Unmanaged<T>.fromOpaque(pointer).takeUnretainedValue()
+    return swiftPeer(for: swiftPointer)
 }
 
-extension SkipBridgeInstance {
-    /// The pointer value of the this Swift object
-    fileprivate var swiftPointerValue: Int64 {
-        let ptr: UnsafeMutableRawPointer = Unmanaged.passUnretained(self).toOpaque()
-        return Int64(Int(bitPattern: ptr))
-    }
-}
-
-extension SkipReferenceBridgable where Self : SkipBridgeInstance {
-    public var javaPeer: JavaObject {
-        get throws {
-            let swiftPointer = self.swiftPointerValue
-            if let existingPeer = swiftJavaPeerMap[swiftPointer] {
-                return existingPeer
-            }
-
-            let clazz = Self.javaClass
-            // bridge classes always must have an accessable no-arg constructor
-            let constructor = clazz.getMethodID(name: "<init>", sig: "()V")!
-            let obj: JavaObject = try clazz.create(ctor: constructor, [])
-            swiftJavaPeerMap[swiftPointer] = obj
-            return obj
-        }
-    }
-}
 #endif
 
 // MARK: Error handling
+
+
+/// An error with the bridging between Swift and Java instances
+public struct SkipBridgeError: Error, CustomStringConvertible {
+    public var description: String
+
+    public init(description: String) {
+        self.description = description
+    }
+}
 
 #if !SKIP
 

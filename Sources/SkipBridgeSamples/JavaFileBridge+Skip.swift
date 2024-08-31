@@ -5,9 +5,7 @@ import SkipJNI
 // skipstone-generated Swift
 
 extension JavaFileBridge : SkipReferenceBridgable {
-    public static var javaClass: JClass {
-        return try! JClass(name: "skip.bridge.samples.JavaFileBridge")
-    }
+    public static let javaClass = try! JClass(fromSwiftType: JavaFileBridge.self) // skip.bridge.samples.JavaFileBridge
 
     public func toJavaObject() -> JavaObject? {
         try? javaPeer

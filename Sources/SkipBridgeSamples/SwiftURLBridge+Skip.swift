@@ -5,9 +5,7 @@ import SkipJNI
 // skipstone-generated Swift
 
 extension SwiftURLBridge : SkipReferenceBridgable {
-    public static var javaClass: JClass {
-        return try! JClass(name: "skip.bridge.samples.SwiftURLBridge")
-    }
+    public static let javaClass = try! JClass(fromSwiftType: SwiftURLBridge.self) // skip.bridge.samples.SwiftURLBridge
 
     public func toJavaObject() -> JavaObject? {
         try? javaPeer
@@ -23,49 +21,13 @@ extension SwiftURLBridge : SkipReferenceBridgable {
         fatalError("SwiftURLBridge does not have any bridged Java functions")
     }
 }
+#endif
 
-// skipstone-generated JNI bridging functions
+// MARK: skipstone-generated JNI bridging
 
-@_cdecl("Java_skip_bridge_samples_SwiftURLBridge_createSwiftURLBridge")
-public func Java_skip_bridge_samples_SwiftURLBridge_createSwiftURLBridge(_ env: JNIEnvPointer, _ obj: JavaObject?) -> Int64 {
-    registerSwiftBridge(SwiftURLBridge())
-}
-
-@_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1setURLString")
-public func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1setURLString(_ env: JNIEnvPointer, _ obj: JavaObject?, _ urlString: JavaString?) {
-    do {
-        let bridge: SwiftURLBridge = try lookupSwiftPeerFromJavaObject(obj) // TODO: how to handle exception?
-        try bridge.setURLString(String.fromJavaObject(urlString))
-    } catch {
-        // `@_cdecl` JNI functions cannot throw errors, so instead we add the current error to the thread's error stack, which we will check after invoking the function
-        pushSwiftError(error)
-    }
-}
-
-@_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL")
-public func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL(_ env: JNIEnvPointer, _ obj: JavaObject?) -> Bool {
-    let bridge: SwiftURLBridge = try! lookupSwiftPeerFromJavaObject(obj)
-    return bridge.isFileURL()
-}
-
-@_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1toJavaFileBridge")
-public func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1toJavaFileBridge(_ env: JNIEnvPointer, _ obj: JavaObject?) -> JavaObject? {
-    do {
-        let bridge: SwiftURLBridge = try! lookupSwiftPeerFromJavaObject(obj)
-        return try JavaFileBridge(filePath: bridge.url.path).toJavaObject()
-    } catch {
-        // `@_cdecl` JNI functions cannot throw errors, so instead we add the current error to the thread's error stack, which we will check after invoking the function
-        pushSwiftError(error)
-        return nil
-    }
-}
-
-#else
-
-// the Kotlin side of the bridge with the invocation of the extern functions
-
-extension SwiftURLBridge {
-    func withSwiftBridge<T>(function: () -> T) -> T {
+#if SKIP
+public extension SwiftURLBridge {
+    internal func withSwiftBridge<T>(function: () -> T) -> T {
         if _swiftPeer == Long(0) {
             loadPeerLibrary("SkipBridgeSamples") // ensure the shared library containing the native implementations is loaded
             // create the Swift peer for this Java instance
@@ -75,21 +37,58 @@ extension SwiftURLBridge {
         return function()
     }
 
-    /* SKIP EXTERN */ public func createSwiftURLBridge() -> Int64 {
-        // this will invoke @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_createSwiftURLBridge")
-    }
+    /* SKIP EXTERN */ func createSwiftURLBridge() -> Int64 { }
+}
+#else
+@_cdecl("Java_skip_bridge_samples_SwiftURLBridge_createSwiftURLBridge")
+internal func Java_skip_bridge_samples_SwiftURLBridge_createSwiftURLBridge(_ env: JNIEnvPointer, _ obj: JavaObject?) -> Int64 {
+    registerSwiftBridge(SwiftURLBridge())
+}
+#endif
 
-    /* SKIP EXTERN */ public func invokeSwift_setURLString(_ value: String) {
-        // this will invoke @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1setURLString")
-    }
-
-    /* SKIP EXTERN */ public func invokeSwift_isFileURL() -> Bool {
-        // this will invoke @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL")
-    }
-
-    /* SKIP EXTERN */ public func invokeSwift_toJavaFileBridge() -> JavaFileBridge {
-        // this will invoke @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1toJavaFileBridge")
+#if SKIP
+public extension SwiftURLBridge {
+    /* SKIP EXTERN */ func invokeSwift_setURLString(_ swiftPeer: Long, _ value: String) { }
+}
+#else
+@_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1setURLString__JLjava_lang_String_2")
+internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1setURLString__JLjava_lang_String_2(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong, _ urlString: JavaString?) {
+    do {
+        let bridge: SwiftURLBridge = swiftPeer(for: swiftPointer)
+        try bridge.setURLString(String.fromJavaObject(urlString))
+    } catch {
+        // `@_cdecl` JNI functions cannot throw errors, so instead we add the current error to the thread's error stack, which we will check after invoking the function
+        pushSwiftError(error)
     }
 }
+#endif
 
+#if SKIP
+public extension SwiftURLBridge {
+    /* SKIP EXTERN */ func invokeSwift_isFileURL(_ swiftPeer: Long) -> Bool { }
+}
+#else
+@_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL__J")
+internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL__J(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong) -> Bool {
+    let bridge: SwiftURLBridge = swiftPeer(for: swiftPointer)
+    return bridge.isFileURL()
+}
+#endif
+
+#if SKIP
+public extension SwiftURLBridge {
+    /* SKIP EXTERN */ public func invokeSwift_toJavaFileBridge(_ swiftPeer: Long) -> JavaFileBridge { }
+}
+#else
+@_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1toJavaFileBridge__J")
+internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1toJavaFileBridge__J(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong) -> JavaObject? {
+    do {
+        let bridge: SwiftURLBridge = swiftPeer(for: swiftPointer)
+        return try JavaFileBridge(filePath: bridge.url.path).toJavaObject()
+    } catch {
+        // `@_cdecl` JNI functions cannot throw errors, so instead we add the current error to the thread's error stack, which we will check after invoking the function
+        pushSwiftError(error)
+        return nil
+    }
+}
 #endif

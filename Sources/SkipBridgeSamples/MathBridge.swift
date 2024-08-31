@@ -25,8 +25,7 @@ public class MathBridge : SkipBridge {
     /// Calling this function from Swift will simply invoke the block directly.
     /// When called through the transpiled Kotlin, this function will be invoked through a `@_cdecl` shim function via JNI.
     public func callSwiftPOW(_ value: Double, power: Double) -> Double {
-        // skipstone will replace `invokeSwift` call with `invokeSwift_callSwiftPOW(value, power)`, which it will also generate (see below)
-        // SKIP REPLACE: return withSwiftBridge { invokeSwift_callSwiftPOW(value, power) }
+        // SKIP REPLACE: return withSwiftBridge { invokeSwift_callSwiftPOW(_swiftPeer, value, power) }
         return invokeSwift(value, power) {
             #if !SKIP
             return Darwin.pow(value, power)
@@ -43,7 +42,7 @@ public class MathBridge : SkipBridge {
     }
 
     public func callSwiftThrowing(message: String) throws {
-        // SKIP REPLACE: { checkSwiftErrorVoid { -> withSwiftBridge { invokeSwift_callSwiftThrowing(message) } } }()
+        // SKIP REPLACE: { checkSwiftErrorVoid { -> withSwiftBridge { invokeSwift_callSwiftThrowing(_swiftPeer, message) } } }()
         try invokeSwiftVoid(message) {
             #if !SKIP
             throw MathError(description: message)

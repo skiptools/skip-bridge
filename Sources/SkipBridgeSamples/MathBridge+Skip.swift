@@ -6,9 +6,7 @@ import SkipJNI
 // skipstone-generated Swift
 
 extension MathBridge : SkipReferenceBridgable {
-    public static var javaClass: JClass {
-        return try! JClass(name: "skip.bridge.samples.MathBridge")
-    }
+    public static let javaClass = try! JClass(fromSwiftType: MathBridge.self) // skip.bridge.samples.MathBridge
 
     public func toJavaObject() -> JavaObject? {
         try? javaPeer
@@ -35,37 +33,15 @@ extension MathBridge : SkipReferenceBridgable {
 
     }
 }
-
-// skipstone-generated JNI functions
-
-@_cdecl("Java_skip_bridge_samples_MathBridge_createSwiftMathBridge")
-public func Java_skip_bridge_samples_MathBridge_createSwiftMathBridge(_ env: JNIEnvPointer, _ obj: JavaObject?) -> Int64 {
-    registerSwiftBridge(MathBridge())
-}
-
-@_cdecl("Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftPOW__DD")
-public func Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftPOW__DD(_ env: JNIEnvPointer, _ obj: JavaObject?, _ value: Double, _ power: Double) -> Double {
-    let bridge: MathBridge = try! lookupSwiftPeerFromJavaObject(obj) // TODO: how to handle exception?
-    return bridge.callSwiftPOW(value, power: power)
-}
-
-@_cdecl("Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftThrowing")
-public func Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftThrowing(_ env: JNIEnvPointer, _ obj: JavaObject?, _ message: JavaString?) {
-    let bridge: MathBridge = try! lookupSwiftPeerFromJavaObject(obj) // TODO: how to handle exception?
-    do {
-        try bridge.callSwiftThrowing(message: String.fromJavaObject(message))
-    } catch {
-        // `@_cdecl` JNI functions cannot throw errors, so instead we add the current error to the thread's error stack, which we will check after invoking the function
-        pushSwiftError(error)
-    }
-}
-
 #else
 
-// the Kotlin side of the bridge with the invocation of the extern functions
+#endif
 
-extension MathBridge {
-    func withSwiftBridge<T>(function: () -> T) -> T {
+// MARK: skipstone-generated JNI bridging
+
+#if SKIP
+public extension MathBridge {
+    internal func withSwiftBridge<T>(function: () -> T) -> T {
         if _swiftPeer == Long(0) {
             loadPeerLibrary("SkipBridgeSamples") // ensure the shared library containing the native implementations is loaded
             // create the Swift peer for this Java instance
@@ -75,17 +51,52 @@ extension MathBridge {
         return function()
     }
 
-    /* SKIP EXTERN */ public func createSwiftMathBridge() -> Int64 {
+    /* SKIP EXTERN */ func createSwiftMathBridge() -> Int64 {
         // this will invoke @_cdecl("Java_skip_bridge_samples_MathBridge_createSwiftMathBridge")
     }
+}
+#else
+@_cdecl("Java_skip_bridge_samples_MathBridge_createSwiftMathBridge")
+internal func Java_skip_bridge_samples_MathBridge_createSwiftMathBridge(_ env: JNIEnvPointer, _ obj: JavaObject?) -> Int64 {
+    registerSwiftBridge(MathBridge())
+}
+#endif
 
-    /* SKIP EXTERN */ public func invokeSwift_callSwiftPOW(_ value: Double, _ power: Double) -> Double {
-        // this will invoke @_cdecl("Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftPOW__DD")
-    }
 
-    /* SKIP EXTERN */ public func invokeSwift_callSwiftThrowing(_ value: String) {
-        // this will invoke @_cdecl("Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftThrowing")
+#if SKIP
+public extension MathBridge {
+    /* SKIP EXTERN */ func invokeSwift_callSwiftPOW(_ swiftPeer: Long, _ value: Double, _ power: Double) -> Double { }
+}
+#else
+@_cdecl("Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftPOW__JDD")
+internal func Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftPOW__JDD(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong, _ value: Double, _ power: Double) -> Double {
+    let bridge: MathBridge = swiftPeer(for: swiftPointer)
+    return bridge.callSwiftPOW(value, power: power)
+}
+#endif
+
+
+#if SKIP
+public extension MathBridge {
+    /* SKIP EXTERN */ func invokeSwift_callSwiftThrowing(_ swiftPeer: Long, _ value: String) { }
+}
+#else
+/// JNI Signature naming rules from https://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/design.html#wp615
+///
+/// - `_1` escaps the underscore in the method name: `invokeSwift_callSwiftThrowing` -> `invokeSwift_1callSwiftThrowing`
+/// - Parameters are separated from function name with `__`
+/// - First paramerer is a Long (`J`)
+/// - Second parameter is a `java.lang.String` whose JNI string ls `Ljava/lang/String;` and which is encoded to the C function name `Ljava_lang_String_2` (`_2` represents `;`)
+/// - If there were a `[` in the function name, that would be represented by `_3`
+@_cdecl("Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftThrowing__JLjava_lang_String_2")
+internal func Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftThrowing__JLjava_lang_String_2(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong, _ message: JavaString?) {
+    let bridge: MathBridge = swiftPeer(for: swiftPointer)
+    do {
+        try bridge.callSwiftThrowing(message: String.fromJavaObject(message))
+    } catch {
+        // `@_cdecl` JNI functions cannot throw errors, so instead we add the current error to the thread's error stack, which we will check after invoking the function
+        pushSwiftError(error)
     }
 }
-
 #endif
+

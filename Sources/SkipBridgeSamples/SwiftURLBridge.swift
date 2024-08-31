@@ -16,7 +16,7 @@ public class SwiftURLBridge : SkipBridge {
     }
 
     internal func setURLString(_ urlString: String) throws {
-        // SKIP REPLACE: return withSwiftBridge { invokeSwift_setURLString(urlString) }
+        // SKIP REPLACE: return withSwiftBridge { invokeSwift_setURLString(_swiftPeer, urlString) }
         invokeSwiftVoid(urlString) {
             #if !SKIP
             self.url = Foundation.URL(string: urlString)
@@ -25,7 +25,7 @@ public class SwiftURLBridge : SkipBridge {
     }
 
     public func isFileURL() -> Bool {
-        // SKIP REPLACE: return withSwiftBridge { invokeSwift_isFileURL() }
+        // SKIP REPLACE: return withSwiftBridge { invokeSwift_isFileURL(_swiftPeer) }
         invokeSwift() {
             #if !SKIP
             self.url.isFileURL
@@ -34,7 +34,7 @@ public class SwiftURLBridge : SkipBridge {
     }
 
     public func toJavaFileBridge() throws -> JavaFileBridge {
-        // SKIP REPLACE: return withSwiftBridge { invokeSwift_toJavaFileBridge() }
+        // SKIP REPLACE: return withSwiftBridge { invokeSwift_toJavaFileBridge(_swiftPeer) }
         try invokeSwift() {
             #if !SKIP
             try JavaFileBridge(filePath: url.path)
