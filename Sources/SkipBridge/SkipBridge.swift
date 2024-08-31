@@ -315,8 +315,11 @@ public func popSwiftError() -> Error? {
     return errorStack.popLast()
 }
 
-@_cdecl("Java_skip_bridge_SkipBridge_popSwiftErrorMessageFromStack")
-internal func Java_skip_bridge_SkipBridge_popSwiftErrorMessageFromStack(_ env: JNIEnvPointer, _ obj: JavaObject?) -> JavaString? {
+/// The static `skip.bridge.SkipBridge$Companion` function reaplces the `$` with the unicode representation: `_00024`.
+///
+/// See: https://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/design.html#wp615
+@_cdecl("Java_skip_bridge_SkipBridge_00024Companion_popSwiftErrorMessageFromStack")
+internal func Java_skip_bridge_SkipBridge_00024Companion_popSwiftErrorMessageFromStack(_ env: JNIEnvPointer, _ obj: JavaObject?) -> JavaString? {
     if let error = popSwiftError() {
         return "\(error)".toJavaObject()
     } else {

@@ -95,14 +95,10 @@ public extension SwiftURLBridge {
     /* SKIP EXTERN */ public static func invokeSwift_fromJavaFileBridge(fileBridge: JavaFileBridge) -> SwiftURLBridge { }
 }
 #else
-@_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1fromJavaFileBridge__Lskip_bridge_samples_JavaFileBridge_2")
-internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1fromJavaFileBridge__J(_ env: JNIEnvPointer, _ obj: JavaObject?, _ fileBridge: JavaObject?) -> JavaObject? {
+@_cdecl("Java_skip_bridge_samples_SwiftURLBridge_00024Companion_invokeSwift_1fromJavaFileBridge__Lskip_bridge_samples_JavaFileBridge_2")
+internal func Java_skip_bridge_samples_SwiftURLBridge_00024Companion_invokeSwift_1fromJavaFileBridge__J(_ env: JNIEnvPointer, _ obj: JavaObject?, _ fileBridge: JavaObject?) -> JavaObject? {
     handleSwiftError {
         try JavaFileBridge.fromJavaObject(fileBridge).toSwiftURLBridge().toJavaObject()
     } ?? nil
 }
 #endif
-
-
-
-

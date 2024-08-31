@@ -54,9 +54,7 @@ extension JavaFileBridge {
         return function()
     }
 
-    /* SKIP EXTERN */ public func createSwiftJavaFileBridge() -> Int64 {
-        // this will invoke @_cdecl("Java_skip_bridge_samples_JavaFileBridge_createSwiftJavaFileBridge")
-    }
+    /* SKIP EXTERN */ public func createSwiftJavaFileBridge() -> Int64 { }
 }
 #else
 @_cdecl("Java_skip_bridge_samples_JavaFileBridge_createSwiftJavaFileBridge")
