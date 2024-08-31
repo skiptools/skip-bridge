@@ -39,10 +39,7 @@ import SkipJNI
 
 @_cdecl("Java_skip_bridge_samples_MathBridge_createSwiftMathBridge")
 public func Java_skip_bridge_samples_MathBridge_createSwiftMathBridge(_ env: JNIEnvPointer, _ obj: JavaObject?) -> Int64 {
-    let bridge = MathBridge()
-    let ptr = bridge.swiftPointerValue
-    javaSwiftPeerMap[ptr] = bridge // need to retain the peer instance so it is not released until the owning Java instance finalizes
-    return ptr
+    registerSwiftBridge(MathBridge())
 }
 
 @_cdecl("Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftPOW__DD")

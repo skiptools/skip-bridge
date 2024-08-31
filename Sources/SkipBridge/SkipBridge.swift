@@ -21,7 +21,7 @@ public protocol SkipReferenceBridgable : AnyObject, SkipBridgable, JObjectConver
     #endif
 }
 
-public protocol SkipBridgeInstance {
+public protocol SkipBridgeInstance : AnyObject {
 
 }
 
@@ -31,43 +31,27 @@ open class SkipBridge : SkipBridgeInstance {
     public var _swiftPeer: Long = 0
     #endif
 
-
-    // FIXME: how to do this in the subclass?
-    
-    /// The name of the Java class for this Swift peer
-
     public init() {
     }
 
-
-    /// Cleanup JNI peer.
-    ///
-    /// Cleanup should only happen if this instance was constructed from the Swift side.
-    /// It if was created from the Java side, then cleanup will happen when the instance is finalized in the owning Java peer, like:
-    ///
-    /// ```
-    /// fun finalize() {
-    ///     JNI_call_cleanupSkipBridge(this)
-    /// }
-    /// ```
+    /// Cleanup Swift/Java peers.
     deinit {
-        if /* createdFromSwift */ true {
-            cleanupSkipBridge()
-        }
+        #if !SKIP
+        swiftJavaPeerMap.removeValue(forKey: self.swiftPointerValue)
+        #else
+        finalizeJava(_swiftPeer)
+        #endif
     }
+
+    #if SKIP
+    /* SKIP EXTERN */ public func finalizeJava(_ swiftPointer: Long) {
+        // this will invoke @_cdecl("Java_skip_bridge_SkipBridge_finalizeJava")
+    }
+    #endif
 }
 
 public extension SkipBridgeInstance {
     #if !SKIP
-    /// The pointer value of the this Swift object
-    var swiftPointerValue: Int64 {
-        let ptr = unsafeBitCast(self, to: Int.self)
-        return Int64(ptr)
-        // alternatively:
-        // let ptr: UnsafeMutableRawPointer = Unmanaged.passUnretained(self).toOpaque()
-        //return Int64(Int(bitPattern: ptr))
-    }
-
     static func fromJavaObject(_ obj: JavaObject?) throws -> Self where Self : SkipBridge {
         try lookupSwiftPeerFromJavaObject(obj)
     }
@@ -111,34 +95,7 @@ public extension SkipBridgeInstance {
     func invokeSwiftVoid(_ args: Any..., implementation: () throws -> ()) rethrows {
         throw SkipBridgeError(description: "invokeSwift should be have been added by the transpiler for each function invocation")
     }
-
-    /// Invokes the given closure, and checks whether an error was thrown by Swift or not.
-    func checkSwiftError<T>(function: () -> T?) -> T {
-        let result = function()
-        if let error = SwiftBridge.shared.popSwiftErrorMessage() {
-            throw RuntimeException(error) // ### TODO: should we try to convert the exception type?
-        }
-        return result!
-    }
-
-    /// Invokes the given closure, and checks whether an error was thrown by Swift or not.
-    func checkSwiftErrorVoid(function: () -> Void) throws -> Void {
-        function()
-        if let error = SwiftBridge.shared.popSwiftErrorMessage() {
-            throw RuntimeException(error) // ### TODO: should we try to convert the exception type?
-        }
-    }
     #endif
-
-    /// Must be called from deinit in a `SkipBridge` implementation in order to clean up the JNI references
-    func cleanupSkipBridge() {
-        #if !SKIP
-        // Called from Swift `deinit`.
-        // If this instance had been constructed from the Java side, then do not remove the references here;
-        // rather, they will be removed via the owning Java object's `finalize` function
-        swiftJavaPeerMap.removeValue(forKey: self.swiftPointerValue)
-        #endif
-    }
 }
 
 #if !SKIP
@@ -198,9 +155,25 @@ extension Double : SkipBridgable { } // double (D)
 extension String : SkipBridgable { } // java.lang.String
 
 
-/// Bookkeeping for peers
-public var swiftJavaPeerMap: [Int64: JavaObject] = [:]
-public var javaSwiftPeerMap: [Int64: SkipBridge] = [:]
+/// Bookkeeping for Swift/Java peers
+private var swiftJavaPeerMap: [Int64: JavaObject] = [:] // TODO: locking for exclusive access
+
+/// The `swiftPeerRegistry` exists simply to retain a bridge instance that is held by the Java peer on memory.
+/// On `finalize()`, the Java peer will remove the instance from the registry, releasing it for deallocation.
+private var swiftPeerRegistry: [Int64: SkipBridge] = [:] // TODO: locking for exclusive access
+
+/// Adds a newly-created Swift bridge and registers the pointer value of the instance globally so it is retained until the Java side is finalized
+public func registerSwiftBridge<T : SkipBridge>(_ bridge: T) -> Int64 {
+    let ptr = bridge.swiftPointerValue
+    swiftPeerRegistry[ptr] = bridge // need to retain the peer instance so it is not released until the owning Java instance finalizes
+    return ptr
+}
+
+/// Called when a Java peer finalizes, this will de-register the Swift peer's pointer from the global map so the Swift side can be deinit'd.
+@_cdecl("Java_skip_bridge_SkipBridge_finalizeJava")
+internal func Java_skip_bridge_SkipBridge_finalizeJava(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong) {
+    swiftPeerRegistry[swiftPointer] = nil
+}
 
 public func lookupSwiftPeerFromJavaObject<T: SkipBridge>(_ obj: JavaObject?) throws -> T {
     guard let obj = obj else {
@@ -224,6 +197,14 @@ public func lookupSwiftPeerFromJavaObject<T: SkipBridge>(_ obj: JavaObject?) thr
     return Unmanaged<T>.fromOpaque(pointer).takeUnretainedValue()
 }
 
+extension SkipBridgeInstance {
+    /// The pointer value of the this Swift object
+    fileprivate var swiftPointerValue: Int64 {
+        let ptr: UnsafeMutableRawPointer = Unmanaged.passUnretained(self).toOpaque()
+        return Int64(Int(bitPattern: ptr))
+    }
+}
+
 extension SkipReferenceBridgable where Self : SkipBridgeInstance {
     public var javaPeer: JavaObject {
         get throws {
@@ -243,8 +224,9 @@ extension SkipReferenceBridgable where Self : SkipBridgeInstance {
 }
 #endif
 
+// MARK: Error handling
+
 #if !SKIP
-// MARK: error handling
 
 private let _swiftErrorStackKey = "_swiftErrorStack"
 
@@ -270,8 +252,8 @@ public func popSwiftError() -> Error? {
     return errorStack.popLast()
 }
 
-@_cdecl("Java_skip_bridge_SwiftBridge_popSwiftErrorMessageFromStack")
-internal func Java_skip_bridge_SwiftBridge_popSwiftErrorMessageFromStack() -> JavaString? {
+@_cdecl("Java_skip_bridge_SkipBridge_popSwiftErrorMessageFromStack")
+internal func Java_skip_bridge_SkipBridge_popSwiftErrorMessageFromStack(_ env: JNIEnvPointer, _ obj: JavaObject?) -> JavaString? {
     if let error = popSwiftError() {
         return "\(error)".toJavaObject()
     } else {
@@ -279,19 +261,33 @@ internal func Java_skip_bridge_SwiftBridge_popSwiftErrorMessageFromStack() -> Ja
     }
 }
 
+
 #else
 
-final class SwiftBridge {
-    static let shared = SwiftBridge()
+public extension SkipBridge {
+    /// Invokes the given closure, and checks whether an error was thrown by Swift or not.
+    func checkSwiftError<T>(function: () -> T?) -> T {
+        let result = function()
+        if let error = popSwiftErrorMessage() {
+            throw RuntimeException(error) // ### TODO: should we try to convert the exception type?
+        }
+        return result!
+    }
+
+    /// Invokes the given closure, and checks whether an error was thrown by Swift or not.
+    func checkSwiftErrorVoid(function: () -> Void) throws -> Void {
+        function()
+        if let error = popSwiftErrorMessage() {
+            throw RuntimeException(error) // ### TODO: should we try to convert the exception type?
+        }
+    }
 
     public func popSwiftErrorMessage() -> String? {
         return popSwiftErrorMessageFromStack()
     }
 
     /* SKIP EXTERN */ public func popSwiftErrorMessageFromStack() -> String? {
-        // this will invoke @_cdecl("Java_skip_bridge_SwiftBridge_popSwiftErrorMessageFromStack")
+        // this will invoke @_cdecl("Java_skip_bridge_SkipBridge_popSwiftErrorMessageFromStack")
     }
-
 }
-
 #endif

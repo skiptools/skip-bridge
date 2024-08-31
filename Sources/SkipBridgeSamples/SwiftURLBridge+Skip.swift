@@ -39,10 +39,7 @@ import SkipJNI
 
 @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_createSwiftURLBridge")
 public func Java_skip_bridge_samples_SwiftURLBridge_createSwiftURLBridge(_ env: JNIEnvPointer, _ obj: JavaObject?) -> Int64 {
-    let bridge = SwiftURLBridge()
-    let ptr = bridge.swiftPointerValue
-    javaSwiftPeerMap[ptr] = bridge // need to retain the peer instance so it is not released until the owning Java instance finalizes
-    return ptr
+    registerSwiftBridge(SwiftURLBridge())
 }
 
 @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL")
