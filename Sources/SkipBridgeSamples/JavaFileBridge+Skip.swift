@@ -59,6 +59,8 @@ extension JavaFileBridge : SkipReferenceBridgable {
             return try callJavaT(functionName: "delete", signature: "()Z", arguments: args)
         case "createNewFile()":
             return try callJavaT(functionName: "createNewFile", signature: "()Z", arguments: args)
+        case "toSwiftURLBridge()":
+            return try callJavaT(functionName: "toSwiftURLBridge", signature: "()Lskip/bridge/samples/SwiftURLBridge;", arguments: args)
         default:
             fatalError("could not identify which function called invokeJava for: \(functionName)")
         }

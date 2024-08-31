@@ -46,4 +46,12 @@ public class JavaFileBridge : SkipBridge {
             #endif
         }
     }
+
+    public func toSwiftURLBridge() throws -> SwiftURLBridge {
+        try invokeJava() {
+            #if SKIP
+            SwiftURLBridge(urlString: self.file.toURI().toURL().toExternalForm())
+            #endif
+        }
+    }
 }

@@ -60,8 +60,14 @@ final class SkipBridgeSamplesTests: XCTestCase {
         XCTAssertFalse(try file.exists())
         XCTAssertTrue(try file.createNewFile())
         XCTAssertTrue(try file.exists())
-        XCTAssertTrue(try file.delete())
-        XCTAssertFalse(try file.exists())
+
+        let url: SwiftURLBridge = try file.toSwiftURLBridge()
+        XCTAssertTrue(url.isFileURL())
+
+        let file2 = try url.toJavaFileBridge()
+        XCTAssertTrue(try file2.exists())
+        XCTAssertTrue(try file2.delete())
+        XCTAssertFalse(try file2.exists())
     }
 
     func testSwiftURLBridge() throws {

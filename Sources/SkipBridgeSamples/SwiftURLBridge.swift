@@ -3,7 +3,7 @@ import SkipBridge
 /// An example of a bridge that manages a `Foundation.URL` on the Swift side and bridges functions to Java.
 public class SwiftURLBridge : SkipBridge {
     #if !SKIP
-    private var url: Foundation.URL!
+    internal var url: Foundation.URL!
     #endif
 
     internal override init() {
@@ -32,4 +32,14 @@ public class SwiftURLBridge : SkipBridge {
             #endif
         }
     }
+
+    public func toJavaFileBridge() throws -> JavaFileBridge {
+        // SKIP REPLACE: return withSwiftBridge { invokeSwift_toJavaFileBridge() }
+        try invokeSwift() {
+            #if !SKIP
+            try JavaFileBridge(filePath: url.path)
+            #endif
+        }
+    }
+
 }

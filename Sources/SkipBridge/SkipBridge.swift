@@ -155,6 +155,8 @@ extension Double : SkipBridgable { } // double (D)
 extension String : SkipBridgable { } // java.lang.String
 
 
+// FIXME: there is a reference cycle here: the Swift instance will create an instance in the `swiftJavaPeerMap` which is only ever removed on `deinit`, but the Java instance will have added the bridge to `swiftPeerRegistry`, which is only removed on finalized()
+
 /// Bookkeeping for Swift/Java peers
 private var swiftJavaPeerMap: [Int64: JavaObject] = [:] // TODO: locking for exclusive access
 
