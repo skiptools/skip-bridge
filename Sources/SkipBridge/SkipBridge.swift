@@ -85,6 +85,16 @@ public extension SkipBridgeInstance {
         try implementation()
     }
 
+    static func invokeSwift<T: SkipBridgable>(_ args: SkipBridgable..., implementation: () throws -> T) rethrows -> T {
+        /// When calling Swift from Swift, we simply invoke the implementation
+        return try implementation()
+    }
+
+    static func invokeSwiftVoid(_ args: SkipBridgable..., implementation: () throws -> ()) rethrows {
+        /// When calling Swift from Swift, we simply invoke the implementation
+        try implementation()
+    }
+
     #else // SKIP
 
     // on the Java side, we don't constrain T or the arguments to the invoke* functions to SkipBridgable since Kotlin cannot retroactively conform primitives to an interface
@@ -100,11 +110,11 @@ public extension SkipBridgeInstance {
     }
 
     func invokeSwift<T>(_ args: Any..., implementation: () throws -> ()) rethrows -> T {
-        throw SkipBridgeError(description: "invokeSwift should be have been added by the transpiler for each function invocation")
+        throw SkipBridgeError(description: "invokeSwift should be have been replaced with the native method invocation by the transpiler")
     }
 
     func invokeSwiftVoid(_ args: Any..., implementation: () throws -> ()) rethrows {
-        throw SkipBridgeError(description: "invokeSwift should be have been added by the transpiler for each function invocation")
+        throw SkipBridgeError(description: "invokeSwift should be have been replaced with the native method invocation by the transpiler")
     }
     #endif
 }
@@ -233,7 +243,7 @@ public func swiftPeer<T: SkipBridge>(for swiftPointer: JavaLong) -> T {
 }
 
 // TODO: @available(*, deprecated, message: "no need for the overhead of reflective field lookup of _swiftPeer when we can just pass the pointer directly")
-public func swiftPeerReflective<T: SkipBridge>(for obj: JavaObject?) throws -> T {
+private func swiftPeerReflective<T: SkipBridge>(for obj: JavaObject?) throws -> T {
     guard let obj = obj else {
         throw SkipBridgeError(description: "Unable to call swiftPeer for a nil JavaObject")
     }
@@ -248,7 +258,7 @@ public func swiftPeerReflective<T: SkipBridge>(for obj: JavaObject?) throws -> T
     let swiftPointer: Int64 = try javaObject.get(field: ptr_field)
 
     if swiftPointer == 0 {
-        throw SkipBridgeError(description: "Value of _swiftPeer was unset for JavaObject")
+        throw SkipBridgeError(description: "Value of _swiftPeer was unset for JavaObject of type \(T.self)")
     }
 
     return swiftPeer(for: swiftPointer)
@@ -271,6 +281,17 @@ public struct SkipBridgeError: Error, CustomStringConvertible {
 #if !SKIP
 
 private let _swiftErrorStackKey = "_swiftErrorStack"
+
+/// Execute the given Swift closure and if an error occurs, put it onto the thread's error stack and return nil.
+public func handleSwiftError<T>(_ block: () throws -> T) -> T? {
+    do {
+        return try block()
+    } catch {
+        // `@_cdecl` JNI C functions cannot throw, so instead we add the current error to the thread's error stack, which we will check after invoking the function
+        pushSwiftError(error)
+        return nil
+    }
+}
 
 /// Adds the given error to the current native error stack.
 public func pushSwiftError(_ error: Error) {
@@ -302,34 +323,32 @@ internal func Java_skip_bridge_SkipBridge_popSwiftErrorMessageFromStack(_ env: J
         return nil
     }
 }
-
-
 #else
-
 public extension SkipBridge {
-    /// Invokes the given closure, and checks whether an error was thrown by Swift or not.
-    func checkSwiftError<T>(function: () -> T?) -> T {
-        let result = function()
-        if let error = popSwiftErrorMessage() {
-            throw RuntimeException(error) // ### TODO: should we try to convert the exception type?
-        }
-        return result!
-    }
-
-    /// Invokes the given closure, and checks whether an error was thrown by Swift or not.
-    func checkSwiftErrorVoid(function: () -> Void) throws -> Void {
-        function()
-        if let error = popSwiftErrorMessage() {
-            throw RuntimeException(error) // ### TODO: should we try to convert the exception type?
-        }
-    }
-
-    public func popSwiftErrorMessage() -> String? {
-        return popSwiftErrorMessageFromStack()
-    }
-
-    /* SKIP EXTERN */ public func popSwiftErrorMessageFromStack() -> String? {
+    /* SKIP EXTERN */ public static func popSwiftErrorMessageFromStack() -> String? {
         // this will invoke @_cdecl("Java_skip_bridge_SkipBridge_popSwiftErrorMessageFromStack")
     }
 }
+
+/// Invokes the given closure, and checks whether an error was thrown by Swift or not.
+public func checkSwiftError<T>(function: () -> T?) -> T {
+    let result = function()
+    if let error = popSwiftErrorMessage() {
+        throw RuntimeException(error) // ### TODO: should we try to convert the exception type?
+    }
+    return result!
+}
+
+/// Invokes the given closure, and checks whether an error was thrown by Swift or not.
+public func checkSwiftErrorVoid(function: () -> Void) throws -> Void {
+    function()
+    if let error = popSwiftErrorMessage() {
+        throw RuntimeException(error) // ### TODO: should we try to convert the exception type?
+    }
+}
+
+public func popSwiftErrorMessage() -> String? {
+    return SkipBridge.popSwiftErrorMessageFromStack()
+}
+
 #endif

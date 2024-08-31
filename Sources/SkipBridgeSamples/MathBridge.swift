@@ -42,7 +42,7 @@ public class MathBridge : SkipBridge {
     }
 
     public func callSwiftThrowing(message: String) throws {
-        // SKIP REPLACE: { checkSwiftErrorVoid { -> withSwiftBridge { invokeSwift_callSwiftThrowing(_swiftPeer, message) } } }()
+        // SKIP REPLACE: { checkSwiftErrorVoid { withSwiftBridge { invokeSwift_callSwiftThrowing(_swiftPeer, message) } } }()
         try invokeSwiftVoid(message) {
             #if !SKIP
             throw MathError(description: message)

@@ -6,7 +6,7 @@ public class JavaFileBridge : SkipBridge {
     private var file: java.io.File!
     #endif
 
-    private override init() {
+    internal override init() {
         super.init()
     }
 

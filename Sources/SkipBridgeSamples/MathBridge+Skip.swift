@@ -6,7 +6,7 @@ import SkipJNI
 // skipstone-generated Swift
 
 extension MathBridge : SkipReferenceBridgable {
-    public static let javaClass = try! JClass(fromSwiftType: MathBridge.self) // skip.bridge.samples.MathBridge
+    public static let javaClass = try! JClass(name: "skip.bridge.samples.MathBridge")
 
     public func toJavaObject() -> JavaObject? {
         try? javaPeer
@@ -91,11 +91,8 @@ public extension MathBridge {
 @_cdecl("Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftThrowing__JLjava_lang_String_2")
 internal func Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftThrowing__JLjava_lang_String_2(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong, _ message: JavaString?) {
     let bridge: MathBridge = swiftPeer(for: swiftPointer)
-    do {
+    handleSwiftError {
         try bridge.callSwiftThrowing(message: String.fromJavaObject(message))
-    } catch {
-        // `@_cdecl` JNI functions cannot throw errors, so instead we add the current error to the thread's error stack, which we will check after invoking the function
-        pushSwiftError(error)
     }
 }
 #endif

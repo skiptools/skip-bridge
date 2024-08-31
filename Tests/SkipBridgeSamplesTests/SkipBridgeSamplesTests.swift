@@ -7,10 +7,79 @@ import SkipJNI
 #endif
 
 final class SkipBridgeSamplesTests: XCTestCase {
+    func testJavaFileBridge() throws {
+        let tmpName = "/tmp/" + UUID().uuidString
+        let file = try JavaFileBridge(filePath: tmpName)
+        XCTAssertFalse(try file.exists())
+        XCTAssertTrue(try file.createNewFile())
+        XCTAssertTrue(try file.exists())
+
+        let url: SwiftURLBridge = try file.toSwiftURLBridge()
+        XCTAssertTrue(url.isFileURL())
+
+        let file2 = try url.toJavaFileBridge()
+        XCTAssertTrue(try file2.exists())
+        XCTAssertTrue(try file2.delete())
+        XCTAssertFalse(try file2.exists())
+    }
+
+    func testStaticFunctions() throws {
+        throw XCTSkip("TODO: fix peer setup for static functions")
+
+        let tmpName = "/tmp/" + UUID().uuidString
+        let file = try JavaFileBridge(filePath: tmpName)
+        // FIXME: java.lang.RuntimeException: kotlin.UninitializedPropertyAccessException: lateinit property filestorage has not been initialized
+        XCTAssertTrue(try SwiftURLBridge.fromJavaFileBridge(file).isFileURL())
+    }
+
+    func testSwiftURLBridge() throws {
+        let url = try SwiftURLBridge(urlString: "https://skip.tools")
+        XCTAssertFalse(url.isFileURL())
+    }
+
+    func testMathBridge() throws {
+        let math = MathBridge()
+        XCTAssertEqual(4.0, math.callPurePOW(2.0, power: 2.0)) // Java -> Java + Swift -> Swift
+        XCTAssertEqual(64.0, math.callSwiftPOW(2.0, power: 6.0)) // Java+Swift -> Swift
+        XCTAssertEqual(32.0, try math.callJavaPOW(2.0, power: 5.0)) // Swift+Java -> Java
+    }
+
+    func testThrowingSwiftFunctions() throws {
+        let math = MathBridge()
+        do {
+            try math.callSwiftThrowing(message: "ABC")
+            XCTFail("callSwiftThrowing should have thrown an error")
+        } catch {
+            #if SKIP
+            XCTAssertEqual("skip.lib.ErrorException: java.lang.RuntimeException: ABC", "\(error)")
+            #else
+            XCTAssertEqual("ABC", "\(error)")
+            #endif
+        }
+    }
+
+    func testThrowingJavaFunctions() throws {
+        let math = MathBridge()
+        do {
+            try math.callJavaThrowing(message: "XYZ")
+            XCTFail("callJavaThrowing should have thrown an error")
+        } catch {
+            XCTAssertEqual("XYZ", "\(error)")
+        }
+    }
+
+    func testAsycFunctions() throws {
+        throw XCTSkip("TODO")
+    }
+
+    func testClosureFunctions() throws {
+        throw XCTSkip("TODO")
+    }
+
+    /// On macOS, start up an embedded JVM so we can test the Swift side of the SkipJNI bridge.
     override func setUp() {
         #if os(macOS)
         if jni == nil {
-            // on macOS, start up an embedded JVM so we can test the Swift side of the SkipJNI bridge.
 
             //print("env: " + ProcessInfo.processInfo.environment.map({ $0 + "=" + $1 }).joined(separator: "\n").description)
 
@@ -53,99 +122,4 @@ final class SkipBridgeSamplesTests: XCTestCase {
         }
         #endif
     }
-
-    func testJavaFileBridge() throws {
-        let tmpName = "/tmp/" + UUID().uuidString
-        let file = try JavaFileBridge(filePath: tmpName)
-        XCTAssertFalse(try file.exists())
-        XCTAssertTrue(try file.createNewFile())
-        XCTAssertTrue(try file.exists())
-
-        let url: SwiftURLBridge = try file.toSwiftURLBridge()
-        XCTAssertTrue(url.isFileURL())
-
-        let file2 = try url.toJavaFileBridge()
-        XCTAssertTrue(try file2.exists())
-        XCTAssertTrue(try file2.delete())
-        XCTAssertFalse(try file2.exists())
-    }
-
-    func testSwiftURLBridge() throws {
-        let url = try SwiftURLBridge(urlString: "https://skip.tools")
-        XCTAssertFalse(url.isFileURL())
-    }
-
-    func testMathBridge() throws {
-        let math = MathBridge()
-        XCTAssertEqual(4.0, math.callPurePOW(2.0, power: 2.0))
-
-        #if SKIP
-        // Java -> Java
-        XCTAssertEqual(8.0, try math.callJavaPOW(2.0, power: 3.0))
-
-        //print("### Classpath: " + System.getProperty("java.class.path"))
-        #else
-        // Swift -> Swift
-        XCTAssertEqual(16.0, math.callSwiftPOW(2.0, power: 4.0))
-
-        //math.thisFunctionWasAddedByTheTranspiler2()
-        #endif
-
-        // Java+Swift -> Swift
-        XCTAssertEqual(64.0, math.callSwiftPOW(2.0, power: 6.0))
-
-        // Swift+Java -> Java
-        XCTAssertEqual(32.0, try math.callJavaPOW(2.0, power: 5.0))
-    }
-
-    func testThrowingSwiftFunctions() throws {
-        let math = MathBridge()
-        do {
-            try math.callSwiftThrowing(message: "ABC")
-            XCTFail("callSwiftThrowing should have failed")
-        } catch {
-            // expected
-            #if SKIP
-            XCTAssertEqual("skip.lib.ErrorException: java.lang.RuntimeException: ABC", "\(error)")
-            #else
-            XCTAssertEqual("ABC", "\(error)")
-            #endif
-        }
-    }
-
-    func testThrowingJavaFunctions() throws {
-        let math = MathBridge()
-        do {
-            try math.callJavaThrowing(message: "XYZ")
-            XCTFail("callJavaThrowing should have failed")
-        } catch {
-            // expected
-            #if SKIP
-            XCTAssertEqual("XYZ", "\(error)")
-            #else
-            XCTAssertEqual("XYZ", "\(error)")
-            #endif
-        }
-    }
-
-    func testStateManagement() throws {
-        throw XCTSkip("TODO")
-    }
-
-    func testStaticFunctions() throws {
-        throw XCTSkip("TODO")
-    }
-
-    func testAsycFunctions() throws {
-        throw XCTSkip("TODO")
-    }
-
-    func testClosureFunctions() throws {
-        throw XCTSkip("TODO")
-    }
-
-    func testBridgeReferenceFunctions() throws {
-        throw XCTSkip("TODO")
-    }
-
 }

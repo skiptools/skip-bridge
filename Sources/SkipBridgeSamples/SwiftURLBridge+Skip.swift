@@ -5,7 +5,7 @@ import SkipJNI
 // skipstone-generated Swift
 
 extension SwiftURLBridge : SkipReferenceBridgable {
-    public static let javaClass = try! JClass(fromSwiftType: SwiftURLBridge.self) // skip.bridge.samples.SwiftURLBridge
+    public static let javaClass = try! JClass(name: "skip.bridge.samples.SwiftURLBridge")
 
     public func toJavaObject() -> JavaObject? {
         try? javaPeer
@@ -82,13 +82,27 @@ public extension SwiftURLBridge {
 #else
 @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1toJavaFileBridge__J")
 internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1toJavaFileBridge__J(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong) -> JavaObject? {
-    do {
+    return handleSwiftError {
         let bridge: SwiftURLBridge = swiftPeer(for: swiftPointer)
         return try JavaFileBridge(filePath: bridge.url.path).toJavaObject()
-    } catch {
-        // `@_cdecl` JNI functions cannot throw errors, so instead we add the current error to the thread's error stack, which we will check after invoking the function
-        pushSwiftError(error)
-        return nil
-    }
+    } ?? nil
 }
 #endif
+
+
+#if SKIP
+public extension SwiftURLBridge {
+    /* SKIP EXTERN */ public static func invokeSwift_fromJavaFileBridge(fileBridge: JavaFileBridge) -> SwiftURLBridge { }
+}
+#else
+@_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1fromJavaFileBridge__Lskip_bridge_samples_JavaFileBridge_2")
+internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1fromJavaFileBridge__J(_ env: JNIEnvPointer, _ obj: JavaObject?, _ fileBridge: JavaObject?) -> JavaObject? {
+    handleSwiftError {
+        try JavaFileBridge.fromJavaObject(fileBridge).toSwiftURLBridge().toJavaObject()
+    } ?? nil
+}
+#endif
+
+
+
+

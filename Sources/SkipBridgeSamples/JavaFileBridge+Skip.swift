@@ -5,7 +5,7 @@ import SkipJNI
 // skipstone-generated Swift
 
 extension JavaFileBridge : SkipReferenceBridgable {
-    public static let javaClass = try! JClass(fromSwiftType: JavaFileBridge.self) // skip.bridge.samples.JavaFileBridge
+    public static let javaClass = try! JClass(name: "skip.bridge.samples.JavaFileBridge")
 
     public func toJavaObject() -> JavaObject? {
         try? javaPeer
@@ -38,26 +38,29 @@ extension JavaFileBridge : SkipReferenceBridgable {
     }
 }
 
-#else
+#endif
 
 // the Kotlin side of the bridge with the invocation of the extern functions
 
+#if SKIP
 extension JavaFileBridge {
-    // the JavaFileBridge doesn't contains any methods that are bridged to Swift, so this logic doesn't need to be added to the extension
+    func withSwiftBridge<T>(function: () -> T) -> T {
+        if _swiftPeer == Long(0) {
+            loadPeerLibrary("SkipBridgeSamples") // ensure the shared library containing the native implementations is loaded
+            // create the Swift peer for this Java instance
+            _swiftPeer = createSwiftJavaFileBridge()
+        }
 
-//    func withSwiftBridge<T>(function: () -> T) -> T {
-//        if _swiftPeer == Long(0) {
-//            loadPeerLibrary("SkipBridgeSamples") // ensure the shared library containing the native implementations is loaded
-//            // create the Swift peer for this Java instance
-//            _swiftPeer = createSwiftJavaFileBridge()
-//        }
-//
-//        return function()
-//    }
-//
-//    /* SKIP EXTERN */ public func createSwiftJavaFileBridge() -> Int64 {
-//        // this will invoke @_cdecl("Java_skip_bridge_samples_JavaFileBridge_createSwiftJavaFileBridge")
-//    }
+        return function()
+    }
+
+    /* SKIP EXTERN */ public func createSwiftJavaFileBridge() -> Int64 {
+        // this will invoke @_cdecl("Java_skip_bridge_samples_JavaFileBridge_createSwiftJavaFileBridge")
+    }
 }
-
+#else
+@_cdecl("Java_skip_bridge_samples_JavaFileBridge_createSwiftJavaFileBridge")
+internal func Java_skip_bridge_samples_JavaFileBridge_createSwiftJavaFileBridge(_ env: JNIEnvPointer, _ obj: JavaObject?) -> Int64 {
+    registerSwiftBridge(JavaFileBridge())
+}
 #endif

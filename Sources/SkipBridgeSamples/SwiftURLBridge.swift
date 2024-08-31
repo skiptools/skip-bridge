@@ -42,4 +42,14 @@ public class SwiftURLBridge : SkipBridge {
         }
     }
 
+    /// Example of a static function; note that `_swiftPeer` is not passed to the extern function and we don't use `withSwiftBridge`
+    public static func fromJavaFileBridge(_ fileBridge: JavaFileBridge) throws -> SwiftURLBridge {
+        // SKIP REPLACE: return { checkSwiftError { invokeSwift_fromJavaFileBridge(fileBridge.withSwiftBridge { fileBridge } ) } }()
+        try invokeSwift(fileBridge) {
+            #if !SKIP
+            try fileBridge.toSwiftURLBridge()
+            #endif
+        }
+    }
+
 }
