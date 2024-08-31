@@ -15,7 +15,7 @@ public class SwiftURLBridge : SkipBridge {
         try setURLString(urlString)
     }
 
-    public func setURLString(_ urlString: String) throws {
+    internal func setURLString(_ urlString: String) throws {
         // SKIP REPLACE: return withSwiftBridge { invokeSwift_setURLString(urlString) }
         invokeSwiftVoid(urlString) {
             #if !SKIP

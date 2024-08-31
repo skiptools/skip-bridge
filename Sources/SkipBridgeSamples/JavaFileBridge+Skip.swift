@@ -1,32 +1,5 @@
 import SkipBridge
 #if !SKIP
-import Darwin
-import Foundation
-#endif
-
-// skipstone: JavaFileBridge+SkipExtensions.swift
-
-#if SKIP
-extension JavaFileBridge {
-    // the JavaFileBridge doesn't contains any methods that are bridged to Swift, so this logic doesn't need to be added to the extension
-
-//    func withSwiftBridge<T>(function: () -> T) -> T {
-//        if _swiftPeer == Long(0) {
-//            loadPeerLibrary("SkipBridgeSamples") // ensure the shared library containing the native implementations is loaded
-//            // create the Swift peer for this Java instance
-//            _swiftPeer = createSwiftJavaFileBridge()
-//        }
-//
-//        return function()
-//    }
-//
-//    /* SKIP EXTERN */ public func createSwiftJavaFileBridge() -> Int64 {
-//        // this will invoke @_cdecl("Java_skip_bridge_samples_JavaFileBridge_createSwiftJavaFileBridge")
-//    }
-}
-
-#else
-
 import SkipJNI
 
 // skipstone-generated Swift
@@ -65,6 +38,28 @@ extension JavaFileBridge : SkipReferenceBridgable {
             fatalError("could not identify which function called invokeJava for: \(functionName)")
         }
     }
+}
+
+#else
+
+// the Kotlin side of the bridge with the invocation of the extern functions
+
+extension JavaFileBridge {
+    // the JavaFileBridge doesn't contains any methods that are bridged to Swift, so this logic doesn't need to be added to the extension
+
+//    func withSwiftBridge<T>(function: () -> T) -> T {
+//        if _swiftPeer == Long(0) {
+//            loadPeerLibrary("SkipBridgeSamples") // ensure the shared library containing the native implementations is loaded
+//            // create the Swift peer for this Java instance
+//            _swiftPeer = createSwiftJavaFileBridge()
+//        }
+//
+//        return function()
+//    }
+//
+//    /* SKIP EXTERN */ public func createSwiftJavaFileBridge() -> Int64 {
+//        // this will invoke @_cdecl("Java_skip_bridge_samples_JavaFileBridge_createSwiftJavaFileBridge")
+//    }
 }
 
 #endif
