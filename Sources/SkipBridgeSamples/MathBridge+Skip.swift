@@ -8,7 +8,7 @@ import SkipJNI
 extension MathBridge : SkipReferenceBridgable {
     public static let javaClass = try! JClass(name: "skip.bridge.samples.MathBridge")
 
-    public func toJavaObject() -> JavaObject? {
+    public func toJavaObject() -> JavaObjectPointer? {
         try? javaPeer
     }
 
@@ -57,7 +57,7 @@ public extension MathBridge {
 }
 #else
 @_cdecl("Java_skip_bridge_samples_MathBridge_createSwiftMathBridge")
-internal func Java_skip_bridge_samples_MathBridge_createSwiftMathBridge(_ env: JNIEnvPointer, _ obj: JavaObject?) -> Int64 {
+internal func Java_skip_bridge_samples_MathBridge_createSwiftMathBridge(_ env: JNIEnvPointer, _ obj: JavaObjectPointer?) -> Int64 {
     registerSwiftBridge(MathBridge())
 }
 #endif
@@ -69,7 +69,7 @@ public extension MathBridge {
 }
 #else
 @_cdecl("Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftPOW__JDD")
-internal func Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftPOW__JDD(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong, _ value: Double, _ power: Double) -> Double {
+internal func Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftPOW__JDD(_ env: JNIEnvPointer, _ obj: JavaObjectPointer?, _ swiftPointer: JavaLong, _ value: Double, _ power: Double) -> Double {
     let bridge: MathBridge = swiftPeer(for: swiftPointer)
     return bridge.callSwiftPOW(value, power: power)
 }
@@ -89,7 +89,7 @@ public extension MathBridge {
 /// - Second parameter is a `java.lang.String` whose JNI string ls `Ljava/lang/String;` and which is encoded to the C function name `Ljava_lang_String_2` (`_2` represents `;`)
 /// - If there were a `[` in the function name, that would be represented by `_3`
 @_cdecl("Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftThrowing__JLjava_lang_String_2")
-internal func Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftThrowing__JLjava_lang_String_2(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong, _ message: JavaString?) {
+internal func Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftThrowing__JLjava_lang_String_2(_ env: JNIEnvPointer, _ obj: JavaObjectPointer?, _ swiftPointer: JavaLong, _ message: JavaString?) {
     let bridge: MathBridge = swiftPeer(for: swiftPointer)
     handleSwiftError {
         try bridge.callSwiftThrowing(message: String.fromJavaObject(message))

@@ -7,7 +7,7 @@ import SkipJNI
 extension SwiftURLBridge : SkipReferenceBridgable {
     public static let javaClass = try! JClass(name: "skip.bridge.samples.SwiftURLBridge")
 
-    public func toJavaObject() -> JavaObject? {
+    public func toJavaObject() -> JavaObjectPointer? {
         try? javaPeer
     }
 
@@ -41,7 +41,7 @@ public extension SwiftURLBridge {
 }
 #else
 @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_createSwiftURLBridge")
-internal func Java_skip_bridge_samples_SwiftURLBridge_createSwiftURLBridge(_ env: JNIEnvPointer, _ obj: JavaObject?) -> Int64 {
+internal func Java_skip_bridge_samples_SwiftURLBridge_createSwiftURLBridge(_ env: JNIEnvPointer, _ obj: JavaObjectPointer?) -> Int64 {
     registerSwiftBridge(SwiftURLBridge())
 }
 #endif
@@ -52,7 +52,7 @@ public extension SwiftURLBridge {
 }
 #else
 @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1setURLString__JLjava_lang_String_2")
-internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1setURLString__JLjava_lang_String_2(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong, _ urlString: JavaString?) {
+internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1setURLString__JLjava_lang_String_2(_ env: JNIEnvPointer, _ obj: JavaObjectPointer?, _ swiftPointer: JavaLong, _ urlString: JavaString?) {
     do {
         let bridge: SwiftURLBridge = swiftPeer(for: swiftPointer)
         try bridge.setURLString(String.fromJavaObject(urlString))
@@ -69,7 +69,7 @@ public extension SwiftURLBridge {
 }
 #else
 @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL__J")
-internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL__J(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong) -> Bool {
+internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL__J(_ env: JNIEnvPointer, _ obj: JavaObjectPointer?, _ swiftPointer: JavaLong) -> Bool {
     let bridge: SwiftURLBridge = swiftPeer(for: swiftPointer)
     return bridge.isFileURL()
 }
@@ -81,7 +81,7 @@ public extension SwiftURLBridge {
 }
 #else
 @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1toJavaFileBridge__J")
-internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1toJavaFileBridge__J(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong) -> JavaObject? {
+internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1toJavaFileBridge__J(_ env: JNIEnvPointer, _ obj: JavaObjectPointer?, _ swiftPointer: JavaLong) -> JavaObjectPointer? {
     return handleSwiftError {
         let bridge: SwiftURLBridge = swiftPeer(for: swiftPointer)
         return try JavaFileBridge(filePath: bridge.url.path).toJavaObject()
@@ -96,7 +96,7 @@ public extension SwiftURLBridge {
 }
 #else
 @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_00024Companion_invokeSwift_1fromJavaFileBridge__Lskip_bridge_samples_JavaFileBridge_2")
-internal func Java_skip_bridge_samples_SwiftURLBridge_00024Companion_invokeSwift_1fromJavaFileBridge__J(_ env: JNIEnvPointer, _ cls: JavaClass?, _ fileBridge: JavaObject?) -> JavaObject? {
+internal func Java_skip_bridge_samples_SwiftURLBridge_00024Companion_invokeSwift_1fromJavaFileBridge__J(_ env: JNIEnvPointer, _ cls: JavaClassPointer?, _ fileBridge: JavaObjectPointer?) -> JavaObjectPointer? {
     handleSwiftError {
         try JavaFileBridge.fromJavaObject(fileBridge).toSwiftURLBridge().toJavaObject()
     } ?? nil

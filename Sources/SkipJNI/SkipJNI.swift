@@ -17,11 +17,7 @@ public typealias JavaLong = jlong
 public typealias JavaFloat = jfloat
 public typealias JavaDouble = jdouble
 
-@available(*, renamed: "JavaObjectPointer")
-public typealias JavaObject = jobject
 public typealias JavaObjectPointer = jobject
-@available(*, renamed: "JavaClassPointer")
-public typealias JavaClass = jclass
 public typealias JavaClassPointer = jobject
 public typealias JavaString = jstring
 public typealias JavaArray = jarray
@@ -126,11 +122,11 @@ extension JNI {
         withEnv { $0.GetJavaVM($1, vm) }
     }
 
-    public func registerNatives(targetClass: JavaClass, _ methods: UnsafePointer<JNINativeMethod>, _ nMethods: JavaInt) -> JavaInt {
+    public func registerNatives(targetClass: JavaClassPointer, _ methods: UnsafePointer<JNINativeMethod>, _ nMethods: JavaInt) -> JavaInt {
         withEnv { $0.RegisterNatives($1, targetClass, methods, nMethods) }
     }
 
-    public func unregisterNatives(targetClass: JavaClass) -> JavaInt {
+    public func unregisterNatives(targetClass: JavaClassPointer) -> JavaInt {
         withEnv { $0.UnregisterNatives($1, targetClass) }
     }
 
@@ -150,15 +146,15 @@ extension JNI {
         withEnv { $0.ExceptionDescribe($1) }
     }
 
-    public func monitorEnter(obj: JavaObject) -> JavaInt {
+    public func monitorEnter(obj: JavaObjectPointer) -> JavaInt {
         withEnv { $0.MonitorEnter($1, obj) }
     }
 
-    public func monitorExit(obj: JavaObject) -> JavaInt {
+    public func monitorExit(obj: JavaObjectPointer) -> JavaInt {
         withEnv { $0.MonitorExit($1, obj) }
     }
 
-    func synchronized<T>(_ obj: JavaObject, _ block: () throws -> T) rethrows -> T {
+    func synchronized<T>(_ obj: JavaObjectPointer, _ block: () throws -> T) rethrows -> T {
         try withEnv { inv, env in
             if inv.MonitorEnter(env, obj) != JNI_OK {
                 fatalError("SkipJNI: unable to MonitorEnter")
@@ -172,27 +168,27 @@ extension JNI {
         }
     }
 
-    public func findClass(_ name: String) -> JavaClass? {
+    public func findClass(_ name: String) -> JavaClassPointer? {
         withEnv { $0.FindClass($1, name) }
     }
 
-    public func newGlobalRef(_ obj: JavaObject) -> JavaObject! {
+    public func newGlobalRef(_ obj: JavaObjectPointer) -> JavaObjectPointer! {
         withEnv { $0.NewGlobalRef($1, obj) }
     }
 
-    public func deleteGlobalRef(_ obj: JavaObject) {
+    public func deleteGlobalRef(_ obj: JavaObjectPointer) {
         withEnv { $0.DeleteGlobalRef($1, obj) }
     }
 
-    public func newLocalRef(_ obj: JavaObject) -> JavaObject! {
+    public func newLocalRef(_ obj: JavaObjectPointer) -> JavaObjectPointer! {
         withEnv { $0.NewLocalRef($1, obj) }
     }
 
-    public func deleteLocalRef(_ obj: JavaObject) {
+    public func deleteLocalRef(_ obj: JavaObjectPointer) {
         withEnv { $0.DeleteLocalRef($1, obj) }
     }
 
-    public func getObjectClass(_ obj: JavaObject) -> JavaClass! {
+    public func getObjectClass(_ obj: JavaObjectPointer) -> JavaClassPointer! {
         withEnv { $0.GetObjectClass($1, obj) }
     }
 }
@@ -243,17 +239,17 @@ public struct JNIError: Error, CustomStringConvertible {
 public protocol JConvertible: JParameterConvertible {
     static var jsig: String { get }
 
-    static func call(_ method: JavaMethodID, on obj: JavaObject, args: [JavaParameter]) throws -> Self
-    static func callStatic(_ method: JavaMethodID, on cls: JavaClass, args: [JavaParameter]) throws -> Self
+    static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Self
+    static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Self
 
-    static func load(_ field: JavaFieldID, of obj: JavaObject) throws -> Self
-    func store(_ field: JavaFieldID, of obj: JavaObject) -> Void
+    static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) throws -> Self
+    func store(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Void
 
-    static func loadStatic(_ field: JavaFieldID, of cls: JavaClass) throws -> Self
-    func storeStatic(_ field: JavaFieldID, of cls: JavaClass) -> Void
+    static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) throws -> Self
+    func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Void
 
-    static func fromJavaObject(_ obj: JavaObject?) throws -> Self
-    func toJavaObject() -> JavaObject?
+    static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> Self
+    func toJavaObject() -> JavaObjectPointer?
 
     //  static func fromJavaArray(_ arr: JavaArray?) -> [Self]
     //  static func toJavaArray(_ arr: [Self]) -> JavaArray?
@@ -262,12 +258,12 @@ public protocol JConvertible: JParameterConvertible {
 
 public protocol JNullInitializable: JConvertible {
     init()
-    static func fromJavaObject(_ obj: JavaObject) throws -> Self
+    static func fromJavaObject(_ obj: JavaObjectPointer) throws -> Self
 }
 
 
 extension JNullInitializable {
-    public static func fromJavaObject(_ obj: JavaObject?) throws -> Self {
+    public static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> Self {
         if let _obj = obj {
             return try fromJavaObject(_obj)
         } else {
@@ -282,14 +278,14 @@ extension Optional: JObjectConvertible, JConvertible, JParameterConvertible wher
         return Wrapped.javaClass
     }
 
-    public static func fromJavaObject(_ obj: JavaObject?) throws -> Optional<Wrapped> {
+    public static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> Optional<Wrapped> {
         if let _obj = obj {
             return try Wrapped.fromJavaObject(_obj)
         }
         return nil
     }
 
-    public func toJavaObject() -> JavaObject? {
+    public func toJavaObject() -> JavaObjectPointer? {
         if let this = self {
             return this.toJavaObject()
         }
@@ -304,7 +300,7 @@ public protocol JPrimitiveObjectProtocol: ObjectProtocol {
     associatedtype ConvertibleType: JConvertible
     var value: ConvertibleType { get throws }
     init(_ value: ConvertibleType)
-    init(_ obj: JavaObject)
+    init(_ obj: JavaObjectPointer)
 }
 
 
@@ -330,14 +326,19 @@ extension JPrimitiveObjectInternalProtocol {
 
 public protocol JPrimitiveConvertible : JNullInitializable {
     associatedtype PrimitiveType: JPrimitiveObjectProtocol
+    associatedtype ArrayType
+
+    static func createArray(len: jsize) -> ArrayType?
+    static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]?
+    static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize)
 }
 
 extension JPrimitiveConvertible where PrimitiveType.ConvertibleType == Self {
-    public func toJavaObject() -> JavaObject? {
+    public func toJavaObject() -> JavaObjectPointer? {
         return PrimitiveType(self).javaObject.ptr
     }
 
-    public static func fromJavaObject(_ obj: JavaObject) throws -> Self {
+    public static func fromJavaObject(_ obj: JavaObjectPointer) throws -> Self {
         return try PrimitiveType(obj).value
     }
 }
@@ -358,28 +359,40 @@ extension Bool: JPrimitiveConvertible {
     public typealias PrimitiveType = JBoolean
     public static let jsig = "Z"
 
-    public static func call(_ method: JavaMethodID, on obj: JavaObject, args: [JavaParameter]) throws -> Bool {
+    public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Bool {
         try jni.withEnvThrowing { $0.CallBooleanMethodA($1, obj, method, args) == JNI_TRUE }
     }
 
-    public static func callStatic(_ method: JavaMethodID, on cls: JavaClass, args: [JavaParameter]) throws -> Bool {
+    public static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Bool {
         try jni.withEnvThrowing { $0.CallStaticBooleanMethodA($1, cls, method, args) == JNI_TRUE }
     }
 
-    public static func load(_ field: JavaFieldID, of obj: JavaObject) -> Bool {
+    public static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Bool {
         jni.withEnv { $0.GetBooleanField($1, obj, field) == JNI_TRUE }
     }
 
-    public func store(_ field: JavaFieldID, of obj: JavaObject) -> Void {
+    public func store(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Void {
         jni.withEnv { $0.SetBooleanField($1, obj, field, (self) ? 1 : 0) }
     }
 
-    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClass) -> Bool {
+    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Bool {
         jni.withEnv { $0.GetStaticBooleanField($1, cls, field) == JNI_TRUE }
     }
 
-    public func storeStatic(_ field: JavaFieldID, of cls: JavaClass) -> Void {
+    public func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Void {
         jni.withEnv { $0.SetBooleanField($1, cls, field, (self) ? 1 : 0) }
+    }
+
+    public static func createArray(len: jsize) -> JavaIntArray? {
+        jni.withEnv { $0.NewIntArray($1, len) }
+    }
+    
+    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
+        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetBooleanArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))).map({ $0 != 0 }) }
+    }
+
+    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
+        jni.withEnv { $0.SetBooleanArrayRegion($1, array, offset, jsize(values.count), values) }
     }
 
     public func toJavaParameter() -> JavaParameter {
@@ -403,28 +416,40 @@ extension Int8: JPrimitiveConvertible {
     public typealias PrimitiveType = JByte
     public static let jsig = "B"
 
-    public static func call(_ method: JavaMethodID, on obj: JavaObject, args: [JavaParameter]) throws -> Int8 {
+    public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int8 {
         try jni.withEnvThrowing { $0.CallByteMethodA($1, obj, method, args) }
     }
 
-    public static func callStatic(_ method: JavaMethodID, on cls: JavaClass, args: [JavaParameter]) throws -> Int8 {
+    public static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Int8 {
         try jni.withEnvThrowing { $0.CallStaticByteMethodA($1, cls, method, args) }
     }
 
-    public static func load(_ field: JavaFieldID, of obj: JavaObject) -> Int8 {
+    public static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Int8 {
         jni.withEnv { $0.GetByteField($1, obj, field) }
     }
 
-    public func store(_ field: JavaFieldID, of obj: JavaObject) {
+    public func store(_ field: JavaFieldID, of obj: JavaObjectPointer) {
         jni.withEnv { $0.SetByteField($1, obj, field, self) }
     }
 
-    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClass) -> Int8 {
+    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Int8 {
         jni.withEnv { $0.GetStaticByteField($1, cls, field) }
     }
 
-    public func storeStatic(_ field: JavaFieldID, of cls: JavaClass) {
+    public func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) {
         jni.withEnv { $0.SetStaticByteField($1, cls, field, self) }
+    }
+
+    public static func createArray(len: jsize) -> JavaByteArray? {
+        jni.withEnv { $0.NewByteArray($1, len) }
+    }
+
+    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
+        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetByteArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
+    }
+
+    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
+        jni.withEnv { $0.SetByteArrayRegion($1, array, offset, jsize(values.count), values) }
     }
 
     public func toJavaParameter() -> JavaParameter {
@@ -447,28 +472,40 @@ extension UInt16: JPrimitiveConvertible {
     public typealias PrimitiveType = JChar
     public static let jsig = "C"
 
-    public static func call(_ method: JavaMethodID, on obj: JavaObject, args: [JavaParameter]) throws -> UInt16 {
+    public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> UInt16 {
         try jni.withEnvThrowing { $0.CallCharMethodA($1, obj, method, args) }
     }
 
-    public static func callStatic(_ method: JavaMethodID, on cls: JavaClass, args: [JavaParameter]) throws -> UInt16 {
+    public static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> UInt16 {
         try jni.withEnvThrowing { $0.CallStaticCharMethodA($1, cls, method, args) }
     }
 
-    public static func load(_ field: JavaFieldID, of obj: JavaObject) -> UInt16 {
+    public static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) -> UInt16 {
         jni.withEnv { $0.GetCharField($1, obj, field) }
     }
 
-    public func store(_ field: JavaFieldID, of obj: JavaObject) {
+    public func store(_ field: JavaFieldID, of obj: JavaObjectPointer) {
         jni.withEnv { $0.SetCharField($1, obj, field, self) }
     }
 
-    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClass) -> UInt16 {
+    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> UInt16 {
         jni.withEnv { $0.GetStaticCharField($1, cls, field) }
     }
 
-    public func storeStatic(_ field: JavaFieldID, of cls: JavaClass) {
+    public func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) {
         jni.withEnv { $0.SetStaticCharField($1, cls, field, self) }
+    }
+
+    public static func createArray(len: jsize) -> JavaCharArray? {
+        jni.withEnv { $0.NewCharArray($1, len) }
+    }
+
+    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
+        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetCharArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
+    }
+
+    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
+        jni.withEnv { $0.SetCharArrayRegion($1, array, offset, jsize(values.count), values) }
     }
 
     public func toJavaParameter() -> JavaParameter {
@@ -491,28 +528,40 @@ extension Int16: JPrimitiveConvertible {
     public typealias PrimitiveType = JShort
     public static let jsig = "S"
 
-    public static func call(_ method: JavaMethodID, on obj: JavaObject, args: [JavaParameter]) throws -> Int16 {
+    public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int16 {
         try jni.withEnvThrowing { $0.CallShortMethodA($1, obj, method, args) }
     }
 
-    public static func callStatic(_ method: JavaMethodID, on cls: JavaClass, args: [JavaParameter]) throws -> Int16 {
+    public static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Int16 {
         try jni.withEnvThrowing { $0.CallStaticShortMethodA($1, cls, method, args) }
     }
 
-    public static func load(_ field: JavaFieldID, of obj: JavaObject) -> Int16 {
+    public static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Int16 {
         jni.withEnv { $0.GetShortField($1, obj, field) }
     }
 
-    public func store(_ field: JavaFieldID, of obj: JavaObject) {
+    public func store(_ field: JavaFieldID, of obj: JavaObjectPointer) {
         jni.withEnv { $0.SetShortField($1, obj, field, self) }
     }
 
-    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClass) -> Int16 {
+    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Int16 {
         jni.withEnv { $0.GetStaticShortField($1, cls, field) }
     }
 
-    public func storeStatic(_ field: JavaFieldID, of cls: JavaClass) {
+    public func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) {
         jni.withEnv { $0.SetStaticShortField($1, cls, field, self) }
+    }
+
+    public static func createArray(len: jsize) -> JavaShortArray? {
+        jni.withEnv { $0.NewShortArray($1, len) }
+    }
+
+    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
+        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetShortArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
+    }
+
+    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
+        jni.withEnv { $0.SetShortArrayRegion($1, array, offset, jsize(values.count), values) }
     }
 
     public func toJavaParameter() -> JavaParameter {
@@ -536,28 +585,40 @@ extension Int32: JPrimitiveConvertible {
     public typealias PrimitiveType = JInteger
     public static let jsig = "I"
 
-    public static func call(_ method: JavaMethodID, on obj: JavaObject, args: [JavaParameter]) throws -> Int32 {
+    public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int32 {
         try jni.withEnvThrowing { $0.CallIntMethodA($1, obj, method, args) }
     }
 
-    public static func callStatic(_ method: JavaMethodID, on cls: JavaClass, args: [JavaParameter]) throws -> Int32 {
+    public static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Int32 {
         try jni.withEnvThrowing { $0.CallStaticIntMethodA($1, cls, method, args) }
     }
 
-    public static func load(_ field: JavaFieldID, of obj: JavaObject) -> Int32 {
+    public static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Int32 {
         jni.withEnv { $0.GetIntField($1, obj, field) }
     }
 
-    public func store(_ field: JavaFieldID, of obj: JavaObject) {
+    public func store(_ field: JavaFieldID, of obj: JavaObjectPointer) {
         jni.withEnv { $0.SetIntField($1, obj, field, self) }
     }
 
-    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClass) -> Int32 {
+    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Int32 {
         jni.withEnv { $0.GetStaticIntField($1, cls, field) }
     }
 
-    public func storeStatic(_ field: JavaFieldID, of cls: JavaClass) {
+    public func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) {
         jni.withEnv { $0.SetStaticIntField($1, cls, field, self) }
+    }
+
+    public static func createArray(len: jsize) -> JavaIntArray? {
+        jni.withEnv { $0.NewIntArray($1, len) }
+    }
+
+    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
+        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetIntArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
+    }
+
+    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
+        jni.withEnv { $0.SetIntArrayRegion($1, array, offset, jsize(values.count), values) }
     }
 
     public func toJavaParameter() -> JavaParameter {
@@ -581,28 +642,40 @@ extension Int64: JPrimitiveConvertible {
     public typealias PrimitiveType = JLong
     public static let jsig = "J"
 
-    public static func call(_ method: JavaMethodID, on obj: JavaObject, args: [JavaParameter]) throws -> Int64 {
+    public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int64 {
         try jni.withEnvThrowing { $0.CallLongMethodA($1, obj, method, args) }
     }
 
-    public static func callStatic(_ method: JavaMethodID, on cls: JavaClass, args: [JavaParameter]) throws -> Int64 {
+    public static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Int64 {
         try jni.withEnvThrowing { $0.CallStaticLongMethodA($1, cls, method, args) }
     }
 
-    public static func load(_ field: JavaFieldID, of obj: JavaObject) -> Int64 {
+    public static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Int64 {
         jni.withEnv { $0.GetLongField($1, obj, field) }
     }
 
-    public func store(_ field: JavaFieldID, of obj: JavaObject) {
+    public func store(_ field: JavaFieldID, of obj: JavaObjectPointer) {
         jni.withEnv { $0.SetLongField($1, obj, field, self) }
     }
 
-    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClass) -> Int64 {
+    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Int64 {
         jni.withEnv { $0.GetStaticLongField($1, cls, field) }
     }
 
-    public func storeStatic(_ field: JavaFieldID, of cls: JavaClass) {
+    public func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) {
         jni.withEnv { $0.SetStaticLongField($1, cls, field, self) }
+    }
+
+    public static func createArray(len: jsize) -> JavaLongArray? {
+        jni.withEnv { $0.NewLongArray($1, len) }
+    }
+
+    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
+        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetLongArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
+    }
+
+    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
+        jni.withEnv { $0.SetLongArrayRegion($1, array, offset, jsize(values.count), values) }
     }
 
     public func toJavaParameter() -> JavaParameter {
@@ -617,43 +690,69 @@ extension Int: JPrimitiveConvertible {
 #if arch(x86_64) || arch(arm64)
     public typealias PrimitiveType = JLong
     private typealias Convertible = Int64
+    public typealias ArrayType = jlongArray
     public static let jsig = "J"
 #else
     public typealias PrimitiveType = JInteger
     private typealias Convertible = Int32
+    public typealias ArrayType = jintArray
     public static let jsig = "I"
 #endif
 
-    public static func fromJavaObject(_ obj: JavaObject) throws -> Int {
+    public static func fromJavaObject(_ obj: JavaObjectPointer) throws -> Int {
         return Int(try Convertible.fromJavaObject(obj))
     }
 
-    public static func call(_ method: JavaMethodID, on obj: JavaObject, args: [JavaParameter]) throws -> Int {
+    public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int {
         return Int(try Convertible.call(method, on: obj, args: args))
     }
 
-    public static func callStatic(_ method: JavaMethodID, on cls: JavaClass, args: [JavaParameter]) throws -> Int {
+    public static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Int {
         return Int(try Convertible.callStatic(method, on: cls, args: args))
     }
 
-    public static func load(_ field: JavaFieldID, of obj: JavaObject) -> Int {
+    public static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Int {
         return Int(Convertible.load(field, of: obj))
     }
 
-    public func store(_ field: JavaFieldID, of obj: JavaObject) {
+    public func store(_ field: JavaFieldID, of obj: JavaObjectPointer) {
         Convertible(self).store(field, of: obj)
     }
 
-    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClass) -> Int {
+    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Int {
         return Int(Convertible.loadStatic(field, of: cls))
     }
 
-    public func storeStatic(_ field: JavaFieldID, of cls: JavaClass) {
+    public func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) {
         Convertible(self).storeStatic(field, of: cls)
     }
 
-    public func toJavaObject() -> JavaObject? {
+    public func toJavaObject() -> JavaObjectPointer? {
         return PrimitiveType(PrimitiveType.ConvertibleType(self)).javaObject.ptr
+    }
+
+    public static func createArray(len: jsize) -> ArrayType? {
+        #if arch(x86_64) || arch(arm64)
+        jni.withEnv { $0.NewLongArray($1, len) }
+        #else
+        jni.withEnv { $0.NewIntArray($1, len) }
+        #endif
+    }
+
+    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
+        #if arch(x86_64) || arch(arm64)
+        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetLongArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
+        #else
+        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetIntArratElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
+        #endif
+    }
+
+    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
+        #if arch(x86_64) || arch(arm64)
+        jni.withEnv { $0.SetLongArrayRegion($1, array, offset, jsize(values.count), values) }
+        #else
+        jni.withEnv { $0.SetIntArrayRegion($1, array, offset, jsize(values.count), values) }
+        #endif
     }
 
     public func toJavaParameter() -> JavaParameter {
@@ -676,28 +775,40 @@ extension Float: JPrimitiveConvertible {
     public typealias PrimitiveType = JFloat
     public static let jsig = "F"
 
-    public static func call(_ method: JavaMethodID, on obj: JavaObject, args: [JavaParameter]) throws -> Float {
+    public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Float {
         try jni.withEnvThrowing { $0.CallFloatMethodA($1, obj, method, args) }
     }
 
-    public static func callStatic(_ method: JavaMethodID, on cls: JavaClass, args: [JavaParameter]) throws -> Float {
+    public static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Float {
         try jni.withEnvThrowing { $0.CallStaticFloatMethodA($1, cls, method, args) }
     }
 
-    public static func load(_ field: JavaFieldID, of obj: JavaObject) -> Float {
+    public static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Float {
         jni.withEnv { $0.GetFloatField($1, obj, field) }
     }
 
-    public func store(_ field: JavaFieldID, of obj: JavaObject) {
+    public func store(_ field: JavaFieldID, of obj: JavaObjectPointer) {
         jni.withEnv { $0.SetFloatField($1, obj, field, self) }
     }
 
-    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClass) -> Float {
+    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Float {
         jni.withEnv { $0.GetStaticFloatField($1, cls, field) }
     }
 
-    public func storeStatic(_ field: JavaFieldID, of cls: JavaClass) {
+    public func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) {
         jni.withEnv { $0.SetStaticFloatField($1, cls, field, self) }
+    }
+
+    public static func createArray(len: jsize) -> JavaFloatArray? {
+        jni.withEnv { $0.NewFloatArray($1, len) }
+    }
+
+    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
+        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetFloatArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
+    }
+
+    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
+        jni.withEnv { $0.SetFloatArrayRegion($1, array, offset, jsize(values.count), values) }
     }
 
     public func toJavaParameter() -> JavaParameter {
@@ -720,28 +831,40 @@ extension Double: JPrimitiveConvertible {
     public typealias PrimitiveType = JDouble
     public static let jsig = "D"
 
-    public static func call(_ method: JavaMethodID, on obj: JavaObject, args: [JavaParameter]) throws -> Double {
+    public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Double {
         try jni.withEnvThrowing { $0.CallDoubleMethodA($1, obj, method, args) }
     }
 
-    public static func callStatic(_ method: JavaMethodID, on cls: JavaClass, args: [JavaParameter]) throws -> Double {
+    public static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Double {
         try jni.withEnvThrowing { $0.CallStaticDoubleMethodA($1, cls, method, args) }
     }
 
-    public static func load(_ field: JavaFieldID, of obj: JavaObject) -> Double {
+    public static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Double {
         jni.withEnv { $0.GetDoubleField($1, obj, field) }
     }
 
-    public func store(_ field: JavaFieldID, of obj: JavaObject) {
+    public func store(_ field: JavaFieldID, of obj: JavaObjectPointer) {
         jni.withEnv { $0.SetDoubleField($1, obj, field, self) }
     }
 
-    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClass) -> Double {
+    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Double {
         jni.withEnv { $0.GetStaticDoubleField($1, cls, field) }
     }
 
-    public func storeStatic(_ field: JavaFieldID, of cls: JavaClass) {
+    public func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) {
         jni.withEnv { $0.SetStaticDoubleField($1, cls, field, self) }
+    }
+
+    public static func createArray(len: jsize) -> JavaDoubleArray? {
+        jni.withEnv { $0.NewDoubleArray($1, len) }
+    }
+
+    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
+        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetDoubleArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
+    }
+
+    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
+        jni.withEnv { $0.SetDoubleArrayRegion($1, array, offset, jsize(values.count), values) }
     }
 
     public func toJavaParameter() -> JavaParameter {
@@ -761,27 +884,27 @@ extension JObjectConvertible {
         return "L\(try! javaClass.jniName);"
     }
 
-    public static func call(_ method: JavaMethodID, on obj: JavaObject, args: [JavaParameter]) throws -> Self {
+    public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Self {
         try fromJavaObject(try jni.withEnvThrowing { $0.CallObjectMethodA($1, obj, method, args) })
     }
 
-    public static func callStatic(_ method: JavaMethodID, on cls: JavaClass, args: [JavaParameter]) throws -> Self {
+    public static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Self {
         try fromJavaObject(try jni.withEnvThrowing { $0.CallStaticObjectMethodA($1, cls, method, args) })
     }
 
-    public static func load(_ field: JavaFieldID, of obj: JavaObject) throws -> Self {
+    public static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) throws -> Self {
         try fromJavaObject(jni.withEnv { $0.GetObjectField($1, obj, field) })
     }
 
-    public func store(_ field: JavaFieldID, of obj: JavaObject) -> Void {
+    public func store(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Void {
         jni.withEnv { $0.SetObjectField($1, obj, field, toJavaObject()) }
     }
 
-    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClass) throws -> Self {
+    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) throws -> Self {
         try fromJavaObject(jni.withEnv { $0.GetStaticObjectField($1, cls, field) })
     }
 
-    public func storeStatic(_ field: JavaFieldID, of cls: JavaClass) -> Void {
+    public func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Void {
         jni.withEnv { $0.SetStaticObjectField($1, cls, field, toJavaObject()) }
     }
 
@@ -826,7 +949,7 @@ extension String: JObjectConvertible, JNullInitializable {
         return __class
     }
 
-    public static func fromJavaObject(_ obj: JavaObject) throws -> String {
+    public static func fromJavaObject(_ obj: JavaObjectPointer) throws -> String {
         try jni.withEnv {
             guard let chars = $0.GetStringUTFChars($1, obj, nil) else {
                 throw JNIError(description: "Coulkd not get characters from String", clear: false)
@@ -845,21 +968,23 @@ extension String: JObjectConvertible, JNullInitializable {
 // MARK: JObject
 
 public class JObject : @unchecked Sendable {
-    public let ptr: JavaObject
+    public let ptr: JavaObjectPointer
+
+    fileprivate static let Object__getClass = Object._class.getMethodID(name: "getClass", sig: "()Ljava/lang/Class;")!
 
     private lazy var _cls = Result {
-        JClass(try jni.synchronized(ptr) { try jni.withEnvThrowing { $0.CallObjectMethodA($1, ptr, Object__getClass, []) } }!)
+        JClass(try jni.synchronized(ptr) { try jni.withEnvThrowing { $0.CallObjectMethodA($1, ptr, Self.Object__getClass, []) } }!)
     }
 
     public var cls: JClass { get { try! _cls.get() } } // force-unwrap because it is common and should always work
 
-    public init(_ ptr: JavaObject) {
+    public init(_ ptr: JavaObjectPointer) {
         self.ptr = jni.newGlobalRef(ptr)
     }
 
-    public convenience init?(_ ptr: JavaObject?) {
+    public convenience init?(_ ptr: JavaObjectPointer?) {
         if let _ptr = ptr {
-            self.init(_ptr as JavaObject)
+            self.init(_ptr as JavaObjectPointer)
         } else {
             return nil
         }
@@ -946,7 +1071,9 @@ extension JObject : JParameterConvertible {
 // MARK: JClass
 
 public final class JClass : JObject {
-    private lazy var _name: Result<String, Error> = Result { try call(method: Class__getName) }
+    fileprivate static let _getName = Class__class.getMethodID(name: "getName", sig: "()Ljava/lang/String;")!
+
+    private lazy var _name: Result<String, Error> = Result { try call(method: Self._getName) }
 
     public var name: String {
         get throws {
@@ -960,7 +1087,7 @@ public final class JClass : JObject {
         }
     }
 
-    fileprivate convenience init(_ obj: JavaObject, name: String) {
+    fileprivate convenience init(_ obj: JavaObjectPointer, name: String) {
         self.init(obj)
     }
 
@@ -995,22 +1122,22 @@ public final class JClass : JObject {
         return jni.withEnv { $0.GetStaticMethodID($1, self.ptr, name, sig) }
     }
 
-    public func create(ctor: JavaMethodID, _ args: [JavaParameter]) throws -> JavaObject {
+    public func create(ctor: JavaMethodID, _ args: [JavaParameter]) throws -> JavaObjectPointer {
         guard let obj = try jni.withEnvThrowing({ $0.NewObjectA($1, self.ptr, ctor, args) }) else {
             throw JNIError(clear: true) // init should never return nil
         }
         return obj
     }
 
-    public func create(ctor: JavaMethodID, _ params: JavaParameter...) throws -> JavaObject {
+    public func create(ctor: JavaMethodID, _ params: JavaParameter...) throws -> JavaObjectPointer {
         try create(ctor: ctor, params)
     }
 
-    public func create(ctor: JavaMethodID, _ args: JParameterConvertible...) throws -> JavaObject {
+    public func create(ctor: JavaMethodID, _ args: JParameterConvertible...) throws -> JavaObjectPointer {
         try create(ctor: ctor, args.map { $0.toJavaParameter() })
     }
 
-    public func create(_ args: JConvertible...) throws -> JavaObject {
+    public func create(_ args: JConvertible...) throws -> JavaObjectPointer {
         let sig = args.reduce("", { $0 + type(of: $1).jsig })
         guard let ctorId = getMethodID(name: "<init>", sig: "(\(sig))V") else {
             throw JNIError(description: "Cannot find constructor with signature (\(sig))V", clear: true)
@@ -1100,9 +1227,6 @@ public final class JClass : JObject {
     }
 }
 
-fileprivate let Class__getName = Class__class.getMethodID(name: "getName", sig: "()Ljava/lang/String;")!
-
-
 
 // MARK: JThrowable
 
@@ -1184,7 +1308,7 @@ internal func getJavaClass<T: ObjectProtocol>(from type: T.Type) throws -> JClas
 }
 
 
-internal func mapJavaObject<T: ObjectProtocol>(_ obj: JavaObject) throws -> T {
+internal func mapJavaObject<T: ObjectProtocol>(_ obj: JavaObjectPointer) throws -> T {
     guard let jcls = jni.getObjectClass(obj) else {
         throw JNIError(description: "Cannot get Java class from Java object", clear: true)
     }
@@ -1203,17 +1327,17 @@ internal func mapJavaObject<T: ObjectProtocol>(_ obj: JavaObject) throws -> T {
 // MARK: ObjectProtocol
 
 public protocol ObjectProtocol: AnyObject, JObjectConvertible {
-    init(_ obj: JavaObject)
+    init(_ obj: JavaObjectPointer)
     var javaObject: JObject { get }
 }
 
 
 public extension ObjectProtocol {
-    func toJavaObject() -> JavaObject? {
+    func toJavaObject() -> JavaObjectPointer? {
         return javaObject.ptr
     }
 
-    static func fromJavaObject(_ obj: JavaObject?) throws -> Self {
+    static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> Self {
         guard let _obj = obj else {
             throw JNIError(description: "Cannot instantiate non-null object from nil", clear: true)
         }
@@ -1236,7 +1360,7 @@ open class ObjectBase: ObjectProtocol {
         return try! getJavaClass(from: self)
     }
 
-    public required init(_ obj: JavaObject) {
+    public required init(_ obj: JavaObjectPointer) {
         javaObject = JObject(obj)
     }
 
@@ -1286,79 +1410,88 @@ public protocol JParameterConvertible {
 // MARK: Object
 
 open class Object: ObjectBase {
+    fileprivate static let _class = JClass(jni.findClass("java/lang/Object")!)
+
+    fileprivate static let _init = _class.getMethodID(name: "<init>", sig: "()V")!
+
     public init() throws {
-        try super.init(ctor: Object__method__0, [])
+        try super.init(ctor: Self._init, [])
     }
 
-    public func getClass<T0>() throws -> Class<T0>? where T0: Object {
-        try self.javaObject.call(method: Object__method__1, [])
-    }
-
-    open func hashCode() throws -> Int32 {
-        try self.javaObject.call(method: Object__method__2, [])
-    }
-
-    open func equals(obj: Object) throws -> Bool {
-        try self.javaObject.call(method: Object__method__3, [obj.toJavaParameter()])
-    }
-
-    open func clone() throws -> Object? {
-        try self.javaObject.call(method: Object__method__4, [])
-    }
-
-    open func toString() throws -> String? {
-        try self.javaObject.call(method: Object__method__5, [])
-    }
-
-    public func notify() throws {
-        try self.javaObject.call(method: Object__method__6, [])
-    }
-
-    public func notifyAll() throws {
-        try self.javaObject.call(method: Object__method__7, [])
-    }
-
-    public func wait(millis: Int64) throws {
-        try self.javaObject.call(method: Object__method__8, [millis.toJavaParameter()])
-    }
-
-    public func wait(millis: Int64, nanos: Int32) throws {
-        try self.javaObject.call(method: Object__method__9, [millis.toJavaParameter(), nanos.toJavaParameter()])
-    }
-
-    public func wait() throws {
-        try self.javaObject.call(method: Object__method__10, [])
-    }
-
-    open func finalize() throws {
-        try self.javaObject.call(method: Object__method__11, [])
-    }
-
-    public required init(_ obj: JavaObject) {
+    public required init(_ obj: JavaObjectPointer) {
         super.init(obj)
     }
 
     public required init(ctor: JavaMethodID, _ args: [JavaParameter]) throws {
         try super.init(ctor: ctor, args)
     }
+
+    fileprivate static let _finalize = _class.getMethodID(name: "finalize", sig: "()V")!
+
+    open func finalize() throws {
+        try self.javaObject.call(method: Self._finalize, [])
+    }
+
+    fileprivate static let _getClass = _class.getMethodID(name: "getClass", sig: "()Ljava/lang/Class;")!
+
+    public func getClass<T0>() throws -> Class<T0>? where T0: Object {
+        try self.javaObject.call(method: Self._getClass, [])
+    }
+
+    fileprivate static let _hashCode = _class.getMethodID(name: "hashCode", sig: "()I")!
+
+    open func hashCode() throws -> Int32 {
+        try self.javaObject.call(method: Self._hashCode, [])
+    }
+
+    fileprivate static let _equals = _class.getMethodID(name: "equals", sig: "(Ljava/lang/Object;)Z")!
+
+    open func equals(obj: Object) throws -> Bool {
+        try self.javaObject.call(method: Self._equals, [obj.toJavaParameter()])
+    }
+
+    fileprivate static let _clone = _class.getMethodID(name: "clone", sig: "()Ljava/lang/Object;")!
+
+    open func clone() throws -> Object? {
+        try self.javaObject.call(method: Self._clone, [])
+    }
+
+    fileprivate static let _toString = _class.getMethodID(name: "toString", sig: "()Ljava/lang/String;")!
+
+    open func toString() throws -> String? {
+        try self.javaObject.call(method: Self._toString, [])
+    }
+
+    fileprivate static let _notify = _class.getMethodID(name: "notify", sig: "()V")!
+
+    public func notify() throws {
+        try self.javaObject.call(method: Self._notify, [])
+    }
+
+    fileprivate static let _notifyAll = _class.getMethodID(name: "notifyAll", sig: "()V")!
+
+    public func notifyAll() throws {
+        try self.javaObject.call(method: Self._notifyAll, [])
+    }
+
+    fileprivate static let _wait1 = _class.getMethodID(name: "wait", sig: "(J)V")!
+
+    public func wait(millis: Int64) throws {
+        try self.javaObject.call(method: Self._wait1, [millis.toJavaParameter()])
+    }
+
+    fileprivate static let _wait2 = _class.getMethodID(name: "wait", sig: "(JI)V")!
+
+    public func wait(millis: Int64, nanos: Int32) throws {
+        try self.javaObject.call(method: Self._wait2, [millis.toJavaParameter(), nanos.toJavaParameter()])
+    }
+
+    fileprivate static let _wait0 = _class.getMethodID(name: "wait", sig: "()V")!
+
+    public func wait() throws {
+        try self.javaObject.call(method: Self._wait0, [])
+    }
 }
-
-fileprivate let Object__class = JClass(jni.findClass("java/lang/Object")!)
-
-fileprivate let Object__getClass = Object__class.getMethodID(name: "getClass", sig: "()Ljava/lang/Class;")!
-
-fileprivate let Object__method__0 = Object__class.getMethodID(name: "<init>", sig: "()V")!
-fileprivate let Object__method__1 = Object__class.getMethodID(name: "getClass", sig: "()Ljava/lang/Class;")!
-fileprivate let Object__method__2 = Object__class.getMethodID(name: "hashCode", sig: "()I")!
-fileprivate let Object__method__3 = Object__class.getMethodID(name: "equals", sig: "(Ljava/lang/Object;)Z")!
-fileprivate let Object__method__4 = Object__class.getMethodID(name: "clone", sig: "()Ljava/lang/Object;")!
-fileprivate let Object__method__5 = Object__class.getMethodID(name: "toString", sig: "()Ljava/lang/String;")!
-fileprivate let Object__method__6 = Object__class.getMethodID(name: "notify", sig: "()V")!
-fileprivate let Object__method__7 = Object__class.getMethodID(name: "notifyAll", sig: "()V")!
-fileprivate let Object__method__8 = Object__class.getMethodID(name: "wait", sig: "(J)V")!
-fileprivate let Object__method__9 = Object__class.getMethodID(name: "wait", sig: "(JI)V")!
-fileprivate let Object__method__10 = Object__class.getMethodID(name: "wait", sig: "()V")!
-fileprivate let Object__method__11 = Object__class.getMethodID(name: "finalize", sig: "()V")!
 
 
 // MARK: Class

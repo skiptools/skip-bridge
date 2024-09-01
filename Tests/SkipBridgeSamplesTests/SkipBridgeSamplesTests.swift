@@ -81,6 +81,13 @@ final class SkipBridgeSamplesTests: XCTestCase {
 import SkipJNI
 
 extension SkipBridgeSamplesTests {
+
+    func testArrayJNI() throws {
+        let array: JavaFloatArray = try XCTUnwrap(Float.createArray(len: 5))
+        Float.setArrayRegion(values: [1.1, 2.2, 3.3], into: array, offset: 1)
+        XCTAssertEqual([0.0, 1.1, 2.2, 3.3, 0.0], Float.getArrayElements(from: array))
+    }
+
     /// On macOS, start up an embedded JVM so we can test the Swift side of the SkipJNI bridge.
     ///
     /// This setup is very delicate, because it relies on the assumed paths of the dependent jars in the `~/.gradle/caches/` folder, among other things.

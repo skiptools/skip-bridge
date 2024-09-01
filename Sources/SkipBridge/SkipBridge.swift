@@ -12,8 +12,8 @@ public protocol SkipBridgable: JConvertible {
 
 public protocol SkipReferenceBridgable : AnyObject, SkipBridgable, JObjectConvertible {
     #if !SKIP
-    var javaPeer: JavaObject { get throws }
-    var _javaPeer: JavaObject? { get set }
+    var javaPeer: JavaObjectPointer { get throws }
+    var _javaPeer: JavaObjectPointer? { get set }
 
     func invokeJava<T: SkipBridgable>(functionName: String, _ args: SkipBridgable..., implementation: () throws -> ()) throws -> T
     func invokeJavaVoid(functionName: String, _ args: SkipBridgable..., implementation: () throws -> ()) throws
@@ -29,7 +29,7 @@ public protocol SkipBridgeInstance : AnyObject {
 
 open class SkipBridge : SkipBridgeInstance {
     #if !SKIP
-    public var _javaPeer: JavaObject?
+    public var _javaPeer: JavaObjectPointer?
     #else
     public var _swiftPeer: Long = 0
     #endif
@@ -63,7 +63,7 @@ open class SkipBridge : SkipBridgeInstance {
 
 public extension SkipBridgeInstance {
     #if !SKIP
-    static func fromJavaObject(_ obj: JavaObject?) throws -> Self where Self : SkipBridge {
+    static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> Self where Self : SkipBridge {
         try swiftPeerReflective(for: obj)
     }
 
@@ -124,7 +124,7 @@ public extension SkipBridgeInstance {
 extension SkipReferenceBridgable {
     /// Returns the Java peer instance for this `SkipBridgeInstance`. It will lazily create the instance if it doesn't already exist.
     /// 
-    public var javaPeer: JavaObject {
+    public var javaPeer: JavaObjectPointer {
         get throws {
             if let peer = _javaPeer {
                 return peer
@@ -133,7 +133,7 @@ extension SkipReferenceBridgable {
             let clazz = Self.javaClass
             // bridge classes always must have an accessable no-arg constructor
             let constructor = clazz.getMethodID(name: "<init>", sig: "()V")!
-            let obj: JavaObject = try clazz.create(ctor: constructor, [])
+            let obj: JavaObjectPointer = try clazz.create(ctor: constructor, [])
             let peer = jni.newGlobalRef(obj)!
             self._javaPeer = peer
             return peer
@@ -154,7 +154,7 @@ extension SkipReferenceBridgable {
 
     /// Java invocation that can return either `Void` or a `SkipBridgable` instance.
     private func callJ<T>(functionName: String, signature: String, arguments args: [SkipBridgable], invoke: (JObject, JavaMethodID, [JavaParameter]) throws -> T) throws -> T {
-        let javaObject: JavaObject = try self.javaPeer
+        let javaObject: JavaObjectPointer = try self.javaPeer
 
         // 1. Get the Java peer of this Swift instance via the pointer value
         let jobj = JObject(javaObject)
@@ -229,7 +229,7 @@ public func registerSwiftBridge<T : SkipBridge>(_ bridge: T) -> Int64 {
 
 /// Called when a Java peer finalizes, this will de-register the Swift peer's pointer from the global map so the Swift side can be deinit'd.
 @_cdecl("Java_skip_bridge_SkipBridge_releaseSkipBridge")
-internal func Java_skip_bridge_SkipBridge_releaseSkipBridge(_ env: JNIEnvPointer, _ obj: JavaObject?, _ swiftPointer: JavaLong) {
+internal func Java_skip_bridge_SkipBridge_releaseSkipBridge(_ env: JNIEnvPointer, _ obj: JavaObjectPointer?, _ swiftPointer: JavaLong) {
     if swiftPointer != 0, let pointer = UnsafeMutableRawPointer(bitPattern: Int(swiftPointer)) {
         let bridge = Unmanaged<SkipBridge>.fromOpaque(pointer)
         bridge.release() // release the Swift instance
@@ -243,7 +243,7 @@ public func swiftPeer<T: SkipBridge>(for swiftPointer: JavaLong) -> T {
 }
 
 // TODO: @available(*, deprecated, message: "no need for the overhead of reflective field lookup of _swiftPeer when we can just pass the pointer directly")
-private func swiftPeerReflective<T: SkipBridge>(for obj: JavaObject?) throws -> T {
+private func swiftPeerReflective<T: SkipBridge>(for obj: JavaObjectPointer?) throws -> T {
     guard let obj = obj else {
         throw SkipBridgeError(description: "Unable to call swiftPeer for a nil JavaObject")
     }
@@ -319,7 +319,7 @@ public func popSwiftError() -> Error? {
 ///
 /// See: https://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/design.html#wp615
 @_cdecl("Java_skip_bridge_SkipBridge_00024Companion_popSwiftErrorMessageFromStack")
-internal func Java_skip_bridge_SkipBridge_00024Companion_popSwiftErrorMessageFromStack(_ env: JNIEnvPointer, _ cls: JavaClass?) -> JavaString? {
+internal func Java_skip_bridge_SkipBridge_00024Companion_popSwiftErrorMessageFromStack(_ env: JNIEnvPointer, _ cls: JavaClassPointer?) -> JavaString? {
     if let error = popSwiftError() {
         return "\(error)".toJavaObject()
     } else {

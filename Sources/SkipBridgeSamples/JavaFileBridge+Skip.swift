@@ -7,7 +7,7 @@ import SkipJNI
 extension JavaFileBridge : SkipReferenceBridgable {
     public static let javaClass = try! JClass(name: "skip.bridge.samples.JavaFileBridge")
 
-    public func toJavaObject() -> JavaObject? {
+    public func toJavaObject() -> JavaObjectPointer? {
         try? javaPeer
     }
 
@@ -58,7 +58,7 @@ extension JavaFileBridge {
 }
 #else
 @_cdecl("Java_skip_bridge_samples_JavaFileBridge_createSwiftJavaFileBridge")
-internal func Java_skip_bridge_samples_JavaFileBridge_createSwiftJavaFileBridge(_ env: JNIEnvPointer, _ obj: JavaObject?) -> Int64 {
+internal func Java_skip_bridge_samples_JavaFileBridge_createSwiftJavaFileBridge(_ env: JNIEnvPointer, _ obj: JavaObjectPointer?) -> Int64 {
     registerSwiftBridge(JavaFileBridge())
 }
 #endif
