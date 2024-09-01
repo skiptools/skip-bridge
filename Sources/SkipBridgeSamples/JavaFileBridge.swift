@@ -1,3 +1,8 @@
+// Copyright 2024 Skip
+//
+// This is free software: you can redistribute and/or modify it
+// under the terms of the GNU Lesser General Public License 3.0
+// as published by the Free Software Foundation https://fsf.org
 import SkipBridge
 
 /// An example of a bridge that manages a `java.io.File` on the Java side and bridges functions to Swift.
@@ -6,12 +11,10 @@ public class JavaFileBridge : SkipBridge {
     private var file: java.io.File!
     #endif
 
-    internal override init() {
-        super.init()
-    }
-
+    // SKIP DECLARE: constructor(filePath: String): this()
     public convenience init(filePath: String) throws {
-        self.init()
+        // SKIP REPLACE: // this gets turned into a this() call, which breaks the constructor overload
+        try self.init()
         try setFilePath(filePath)
     }
 

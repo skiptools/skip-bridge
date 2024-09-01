@@ -1,3 +1,8 @@
+// Copyright 2024 Skip
+//
+// This is free software: you can redistribute and/or modify it
+// under the terms of the GNU Lesser General Public License 3.0
+// as published by the Free Software Foundation https://fsf.org
 #if !SKIP
 @_exported import Foundation
 import SkipJNI
@@ -12,7 +17,6 @@ public protocol SkipBridgable: JConvertible {
 
 public protocol SkipReferenceBridgable : AnyObject, SkipBridgable, JObjectConvertible {
     #if !SKIP
-    var javaPeer: JavaObjectPointer { get throws }
     var _javaPeer: JavaObjectPointer? { get set }
 
     func invokeJava<T: SkipBridgable>(functionName: String, _ args: SkipBridgable..., implementation: () throws -> ()) throws -> T
@@ -28,28 +32,36 @@ public protocol SkipBridgeInstance : AnyObject {
 }
 
 open class SkipBridge : SkipBridgeInstance {
+    private let _createdFromJava: Bool
     #if !SKIP
     public var _javaPeer: JavaObjectPointer?
-    #else
-    public var _swiftPeer: Long = 0
-    #endif
 
-    public init() {
+    public init(javaPeer: JavaObjectPointer!) {
+        self._javaPeer = javaPeer
+        self._createdFromJava = javaPeer != nil
     }
+    #else
+    public var _swiftPeer: Long
+
+    public init(swiftPeer: Long) {
+        self._swiftPeer = swiftPeer
+        self._createdFromJava = swiftPeer == Long(0)
+    }
+    #endif
 
     /// Cleanup Swift/Java peers.
     deinit {
         #if !SKIP
         // release the Java instance when the Swift peer is dealloced, freeing it for garbage collection
-        if let javaPeer = _javaPeer {
-            // FIXME: this winds up deallocating the Swift instance too soon, but without we have a reference cycle between the Swift and Java peers
-            // https://developer.android.com/training/articles/perf-jni#local-and-global-references
-            //jni.deleteGlobalRef(javaPeer)
+        if _createdFromJava == false, let javaPeer = _javaPeer {
+            jni.deleteGlobalRef(javaPeer)
+            self._javaPeer = nil
         }
         #else
-        // finalize the Java instance, which will remove the Swift peer from the swiftPeerRegistry
-        if _swiftPeer != Long(0) {
+        // release the Swift instance
+        if _createdFromJava == true, _swiftPeer != Long(0) {
             releaseSkipBridge(_swiftPeer)
+            self._swiftPeer = Long(0)
         }
         #endif
     }
@@ -126,22 +138,22 @@ public extension SkipBridgeInstance {
 #if !SKIP
 
 extension SkipReferenceBridgable {
-    /// Returns the Java peer instance for this `SkipBridgeInstance`. It will lazily create the instance if it doesn't already exist.
-    /// 
-    public var javaPeer: JavaObjectPointer {
-        get throws {
-            if let peer = _javaPeer {
-                return peer
-            }
+    public func toJavaObject() -> JavaObjectPointer? {
+        _javaPeer
+    }
 
-            let clazz = Self.javaClass
-            // bridge classes always must have an accessable no-arg constructor
-            let constructor = clazz.getMethodID(name: "<init>", sig: "()V")!
-            let obj: JavaObjectPointer = try clazz.create(ctor: constructor, [])
-            let peer = jni.newGlobalRef(obj)!
-            self._javaPeer = peer
-            return peer
+    public func createJavaPeer() throws -> JavaObjectPointer {
+        let swiftPointer = registerSwiftBridge(self, retain: false)
+
+        let clazz = Self.javaClass
+        let bridgeClass = try JClass(name: "skip.bridge.SkipBridge") // need to use the superclass, which is where getMethodID is delcared
+        // bridge classes always must have an accessable single-arg constructor take takes a pointer to the Swift peer
+        guard let constructor = bridgeClass.getMethodID(name: "<init>", sig: "(J)V") else {
+            throw SkipBridgeError(description: "Could not find single-argument constructor for Java instance of type \(try! clazz.name)")
         }
+        let jobj: JavaObjectPointer = try clazz.create(ctor: constructor, [swiftPointer.toJavaParameter()])
+
+        return jni.newGlobalRef(jobj)
     }
 
     public func callJavaT<T: SkipBridgable>(functionName: String, signature: String, arguments args: [SkipBridgable]) throws -> T {
@@ -158,15 +170,17 @@ extension SkipReferenceBridgable {
 
     /// Java invocation that can return either `Void` or a `SkipBridgable` instance.
     private func callJ<T>(functionName: String, signature: String, arguments args: [SkipBridgable], invoke: (JObject, JavaMethodID, [JavaParameter]) throws -> T) throws -> T {
-        let javaObject: JavaObjectPointer = try self.javaPeer
+        guard let javaObject: JavaObjectPointer = self._javaPeer else {
+            throw SkipBridgeError(description: "No Java peer set for invocation of: \(functionName) with signature: \(signature)")
+        }
 
         // 1. Get the Java peer of this Swift instance via the pointer value
         let jobj = JObject(javaObject)
         let jcls = jobj.cls
 
-        // 2. Look up the callJavaPOW function using JNI with the specified arguments
+        // 2. Look up the function using JNI with the specified arguments
         guard let mid = jcls.getMethodID(name: functionName, sig: signature) else {
-            fatalError("could not lookup method id")
+            throw SkipBridgeError(description: "Could not lookup method id: \(functionName) with signature: \(signature)")
         }
 
         // 3. Invoke the JNI method with the given arguments
@@ -226,10 +240,10 @@ extension Optional : SkipBridgable where Wrapped : SkipBridgable & JObjectConver
 //private let swiftPeerRegistryLock = OSAllocatedUnfairLock()
 
 /// Adds a newly-created Swift bridge and registers the pointer value of the instance globally so it is retained until the Java side is finalized
-public func registerSwiftBridge<T : SkipBridge>(_ bridge: T) -> Int64 {
+public func registerSwiftBridge<T : SkipReferenceBridgable>(_ bridge: T, retain: Bool) -> Int64 {
     // The pointer value of the this Swift object, which is how the Swift reference can be stored in the Java object.
     // Note that this `retain` will need to be manually balanced by a `release` when the Java instance is finalized.
-    let ptr: UnsafeMutableRawPointer = Unmanaged.passRetained(bridge).toOpaque()
+    let ptr: UnsafeMutableRawPointer = (retain ? Unmanaged.passRetained(bridge) : Unmanaged.passUnretained(bridge)).toOpaque()
     return Int64(Int(bitPattern: ptr))
 }
 
@@ -244,6 +258,7 @@ internal func Java_skip_bridge_SkipBridge_releaseSkipBridge(_ env: JNIEnvPointer
 
 /// Takes the pointer to the Swift instance and converts it into the expected `SkipBridge` type
 public func swiftPeer<T: SkipBridge>(for swiftPointer: JavaLong) -> T {
+    assert(swiftPointer != 0, "SkipBridge: swiftPeer: swiftPointer was zero")
     let pointer = UnsafeMutableRawPointer(bitPattern: Int(swiftPointer))!
     return Unmanaged<T>.fromOpaque(pointer).takeUnretainedValue()
 }
@@ -361,3 +376,60 @@ public func popSwiftErrorMessage() -> String? {
 }
 
 #endif
+
+#if SKIP
+
+public extension SkipBridge {
+    /// In order to use JNI to access the Swift side of the bridge, we need to first manually load the library.
+    /// This only works on macOS; Android will need to load the .so from the embedded jni library path.
+    ///
+    /// When searching for the library to load, there are four scenarios we need to handle,
+    /// each of which has different paths that need to be searched:
+    ///
+    /// 1. Xcode-launched Swift tests where the embedded JVM needs to load the Xcode-created library ("SkipBridgeSamples.framework/SkipBridgeSamples")
+    /// 2. Xcode-launched Skip gradle tests, where gradle's JVM needs to load the Xcode created-library ("SkipBridgeSamples.framework/SkipBridgeSamples")
+    /// 3. SwiftPM-launched Swift tests where the embedded JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
+    /// 4. SwiftPM-launched Skip gradle tests, where gradle's JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
+    func loadPeerLibrary(_ libName: String) {
+        //print("### System.getenv(): \(System.getenv())")
+
+        // Xcode output for dynamic library
+        // user.dir: ~/Developer/Xcode/DerivedData/ProjectName/SourcePackages/plugins/skip-jni.output/SkipBridgeSamplesTests/skipstone/SkipBridgeSamples
+        // framework dylib: ~/Library/Developer/Xcode/DerivedData/ProjectName/Build/Products/Debug/PackageFrameworks/SkipBridgeSamples.framework/Versions/A/SkipBridgeSamples
+
+        // XCTestBundlePath=/Users/marc/Library/Developer/Xcode/DerivedData/Skip-Everything-aqywrhrzhkbvfseiqgxuufbdwdft/Build/Products/Debug/SkipBridgeSamplesTests.xctest
+        var libraryPath: String
+        if let testBundlePath = System.getenv()["XCTestBundlePath"] { // running from within Xcode
+            libraryPath = testBundlePath + "/../PackageFrameworks/\(libName).framework/Versions/A/\(libName)"
+        } else {
+            let cwd = System.getProperty("user.dir")
+            // from gradle: /opt/src/github/skiptools/skip-jni/.build/plugins/outputs/skip-jni/SkipBridgeSamplesTests/skipstone
+            // from swiftPM CLI: /opt/src/github/skiptools/skip-jni
+            let dylib = "lib\(libName).dylib"
+            let arch = System.getProperty("os.arch") == "aarch64" ? "arm64-apple-macosx" : "x86_64-apple-macosx"
+            libraryPath = cwd + "/.build/\(arch)/debug/\(dylib)" // Swift-launched JVM
+            if !java.io.File(libraryPath).isFile() {
+                libraryPath = cwd + "/../../../../../../\(arch)/debug/\(dylib)" // gradle-launched JVM
+            }
+        }
+
+        if loadedLibraries.contains(libraryPath) {
+            return // already loaded
+        }
+
+        // load the native library that contains the function implementations
+        if !java.io.File(libraryPath).isFile() {
+            print("warning: missing library: \(libraryPath)")
+        } else {
+            print("note: loading library: \(libraryPath)")
+            System.load(libraryPath)
+            loadedLibraries.insert(libraryPath)
+            print("note: loaded library: \(libraryPath)")
+        }
+    }
+}
+
+/// The list the library file paths we have already loaded so we don't try to load the multiple times
+private var loadedLibraries: Set<String> = []
+#endif
+

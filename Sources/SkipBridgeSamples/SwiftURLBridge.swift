@@ -1,3 +1,8 @@
+// Copyright 2024 Skip
+//
+// This is free software: you can redistribute and/or modify it
+// under the terms of the GNU Lesser General Public License 3.0
+// as published by the Free Software Foundation https://fsf.org
 import SkipBridge
 
 /// An example of a bridge that manages a `Foundation.URL` on the Swift side and bridges functions to Java.
@@ -6,17 +11,15 @@ public class SwiftURLBridge : SkipBridge {
     internal var url: Foundation.URL!
     #endif
 
-    internal override init() {
-        super.init()
-    }
-
+    // SKIP DECLARE: constructor(urlString: String): this()
     public convenience init(urlString: String) throws {
-        self.init()
+        // SKIP REPLACE: // this gets turned into a this() call, which breaks the constructor overload
+        try self.init()
         try setURLString(urlString)
     }
 
     internal func setURLString(_ urlString: String) throws {
-        // SKIP REPLACE: return withSwiftBridge { invokeSwift_setURLString(_swiftPeer, urlString) }
+        // SKIP REPLACE: return invokeSwift_setURLString(_swiftPeer, urlString)
         invokeSwiftVoid(urlString) {
             #if !SKIP
             self.url = Foundation.URL(string: urlString)
@@ -25,7 +28,7 @@ public class SwiftURLBridge : SkipBridge {
     }
 
     public func isFileURL() -> Bool {
-        // SKIP REPLACE: return withSwiftBridge { invokeSwift_isFileURL(_swiftPeer) }
+        // SKIP REPLACE: return invokeSwift_isFileURL(_swiftPeer)
         invokeSwift() {
             #if !SKIP
             self.url.isFileURL
@@ -33,16 +36,8 @@ public class SwiftURLBridge : SkipBridge {
         }
     }
 
-    public func readContents() async throws -> String? {
-        try await invokeSwift() {
-            #if !SKIP
-            String(data: try await URLSession.shared.data(from: self.url).0, encoding: .utf8)
-            #endif
-        }
-    }
-
     public func toJavaFileBridge() throws -> JavaFileBridge {
-        // SKIP REPLACE: return withSwiftBridge { invokeSwift_toJavaFileBridge(_swiftPeer) }
+        // SKIP REPLACE: return invokeSwift_toJavaFileBridge(_swiftPeer)
         try invokeSwift() {
             #if !SKIP
             try JavaFileBridge(filePath: url.path)
@@ -52,7 +47,7 @@ public class SwiftURLBridge : SkipBridge {
 
     /// Example of a static function; note that `_swiftPeer` is not passed to the extern function and we don't use `withSwiftBridge`
     public static func fromJavaFileBridge(_ fileBridge: JavaFileBridge) throws -> SwiftURLBridge {
-        // SKIP REPLACE: return { checkSwiftError { invokeSwift_fromJavaFileBridge(fileBridge.withSwiftBridge { fileBridge } ) } }()
+        // SKIP REPLACE: return { checkSwiftError { invokeSwift_fromJavaFileBridge(fileBridge) } }()
         try invokeSwift(fileBridge) {
             #if !SKIP
             try fileBridge.toSwiftURLBridge()
@@ -60,4 +55,20 @@ public class SwiftURLBridge : SkipBridge {
         }
     }
 
+    public func readContents() async throws -> String? {
+        #if SKIP
+        nil // TODO
+//        try await withCheckedThrowingContinuation { c in
+//            invokeSwift_readContents(_swiftPeer, JavaCallback(callback: { value in
+//                c.resume(returning: value as! String)
+//            }))
+//        }
+        #else
+        try await invokeSwift() {
+            #if !SKIP
+            String(data: try await URLSession.shared.data(from: self.url).0, encoding: .utf8)
+            #endif
+        }
+        #endif
+    }
 }

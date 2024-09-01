@@ -1,3 +1,8 @@
+// Copyright 2024 Skip
+//
+// This is free software: you can redistribute and/or modify it
+// under the terms of the GNU Lesser General Public License 3.0
+// as published by the Free Software Foundation https://fsf.org
 import XCTest
 import Foundation
 import SkipBridge
@@ -5,7 +10,7 @@ import SkipBridgeSamples
 
 final class SkipBridgeSamplesTests: XCTestCase {
     func testMathBridge() throws {
-        let math = MathBridge()
+        let math = try MathBridge()
         XCTAssertEqual(4.0, math.callPurePOW(2.0, power: 2.0)) // Java -> Java + Swift -> Swift
         XCTAssertEqual(64.0, math.callSwiftPOW(2.0, power: 6.0)) // Java+Swift -> Swift
         XCTAssertEqual(32.0, try math.callJavaPOW(2.0, power: 5.0)) // Swift+Java -> Java
@@ -37,13 +42,12 @@ final class SkipBridgeSamplesTests: XCTestCase {
         try "ABC".write(toFile: tmpName, atomically: false, encoding: .utf8)
         let urlBridge = try SwiftURLBridge(urlString: "file:" + tmpName)
         #if SKIP
-        throw XCTSkip("TODO: async")
+        throw XCTSkip("TODO: implement async on the Java side")
         #else
         let contents = try await urlBridge.readContents()
         XCTAssertEqual("ABC", contents)
-        #endif
-
         _ = try JavaFileBridge(filePath: tmpName).delete()
+        #endif
     }
 
     func testStaticFunctions() throws {
@@ -53,13 +57,13 @@ final class SkipBridgeSamplesTests: XCTestCase {
             let result = try SwiftURLBridge.fromJavaFileBridge(file).isFileURL()
             XCTAssertTrue(result)
         } catch {
-            // FIXME: java.lang.RuntimeException: kotlin.UninitializedPropertyAccessException: lateinit property filestorage has not been initialized
-            throw XCTSkip("TODO: fix peer setup for static functions")
+            // FIXME: java.lang.RuntimeException: Could not lookup method id: toSwiftURLBridge with signature: ()Lskip/bridge/samples/SwiftURLBridge;
+            throw XCTSkip("TODO: fix peer setup for static functions: \(error)")
         }
     }
 
     func testThrowingSwiftFunctions() throws {
-        let math = MathBridge()
+        let math = try MathBridge()
         do {
             try math.callSwiftThrowing(message: "ABC")
             XCTFail("callSwiftThrowing should have thrown an error")
@@ -73,21 +77,13 @@ final class SkipBridgeSamplesTests: XCTestCase {
     }
 
     func testThrowingJavaFunctions() throws {
-        let math = MathBridge()
+        let math = try MathBridge()
         do {
             try math.callJavaThrowing(message: "XYZ")
             XCTFail("callJavaThrowing should have thrown an error")
         } catch {
             XCTAssertEqual("XYZ", "\(error)")
         }
-    }
-
-    func testAsycFunctions() throws {
-        throw XCTSkip("TODO")
-    }
-
-    func testClosureParameters() throws {
-        throw XCTSkip("TODO")
     }
 }
 

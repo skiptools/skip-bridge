@@ -1,4 +1,23 @@
+// Copyright 2024 Skip
+//
+// This is free software: you can redistribute and/or modify it
+// under the terms of the GNU Lesser General Public License 3.0
+// as published by the Free Software Foundation https://fsf.org
 import SkipBridge
+
+extension MathBridge {
+    public convenience init() throws {
+        #if !SKIP
+        self.init(javaPeer: nil) // temporary sentinel
+        self._javaPeer = try createJavaPeer()
+        #else
+        super.init(swiftPeer: Long(0))
+        loadPeerLibrary("SkipBridgeSamples")
+        self._swiftPeer = createSwiftMathBridge()
+        #endif
+    }
+}
+
 #if !SKIP
 import Foundation
 import SkipJNI
@@ -7,10 +26,6 @@ import SkipJNI
 
 extension MathBridge : SkipReferenceBridgable {
     public static let javaClass = try! JClass(name: "skip.bridge.samples.MathBridge")
-
-    public func toJavaObject() -> JavaObjectPointer? {
-        try? javaPeer
-    }
 
     /// Call from Swift into Java using JNI
     public func invokeJavaVoid(functionName: String = #function, _ args: SkipBridgable..., implementation: () throws -> ()) throws {
@@ -41,24 +56,14 @@ extension MathBridge : SkipReferenceBridgable {
 
 #if SKIP
 public extension MathBridge {
-    internal func withSwiftBridge<T>(function: () -> T) -> T {
-        if _swiftPeer == Long(0) {
-            loadPeerLibrary("SkipBridgeSamples") // ensure the shared library containing the native implementations is loaded
-            // create the Swift peer for this Java instance
-            _swiftPeer = createSwiftMathBridge()
-        }
-
-        return function()
-    }
-
     /* SKIP EXTERN */ func createSwiftMathBridge() -> Int64 {
         // this will invoke @_cdecl("Java_skip_bridge_samples_MathBridge_createSwiftMathBridge")
     }
 }
 #else
 @_cdecl("Java_skip_bridge_samples_MathBridge_createSwiftMathBridge")
-internal func Java_skip_bridge_samples_MathBridge_createSwiftMathBridge(_ env: JNIEnvPointer, _ obj: JavaObjectPointer?) -> Int64 {
-    registerSwiftBridge(MathBridge())
+internal func Java_skip_bridge_samples_MathBridge_createSwiftMathBridge(_ env: JNIEnvPointer, _ obj: JavaObjectPointer) -> Int64 {
+    registerSwiftBridge(MathBridge(javaPeer: obj), retain: true)
 }
 #endif
 

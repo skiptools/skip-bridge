@@ -1,4 +1,23 @@
+// Copyright 2024 Skip
+//
+// This is free software: you can redistribute and/or modify it
+// under the terms of the GNU Lesser General Public License 3.0
+// as published by the Free Software Foundation https://fsf.org
 import SkipBridge
+
+extension JavaFileBridge {
+    public convenience init() throws {
+        #if !SKIP
+        self.init(javaPeer: nil)
+        self._javaPeer = try createJavaPeer()
+        #else
+        super.init(swiftPeer: Long(0))
+        loadPeerLibrary("SkipBridgeSamples")
+        self._swiftPeer = createSwiftJavaFileBridge()
+        #endif
+    }
+}
+
 #if !SKIP
 import SkipJNI
 
@@ -6,10 +25,6 @@ import SkipJNI
 
 extension JavaFileBridge : SkipReferenceBridgable {
     public static let javaClass = try! JClass(name: "skip.bridge.samples.JavaFileBridge")
-
-    public func toJavaObject() -> JavaObjectPointer? {
-        try? javaPeer
-    }
 
     /// Call from Swift into Java using JNI
     public func invokeJavaVoid(functionName: String = #function, _ args: SkipBridgable..., implementation: () throws -> ()) throws {
@@ -40,25 +55,13 @@ extension JavaFileBridge : SkipReferenceBridgable {
 
 #endif
 
-// the Kotlin side of the bridge with the invocation of the extern functions
-
 #if SKIP
 extension JavaFileBridge {
-    func withSwiftBridge<T>(function: () -> T) -> T {
-        if _swiftPeer == Long(0) {
-            loadPeerLibrary("SkipBridgeSamples") // ensure the shared library containing the native implementations is loaded
-            // create the Swift peer for this Java instance
-            _swiftPeer = createSwiftJavaFileBridge()
-        }
-
-        return function()
-    }
-
     /* SKIP EXTERN */ public func createSwiftJavaFileBridge() -> Int64 { }
 }
 #else
 @_cdecl("Java_skip_bridge_samples_JavaFileBridge_createSwiftJavaFileBridge")
-internal func Java_skip_bridge_samples_JavaFileBridge_createSwiftJavaFileBridge(_ env: JNIEnvPointer, _ obj: JavaObjectPointer?) -> Int64 {
-    registerSwiftBridge(JavaFileBridge())
+internal func Java_skip_bridge_samples_JavaFileBridge_createSwiftJavaFileBridge(_ env: JNIEnvPointer, _ obj: JavaObjectPointer) -> Int64 {
+    registerSwiftBridge(JavaFileBridge(javaPeer: obj), retain: true)
 }
 #endif
