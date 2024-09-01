@@ -61,7 +61,8 @@ open class SkipBridge : SkipBridgeInstance {
         #else
         // release the Swift instance
         if _createdFromJava == true, _swiftPeer != Long(0) {
-            releaseSkipBridge(_swiftPeer)
+            // FIXME: seems to delete the reference out from under the Java instance
+            //releaseSkipBridge(_swiftPeer)
             self._swiftPeer = Long(0)
         }
         #endif
