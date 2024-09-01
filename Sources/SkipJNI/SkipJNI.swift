@@ -357,6 +357,7 @@ final public class JBoolean: Object, JPrimitiveObjectInternalProtocol {
 
 extension Bool: JPrimitiveConvertible {
     public typealias PrimitiveType = JBoolean
+    public typealias ArrayType = JavaBooleanArray
     public static let jsig = "Z"
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Bool {
@@ -384,7 +385,7 @@ extension Bool: JPrimitiveConvertible {
     }
 
     public static func createArray(len: jsize) -> JavaBooleanArray? {
-        jni.withEnv { $0.NewIntArray($1, len) }
+        jni.withEnv { $0.NewBooleanArray($1, len) }
     }
     
     public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
@@ -414,6 +415,7 @@ final public class JByte: Object, JPrimitiveObjectInternalProtocol {
 
 extension Int8: JPrimitiveConvertible {
     public typealias PrimitiveType = JByte
+    public typealias ArrayType = JavaByteArray
     public static let jsig = "B"
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int8 {
@@ -470,6 +472,7 @@ final public class JChar: Object, JPrimitiveObjectInternalProtocol {
 
 extension UInt16: JPrimitiveConvertible {
     public typealias PrimitiveType = JChar
+    public typealias ArrayType = JavaCharArray
     public static let jsig = "C"
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> UInt16 {
@@ -526,6 +529,7 @@ final public class JShort: Object, JPrimitiveObjectInternalProtocol {
 
 extension Int16: JPrimitiveConvertible {
     public typealias PrimitiveType = JShort
+    public typealias ArrayType = JavaShortArray
     public static let jsig = "S"
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int16 {
@@ -583,6 +587,7 @@ final public class JInteger: Object, JPrimitiveObjectInternalProtocol {
 
 extension Int32: JPrimitiveConvertible {
     public typealias PrimitiveType = JInteger
+    public typealias ArrayType = JavaIntArray
     public static let jsig = "I"
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int32 {
@@ -640,6 +645,7 @@ final public class JLong: Object, JPrimitiveObjectInternalProtocol {
 
 extension Int64: JPrimitiveConvertible {
     public typealias PrimitiveType = JLong
+    public typealias ArrayType = JavaLongArray
     public static let jsig = "J"
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int64 {
@@ -687,17 +693,17 @@ extension Int64: JPrimitiveConvertible {
 // MARK: Int
 
 extension Int: JPrimitiveConvertible {
-#if arch(x86_64) || arch(arm64)
+    #if arch(x86_64) || arch(arm64)
     public typealias PrimitiveType = JLong
+    public typealias ArrayType = JavaLongArray
     private typealias Convertible = Int64
-    public typealias ArrayType = jlongArray
     public static let jsig = "J"
-#else
+    #else
     public typealias PrimitiveType = JInteger
+    public typealias ArrayType = JavaIntArray
     private typealias Convertible = Int32
-    public typealias ArrayType = jintArray
     public static let jsig = "I"
-#endif
+    #endif
 
     public static func fromJavaObject(_ obj: JavaObjectPointer) throws -> Int {
         return Int(try Convertible.fromJavaObject(obj))
@@ -773,6 +779,7 @@ final public class JFloat: Object, JPrimitiveObjectInternalProtocol {
 
 extension Float: JPrimitiveConvertible {
     public typealias PrimitiveType = JFloat
+    public typealias ArrayType = JavaFloatArray
     public static let jsig = "F"
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Float {
@@ -829,6 +836,7 @@ final public class JDouble: Object, JPrimitiveObjectInternalProtocol {
 
 extension Double: JPrimitiveConvertible {
     public typealias PrimitiveType = JDouble
+    public typealias ArrayType = JavaDoubleArray
     public static let jsig = "D"
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Double {
