@@ -383,7 +383,7 @@ extension Bool: JPrimitiveConvertible {
         jni.withEnv { $0.SetBooleanField($1, cls, field, (self) ? 1 : 0) }
     }
 
-    public static func createArray(len: jsize) -> JavaIntArray? {
+    public static func createArray(len: jsize) -> JavaBooleanArray? {
         jni.withEnv { $0.NewIntArray($1, len) }
     }
     
