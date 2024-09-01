@@ -33,6 +33,14 @@ public class SwiftURLBridge : SkipBridge {
         }
     }
 
+    public func readContents() async throws -> String? {
+        try await invokeSwift() {
+            #if !SKIP
+            String(data: try await URLSession.shared.data(from: self.url).0, encoding: .utf8)
+            #endif
+        }
+    }
+
     public func toJavaFileBridge() throws -> JavaFileBridge {
         // SKIP REPLACE: return withSwiftBridge { invokeSwift_toJavaFileBridge(_swiftPeer) }
         try invokeSwift() {

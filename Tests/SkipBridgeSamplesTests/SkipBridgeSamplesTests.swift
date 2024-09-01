@@ -17,7 +17,7 @@ final class SkipBridgeSamplesTests: XCTestCase {
     }
 
     func testJavaFileBridge() throws {
-        let tmpName = "/tmp/" + UUID().uuidString
+        let tmpName = "/tmp/skipbridge-" + UUID().uuidString
         let file = try JavaFileBridge(filePath: tmpName)
         XCTAssertFalse(try file.exists())
         XCTAssertTrue(try file.createNewFile())
@@ -32,8 +32,22 @@ final class SkipBridgeSamplesTests: XCTestCase {
         XCTAssertFalse(try file2.exists())
     }
 
+    func testAsyncFunctions() async throws {
+        let tmpName = "/tmp/skipbridge-" + UUID().uuidString
+        try "ABC".write(toFile: tmpName, atomically: false, encoding: .utf8)
+        let urlBridge = try SwiftURLBridge(urlString: "file:" + tmpName)
+        #if SKIP
+        throw XCTSkip("TODO: async")
+        #else
+        let contents = try await urlBridge.readContents()
+        XCTAssertEqual("ABC", contents)
+        #endif
+
+        _ = try JavaFileBridge(filePath: tmpName).delete()
+    }
+
     func testStaticFunctions() throws {
-        let tmpName = "/tmp/" + UUID().uuidString
+        let tmpName = "/tmp/skipbridge-" + UUID().uuidString
         let file = try JavaFileBridge(filePath: tmpName)
         do {
             let result = try SwiftURLBridge.fromJavaFileBridge(file).isFileURL()

@@ -80,6 +80,10 @@ public extension SkipBridgeInstance {
         return try implementation()
     }
 
+    func invokeSwift<T: SkipBridgable>(_ args: SkipBridgable..., implementation: () async throws -> T) async rethrows -> T {
+        return try await implementation()
+    }
+
     func invokeSwiftVoid(_ args: SkipBridgable..., implementation: () throws -> ()) rethrows {
         /// When calling Swift from Swift, we simply invoke the implementation
         try implementation()
@@ -213,6 +217,8 @@ extension Float : SkipBridgable { } // float (F)
 extension Double : SkipBridgable { } // double (D)
 extension String : SkipBridgable { } // java.lang.String
 
+extension Optional : SkipBridgable where Wrapped : SkipBridgable & JObjectConvertible {
+}
 
 /// The `swiftPeerRegistry` exists simply to retain a bridge instance that is held by the Java peer on memory.
 /// On `finalize()`, the Java peer will remove the instance from the registry, releasing it for deallocation.

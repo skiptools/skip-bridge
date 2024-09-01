@@ -75,11 +75,26 @@ extension JNI {
             if jvm.AttachCurrentThread(_jvm, &tenv, nil) != JNI_OK {
                 fatalError("SkipJNI: unable to attach JNI to current thread")
             }
-            defer {
-                if jvm.DetachCurrentThread(_jvm) != JNI_OK {
-                    fatalError("SkipJNI: unable to detach JNI from thread")
-                }
+
+            // This should work in theory, but it invalidates any local references that were created from this thread, possibly before a global reference may have been created, which will then crash the next time the thread is references
+            //defer {
+            //    if jvm.DetachCurrentThread(_jvm) != JNI_OK {
+            //        fatalError("SkipJNI: unable to detach JNI from thread")
+            //    }
+            //}
+
+            // so instead we register a cleanup function for removing the environment when the thread exits, otherwise we will leak the thread
+            func JNI_DetachCurrentThread(_ ptr: UnsafeMutableRawPointer) {
+                _ = jni._jvm.pointee?.pointee.DetachCurrentThread(jni._jvm)
             }
+            let keyCreated = withUnsafeMutablePointer(to: &jniEnvKey, {
+                pthread_key_create($0, JNI_DetachCurrentThread) // thread destructor callback
+            })
+            if keyCreated != 0 {
+                fatalError("SkipJNI: pthread_key_create failed")
+            }
+            pthread_setspecific(jniEnvKey, tenv)
+
             return try block(tenv.pointee!.pointee, tenv)
         case JNI_EVERSION:
             fatalError("SkipJNI: unsupoprted JNI version")
@@ -113,6 +128,9 @@ extension JNI {
         }
     }
 }
+
+/// Thread cleanup
+fileprivate var jniEnvKey = pthread_key_t()
 
 extension JNI {
     /// The JNI version in effect
