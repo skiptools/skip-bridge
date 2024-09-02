@@ -50,7 +50,7 @@ final class SkipBridgeSamplesTests: XCTestCase {
         #endif
     }
 
-    func XXXtestStaticFunctions() throws {
+    func testStaticFunctions() throws {
         let tmpName = "/tmp/skipbridge-" + UUID().uuidString
         let file = try JavaFileBridge(filePath: tmpName)
         #if !SKIP
@@ -59,7 +59,7 @@ final class SkipBridgeSamplesTests: XCTestCase {
         #else
         // FIXME: java.lang.RuntimeException: Could not lookup method id: toSwiftURLBridge with signature: ()Lskip/bridge/samples/SwiftURLBridge;
         // or crash in CI…
-        throw XCTSkip("TODO: fix peer setup for static functions: \(error)")
+        throw XCTSkip("TODO: fix peer setup for static functions")
         #endif
     }
 
