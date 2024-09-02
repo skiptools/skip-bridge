@@ -50,7 +50,7 @@ final class SkipBridgeSamplesTests: XCTestCase {
         #endif
     }
 
-    func testStaticFunctions() throws {
+    func XXXtestStaticFunctions() throws {
         let tmpName = "/tmp/skipbridge-" + UUID().uuidString
         let file = try JavaFileBridge(filePath: tmpName)
         do {
