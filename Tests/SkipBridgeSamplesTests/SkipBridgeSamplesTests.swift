@@ -62,7 +62,7 @@ final class SkipBridgeSamplesTests: XCTestCase {
         }
     }
 
-    func XXXtestThrowingSwiftFunctions() throws {
+    func testThrowingSwiftFunctions() throws {
         let math = try MathBridge()
         do {
             try math.callSwiftThrowing(message: "ABC")
