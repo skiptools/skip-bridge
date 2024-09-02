@@ -11,7 +11,7 @@ extension JavaFileBridge {
         self.init(javaPeer: nil)
         self._javaPeer = try createJavaPeer()
         #else
-        super.init(swiftPeer: Long(0))
+        super.init(swiftPeer: SWIFT_NULL)
         loadPeerLibrary("SkipBridgeSamples")
         self._swiftPeer = createSwiftJavaFileBridge()
         #endif

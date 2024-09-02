@@ -11,7 +11,7 @@ extension MathBridge {
         self.init(javaPeer: nil) // temporary sentinel
         self._javaPeer = try createJavaPeer()
         #else
-        super.init(swiftPeer: Long(0))
+        super.init(swiftPeer: SWIFT_NULL)
         loadPeerLibrary("SkipBridgeSamples")
         self._swiftPeer = createSwiftMathBridge()
         #endif
@@ -70,7 +70,7 @@ internal func Java_skip_bridge_samples_MathBridge_createSwiftMathBridge(_ env: J
 
 #if SKIP
 public extension MathBridge {
-    /* SKIP EXTERN */ func invokeSwift_callSwiftPOW(_ swiftPeer: Long, _ value: Double, _ power: Double) -> Double { }
+    /* SKIP EXTERN */ func invokeSwift_callSwiftPOW(_ swiftPeer: SwiftObjectPointer, _ value: Double, _ power: Double) -> Double { }
 }
 #else
 @_cdecl("Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftPOW__JDD")
@@ -83,7 +83,7 @@ internal func Java_skip_bridge_samples_MathBridge_invokeSwift_1callSwiftPOW__JDD
 
 #if SKIP
 public extension MathBridge {
-    /* SKIP EXTERN */ func invokeSwift_callSwiftThrowing(_ swiftPeer: Long, _ value: String) { }
+    /* SKIP EXTERN */ func invokeSwift_callSwiftThrowing(_ swiftPeer: SwiftObjectPointer, _ value: String) { }
 }
 #else
 /// JNI Signature naming rules from https://docs.oracle.com/javase/1.5.0/docs/guide/jni/spec/design.html#wp615

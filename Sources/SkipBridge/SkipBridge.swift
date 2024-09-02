@@ -31,21 +31,26 @@ public protocol SkipBridgeInstance : AnyObject {
 
 }
 
+#if SKIP
+public typealias SwiftObjectPointer = Long
+public let SWIFT_NULL = SwiftObjectPointer(0)
+#endif
+
 open class SkipBridge : SkipBridgeInstance {
     private let _createdFromJava: Bool
     #if !SKIP
     public var _javaPeer: JavaObjectPointer?
 
-    public init(javaPeer: JavaObjectPointer!) {
+    public init(javaPeer: JavaObjectPointer?) {
         self._javaPeer = javaPeer
         self._createdFromJava = javaPeer != nil
     }
     #else
-    public var _swiftPeer: Long
+    public var _swiftPeer: SwiftObjectPointer
 
-    public init(swiftPeer: Long) {
+    public init(swiftPeer: SwiftObjectPointer) {
         self._swiftPeer = swiftPeer
-        self._createdFromJava = swiftPeer == Long(0)
+        self._createdFromJava = swiftPeer == SWIFT_NULL
     }
     #endif
 
@@ -59,15 +64,15 @@ open class SkipBridge : SkipBridgeInstance {
         }
         #else
         // release the Swift instance
-        if _createdFromJava == true, _swiftPeer != Long(0) {
+        if _createdFromJava == true, _swiftPeer != SWIFT_NULL {
             releaseSkipBridge(_swiftPeer)
-            self._swiftPeer = Long(0)
+            self._swiftPeer = SWIFT_NULL
         }
         #endif
     }
 
     #if SKIP
-    /* SKIP EXTERN */ internal func releaseSkipBridge(_ swiftPointer: Long) {
+    /* SKIP EXTERN */ internal func releaseSkipBridge(_ swiftPointer: SwiftObjectPointer) {
         // this will invoke @_cdecl("Java_skip_bridge_SkipBridge_releaseSkipBridge")
     }
     #endif

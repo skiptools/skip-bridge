@@ -11,7 +11,7 @@ extension SwiftURLBridge {
         self.init(javaPeer: nil)
         self._javaPeer = try createJavaPeer()
         #else
-        super.init(swiftPeer: Long(0))
+        super.init(swiftPeer: SWIFT_NULL)
         loadPeerLibrary("SkipBridgeSamples")
         self._swiftPeer = createSwiftURLBridge()
         #endif
@@ -54,7 +54,7 @@ internal func Java_skip_bridge_samples_SwiftURLBridge_createSwiftURLBridge(_ env
 
 #if SKIP
 public extension SwiftURLBridge {
-    /* SKIP EXTERN */ func invokeSwift_setURLString(_ swiftPeer: Long, _ value: String) { }
+    /* SKIP EXTERN */ func invokeSwift_setURLString(_ swiftPeer: SwiftObjectPointer, _ value: String) { }
 }
 #else
 @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1setURLString__JLjava_lang_String_2")
@@ -72,7 +72,7 @@ internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1setURLString_
 
 #if SKIP
 public extension SwiftURLBridge {
-    /* SKIP EXTERN */ func invokeSwift_isFileURL(_ swiftPeer: Long) -> Bool { }
+    /* SKIP EXTERN */ func invokeSwift_isFileURL(_ swiftPeer: SwiftObjectPointer) -> Bool { }
 }
 #else
 @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL__J")
@@ -85,7 +85,7 @@ internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL__J(
 
 #if SKIP
 public extension SwiftURLBridge {
-    /* SKIP EXTERN */ public func invokeSwift_toJavaFileBridge(_ swiftPeer: Long) -> JavaFileBridge { }
+    /* SKIP EXTERN */ public func invokeSwift_toJavaFileBridge(_ swiftPeer: SwiftObjectPointer) -> JavaFileBridge { }
 }
 #else
 @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1toJavaFileBridge__J")
@@ -120,7 +120,7 @@ internal func Java_skip_bridge_samples_SwiftURLBridge_00024Companion_invokeSwift
 
 //#if SKIP
 //public extension SwiftURLBridge {
-//    /* SKIP EXTERN */ func invokeSwift_readContents(_ swiftPeer: Long, _ callback: JavaCallback) { }
+//    /* SKIP EXTERN */ func invokeSwift_readContents(_ swiftPeer: SwiftObjectPointer, _ callback: JavaCallback) { }
 //}
 //#else
 //@_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1readContents__JLskip_bridge_JavaCallback_2")
