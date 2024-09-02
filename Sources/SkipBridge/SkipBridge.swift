@@ -54,15 +54,13 @@ open class SkipBridge : SkipBridgeInstance {
         #if !SKIP
         // release the Java instance when the Swift peer is dealloced, freeing it for garbage collection
         if _createdFromJava == false, let javaPeer = _javaPeer {
-            // FIXME: seems to delete the reference out from under the Swift instance
-            //jni.deleteGlobalRef(javaPeer)
+            jni.deleteGlobalRef(javaPeer)
             self._javaPeer = nil
         }
         #else
         // release the Swift instance
         if _createdFromJava == true, _swiftPeer != Long(0) {
-            // FIXME: seems to delete the reference out from under the Java instance
-            //releaseSkipBridge(_swiftPeer)
+            releaseSkipBridge(_swiftPeer)
             self._swiftPeer = Long(0)
         }
         #endif
