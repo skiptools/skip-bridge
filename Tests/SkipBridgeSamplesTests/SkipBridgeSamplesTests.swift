@@ -16,7 +16,7 @@ final class SkipBridgeSamplesTests: XCTestCase {
         XCTAssertEqual(32.0, try math.callJavaPOW(2.0, power: 5.0)) // Swift+Java -> Java
     }
 
-    func XXXtestSwiftURLBridge() throws {
+    func testSwiftURLBridge() throws {
         let url = try SwiftURLBridge(urlString: "https://skip.tools")
         XCTAssertFalse(url.isFileURL())
     }
