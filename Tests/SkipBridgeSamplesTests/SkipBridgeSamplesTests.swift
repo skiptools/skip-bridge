@@ -37,7 +37,7 @@ final class SkipBridgeSamplesTests: XCTestCase {
         XCTAssertFalse(try file2.exists())
     }
 
-    func XXXtestAsyncFunctions() async throws {
+    func testAsyncFunctions() async throws {
         let tmpName = "/tmp/skipbridge-" + UUID().uuidString
         try "ABC".write(toFile: tmpName, atomically: false, encoding: .utf8)
         let urlBridge = try SwiftURLBridge(urlString: "file:" + tmpName)
