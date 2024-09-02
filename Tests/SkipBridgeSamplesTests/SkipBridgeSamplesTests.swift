@@ -76,7 +76,7 @@ final class SkipBridgeSamplesTests: XCTestCase {
         }
     }
 
-    func XXXtestThrowingJavaFunctions() throws {
+    func testThrowingJavaFunctions() throws {
         let math = try MathBridge()
         do {
             try math.callJavaThrowing(message: "XYZ")
