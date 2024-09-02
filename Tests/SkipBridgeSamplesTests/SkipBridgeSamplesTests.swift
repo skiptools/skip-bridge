@@ -21,7 +21,7 @@ final class SkipBridgeSamplesTests: XCTestCase {
         XCTAssertFalse(url.isFileURL())
     }
 
-    func XXXtestJavaFileBridge() throws {
+    func testJavaFileBridge() throws {
         let tmpName = "/tmp/skipbridge-" + UUID().uuidString
         let file = try JavaFileBridge(filePath: tmpName)
         XCTAssertFalse(try file.exists())
