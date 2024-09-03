@@ -16,7 +16,7 @@ it provides can be used in the same way from either the Swift side or the Kotlin
 Each instance of the bridge, regardless of which side it was created on,
 holds a reference to a "peer" on the other side of the bridge: the Java side
 has a `_swiftPeer` property, which is a longint pointer value for the Swift class instance,
-and the Swift side has a `javaPeer` property, which is a JNI jobject reference to the Java instance.
+and the Swift side has a `_javaPeer` property, which is a JNI jobject reference to the Java instance.
 
 ### Swift->Java Bridge
 
@@ -135,7 +135,7 @@ public class SwiftURLBridge : SkipBridge {
 }
 ```
 
-The transpilation will replace the `isFileURL()` function body with a call to `invokeSwift_isFileURL()`, whose implementation will look like:
+The transpilation will replace the `invokeSwift` call in the `isFileURL()` function body with a call to `invokeSwift_isFileURL()`, whose implementation will look like:
 
 ```swift
 #if SKIP
@@ -172,3 +172,63 @@ open class SwiftURLBridge: SkipBridge {
     open external fun invokeSwift_isFileURL(swiftPeer: Long): Boolean
 }
 ```
+
+### Bridging Topics
+
+#### Bridgeable parameters and return values
+
+Any bridged function parameters and return values must be either a primitive or String
+that is handled by JNI, with the following mapping:
+
+| Swift  | Java    |
++--------+---------+
+| Int8   | jbyte   |
+| Int16  | jshort  |
+| UInt16 | jchar   |
+| Int32  | jint    |
+| Int64  | jlong   |
+| Float  | jfloat  |
+| Double | jdouble |
+| String | jstring |
+
+In addition, other types that extend `SkipBridge` can be passed as parameters or
+used as return values.
+
+#### Bridge lifecycle and memory management
+
+Each side of the Swift/Java bridge holds a "peer", which is a reference to the
+other side of the bridge. A bridge must have a single no-argument constructor,
+which, when invoked from one side of the bridge, will be responsible for allocating
+the other side of the bridge.
+
+TBD: should the Swift peer always be retained as long as the Java peer? If not,
+a Swift instance could be deallocated while the Java side is still awaiting garbage
+collection.
+
+#### Throwable
+
+When invoking a Java function from Swift, JNI can be used to check whether
+an exception happened during the call using the
+[ExceptionOccurred](https://docs.oracle.com/javase/8/docs/technotes/guides/jni/spec/functions.html#ExceptionOccurred)
+function, which can then be converted into a Swift exception.
+
+There is no such affordance when going from Java to Swift/C, so any potentially-throwing
+Swift functions should use the `handleSwiftError` utility function in their `@_cdecl`
+implementation, which will try to execute the function, and if it fails, invoke
+`pushSwiftError`, which will store the exception in a thread-local variable.
+From the Java side, this error can be checked with the `popSwiftErrorMessageFromStack()`
+function, which will check whether an error occurred as a result of the most
+recent invocation, and if so, convert it into a Swift error.
+
+#### Closure parameters and state
+
+TBD
+
+#### Async/await + coroutines
+
+TBD
+
+#### Static functions
+
+TBD
+
