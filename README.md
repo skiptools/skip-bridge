@@ -63,6 +63,29 @@ public class JavaFileBridge : SkipBridge {
 }
 ```
 
+The `exists()` invocation will be handled with the following generated code:
+
+```swift
+extension JavaFileBridge {
+    public func invokeJava<T: SkipBridgable>(functionName: String = #function, _ args: SkipBridgable..., implementation: () throws -> ()) throws -> T {
+        switch functionName {
+        case "exists()":
+            return try callJavaT(functionName: "exists", signature: "()Z", arguments: args)
+        default:
+            fatalError("could not identify which function called invokeJava for: \(functionName)")
+        }
+    }
+
+    private func callJavaT<T>(functionName: String, signature: String, arguments args: [SkipBridgable], invoke: (JObject, JavaMethodID, [JavaParameter]) throws -> T) throws -> T {
+        let jobj: JavaObjectPointer = self._javaPeer
+        let mid = jobj.jclass.getMethodID(name: functionName, sig: signature)
+        let jargs = args.map({ $0.toJavaParameter() })
+        return try jobj.call(method: mid, jargs)
+    }
+}
+```
+
+
 ### Java->Swift Bridge
 
 `SwiftURLBridge` is an example of a bridge that holds state on the Swift
@@ -109,5 +132,22 @@ public class SwiftURLBridge : SkipBridge {
         }
     }
 }
+```
+
+The transpilation will replace the `isFileURL()` function body with a call to `invokeSwift_isFileURL()`, whose implementation will look like:
+
+```
+
+#if SKIP
+public extension SwiftURLBridge {
+    /* SKIP EXTERN */ func invokeSwift_isFileURL(_ swiftPeer: SwiftObjectPointer) -> Bool { }
+}
+#else
+@_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL__J")
+internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL__J(_ env: JNIEnvPointer, _ obj: JavaObjectPointer?, _ swiftPointer: JavaLong) -> Bool {
+    let bridge: SwiftURLBridge = swiftPeer(for: swiftPointer)
+    return bridge.isFileURL()
+}
+#endif
 ```
 
