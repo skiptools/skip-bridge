@@ -136,8 +136,7 @@ public class SwiftURLBridge : SkipBridge {
 
 The transpilation will replace the `isFileURL()` function body with a call to `invokeSwift_isFileURL()`, whose implementation will look like:
 
-```
-
+```swift
 #if SKIP
 public extension SwiftURLBridge {
     /* SKIP EXTERN */ func invokeSwift_isFileURL(_ swiftPeer: SwiftObjectPointer) -> Bool { }
