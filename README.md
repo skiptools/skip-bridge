@@ -227,15 +227,29 @@ that since the Java side is transpiled Kotlin (unannotated by `@JvmStatic`),
 the Swift invocation side needs to look up the `Companion` instance of the
 Java class and invoke the method on the companion.
 
-#### Closure parameters and state
+#### Closure parameters and return values?
 
-TBD
+**TBD**: How to handle closures. Possibly with a
+`SwiftCallback` and `JavaCallback` bridging class that
+wraps a closure on the Swift and Kotlin sides. But how
+to support multiple parameters to the specified callback?
+With `SwiftCallback2`, `SwiftCallback3`, etc?
 
 #### Async/await + coroutines
 
-TBD
+**TBD**: How will Java calling to Swift async functions, and
+how will Swift call into Kotlin coroutines? One possibility
+is to use `withCheckedThrowingContinuation` on the Swift
+side and `suspendCoroutine` on the Kotlin side with a
+`completion` callback bridge wrapper.
 
 #### @Composable functions
 
-TBD
+**TBD**: If this bridging system is to be used for Compose integration,
+how will @Composable functions be supported?
 
+#### Bridge subclassing and extending
+
+**TBD**: Should bridges be allowed to subclassed, or should they have to
+be `final`? Similarly, should bridge class be able to have extensions,
+either in the same module or in external modules?

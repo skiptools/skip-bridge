@@ -976,12 +976,14 @@ extension String: JObjectConvertible, JNullInitializable {
     }
 
     public static func fromJavaObject(_ obj: JavaObjectPointer) throws -> String {
-        try jni.withEnv {
-            guard let chars = $0.GetStringUTFChars($1, obj, nil) else {
-                throw JNIError(description: "Coulkd not get characters from String", clear: false)
+        try jni.withEnv { jnii, env in
+            guard let chars = jnii.GetStringUTFChars(env, obj, nil) else {
+                throw JNIError(description: "Could not get characters from String", clear: false)
             }
-            let str = String(cString: chars)
-            $0.ReleaseStringUTFChars($1, obj, chars)
+            defer { jnii.ReleaseStringUTFChars(env, obj, chars) }
+            guard let str = String(validatingUTF8: chars) else {
+                throw JNIError(description: "Could not get valid UTF8 characters from String", clear: false)
+            }
             return str
         }
     }
