@@ -15,7 +15,8 @@ A bridge is transpiled into Kotlin by the skipstone plugin, and the API
 it provides can be used in the same way from either the Swift side or the Kotlin side.
 Each instance of the bridge, regardless of which side it was created on,
 holds a reference to a "peer" on the other side of the bridge: the Java side
-has a `swiftPeer`, and the Swift side has a `javaPeer`.
+has a `_swiftPeer` property, which is a longint pointer value for the Swift class instance,
+and the Swift side has a `javaPeer` property, which is a JNI jobject reference to the Java instance.
 
 ### Swift->Java Bridge
 
@@ -150,3 +151,24 @@ internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL__J(
 #endif
 ```
 
+The transpiled Kotlin will ultimately look like:
+
+```kotlin
+package skip.bridge.samples
+
+import skip.lib.*
+import skip.bridge.*
+
+/// An example of a bridge that manages a `Foundation.URL` on the Swift side and bridges functions to Java.
+open class SwiftURLBridge: SkipBridge {
+    constructor(urlString: String): this() {
+        setURLString(urlString)
+    }
+
+    internal open fun setURLString(urlString: String): Unit = invokeSwift_setURLString(_swiftPeer, urlString)
+    open external fun invokeSwift_setURLString(swiftPeer: Long, value: String)
+
+    open fun isFileURL(): Boolean = invokeSwift_isFileURL(_swiftPeer)
+    open external fun invokeSwift_isFileURL(swiftPeer: Long): Boolean
+}
+```
