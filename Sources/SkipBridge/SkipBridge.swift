@@ -22,6 +22,9 @@ public protocol SkipReferenceBridgable : AnyObject, SkipBridgable, JObjectConver
     func invokeJava<T: SkipBridgable>(functionName: String, _ args: SkipBridgable..., implementation: () throws -> ()) throws -> T
     func invokeJavaVoid(functionName: String, _ args: SkipBridgable..., implementation: () throws -> ()) throws
 
+    static func invokeJavaStatic<T: SkipBridgable>(functionName: String, _ args: SkipBridgable..., implementation: () throws -> ()) throws -> T
+    static func invokeJavaStaticVoid(functionName: String, _ args: SkipBridgable..., implementation: () throws -> ()) throws
+
     func invokeSwift<T: SkipBridgable>(_ args: SkipBridgable..., implementation: () throws -> T) rethrows -> T
     func invokeSwiftVoid(_ args: SkipBridgable..., implementation: () throws -> ()) rethrows
     #endif
@@ -92,6 +95,14 @@ public extension SkipBridgeInstance {
         throw SkipBridgeError(description: "invokeJava should be have been added by the transpiler via an extension on the owning type")
     }
 
+    static func invokeJavaStatic<T: SkipBridgable>(functionName: String = #function, _ args: SkipBridgable..., implementation: () -> ()) throws -> T {
+        throw SkipBridgeError(description: "invokeJava should be have been added by the transpiler via an extension on the owning type")
+    }
+
+    static func invokeJavaStaticVoid(functionName: String = #function, _ args: SkipBridgable..., implementation: () -> ()) throws  {
+        throw SkipBridgeError(description: "invokeJava should be have been added by the transpiler via an extension on the owning type")
+    }
+
     func invokeSwift<T: SkipBridgable>(_ args: SkipBridgable..., implementation: () throws -> T) rethrows -> T {
         /// When calling Swift from Swift, we simply invoke the implementation
         return try implementation()
@@ -130,6 +141,16 @@ public extension SkipBridgeInstance {
         try implementation()
     }
 
+    static func invokeJavaStatic<T>(_ args: Any..., implementation: () -> T) throws -> T {
+        /// When calling Java from Java, we simply invoke the implementation
+        return try implementation()
+    }
+
+    static func invokeJavaStaticVoid(_ args: Any..., implementation: () -> ()) throws {
+        /// When calling Java from Java, we simply invoke the implementation
+        try implementation()
+    }
+
     func invokeSwift<T>(_ args: Any..., implementation: () throws -> ()) rethrows -> T {
         throw SkipBridgeError(description: "invokeSwift should be have been replaced with the native method invocation by the transpiler")
     }
@@ -162,19 +183,19 @@ extension SkipReferenceBridgable {
     }
 
     public func callJavaT<T: SkipBridgable>(functionName: String, signature: String, arguments args: [SkipBridgable]) throws -> T {
-        try callJ(functionName: functionName, signature: signature, arguments: args) { jobj, mid, jargs in
+        try callInstanceMethod(functionName: functionName, signature: signature, arguments: args) { jobj, mid, jargs in
             try jobj.call(method: mid, jargs)
         }
     }
 
     public func callJavaV(functionName: String, signature: String, arguments args: [SkipBridgable]) throws {
-        try callJ(functionName: functionName, signature: signature, arguments: args) { jobj, mid, jargs in
+        try callInstanceMethod(functionName: functionName, signature: signature, arguments: args) { jobj, mid, jargs in
             try jobj.call(method: mid, jargs)
         }
     }
 
     /// Java invocation that can return either `Void` or a `SkipBridgable` instance.
-    private func callJ<T>(functionName: String, signature: String, arguments args: [SkipBridgable], invoke: (JObject, JavaMethodID, [JavaParameter]) throws -> T) throws -> T {
+    private func callInstanceMethod<T>(functionName: String, signature: String, arguments args: [SkipBridgable], invoke: (JObject, JavaMethodID, [JavaParameter]) throws -> T) throws -> T {
         guard let javaObject: JavaObjectPointer = self._javaPeer else {
             throw SkipBridgeError(description: "No Java peer set for invocation of: \(functionName) with signature: \(signature)")
         }
@@ -191,6 +212,48 @@ extension SkipReferenceBridgable {
         // 3. Invoke the JNI method with the given arguments
         let jargs = args.map({ $0.toJavaParameter() })
         return try invoke(jobj, mid, jargs)
+    }
+
+    /// Java static invocation that can return either `Void` or a `SkipBridgable` instance.
+    private static func callStaticMethod<T>(functionName: String, signature: String, on clazz: JClass, arguments args: [SkipBridgable], invoke: (JObject, JavaMethodID, [JavaParameter]) throws -> T) throws -> T {
+        // if the Kotlin static were defines is @JvmStatic, then we could just do this:
+        //guard let mid = clazz.getStaticMethodID(name: functionName, sig: signature) else {
+        //    throw SkipBridgeError(description: "Could not lookup method id: \(functionName) with signature: \(signature)")
+        //}
+
+        // instead, we need to get the Companion instance for the class and invoke the instance method on it
+        let companionClassName = try "L" + clazz.jniName + "$Companion;"
+        guard let companionFieldID = clazz.getStaticFieldID(name: "Companion", sig: companionClassName) else {
+            throw SkipBridgeError(description: "Could not lookup Companion field for class of type: \(companionClassName)")
+        }
+
+        guard let companionInstance: Object = try clazz.getStatic(field: companionFieldID) else {
+            throw SkipBridgeError(description: "Could not get companion field for class")
+        }
+
+        let jobj = companionInstance.javaObject
+        let jcls = jobj.cls
+
+        // 2. Look up the function using JNI with the specified arguments
+        guard let mid = jcls.getMethodID(name: functionName, sig: signature) else {
+            throw SkipBridgeError(description: "Could not lookup method id: \(functionName) with signature: \(signature)")
+        }
+
+        // 3. Invoke the JNI method with the given arguments
+        let jargs = args.map({ $0.toJavaParameter() })
+        return try invoke(jobj, mid, jargs)
+    }
+
+    public static func callJavaST<T: SkipBridgable>(functionName: String, signature: String, on clazz: JClass, arguments args: [SkipBridgable]) throws -> T {
+        try callStaticMethod(functionName: functionName, signature: signature, on: clazz, arguments: args) { jobj, mid, jargs in
+            try jobj.call(method: mid, jargs)
+        }
+    }
+
+    public static func callJavaSV(functionName: String, signature: String, on clazz: JClass, arguments args: [SkipBridgable]) throws {
+        try callStaticMethod(functionName: functionName, signature: signature, on: clazz, arguments: args) { jobj, mid, jargs in
+            try jobj.call(method: mid, jargs)
+        }
     }
 }
 

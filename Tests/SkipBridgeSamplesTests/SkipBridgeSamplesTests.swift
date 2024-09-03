@@ -37,6 +37,29 @@ final class SkipBridgeSamplesTests: XCTestCase {
         XCTAssertFalse(try file2.exists())
     }
 
+    func testStaticSwiftFunction() throws {
+        XCTAssertEqual("www.skip.tools", SwiftURLBridge.host(forURL: "https://www.skip.tools/docs"))
+    }
+
+    func testStaticJavaFunction() throws {
+        XCTAssertEqual("/", try JavaFileBridge.separatorString())
+        XCTAssertEqual(JavaFileBridge.Char(47), try JavaFileBridge.separatorChar())
+    }
+
+    func testStaticStateFunctions() throws {
+        let tmpName = "/tmp/skipbridge-" + UUID().uuidString
+        let file = try JavaFileBridge(filePath: tmpName)
+        #if !SKIP
+        // FIXME: fromJavaFileBridge allocates a new Swift instance which is immediately deallocated…
+        let result = try SwiftURLBridge.fromJavaFileBridge(file).isFileURL()
+        XCTAssertTrue(result)
+        #else
+        // FIXME: java.lang.RuntimeException: Could not lookup method id: toSwiftURLBridge with signature: ()Lskip/bridge/samples/SwiftURLBridge;
+        // or crash in CI…
+        throw XCTSkip("TODO: fix peer setup for static functions")
+        #endif
+    }
+
     func testAsyncFunctions() async throws {
         let tmpName = "/tmp/skipbridge-" + UUID().uuidString
         try "ABC".write(toFile: tmpName, atomically: false, encoding: .utf8)
@@ -47,19 +70,6 @@ final class SkipBridgeSamplesTests: XCTestCase {
         let contents = try await urlBridge.readContents()
         XCTAssertEqual("ABC", contents)
         _ = try JavaFileBridge(filePath: tmpName).delete()
-        #endif
-    }
-
-    func testStaticFunctions() throws {
-        let tmpName = "/tmp/skipbridge-" + UUID().uuidString
-        let file = try JavaFileBridge(filePath: tmpName)
-        #if !SKIP
-        let result = try SwiftURLBridge.fromJavaFileBridge(file).isFileURL()
-        XCTAssertTrue(result)
-        #else
-        // FIXME: java.lang.RuntimeException: Could not lookup method id: toSwiftURLBridge with signature: ()Lskip/bridge/samples/SwiftURLBridge;
-        // or crash in CI…
-        throw XCTSkip("TODO: fix peer setup for static functions")
         #endif
     }
 

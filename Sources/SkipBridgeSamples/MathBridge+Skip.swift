@@ -45,7 +45,16 @@ extension MathBridge : SkipReferenceBridgable {
         default:
             fatalError("could not identify which function called invokeJava for: \(functionName)")
         }
+    }
 
+    /// Call from Swift into a static Java function using JNI
+    public static func invokeJavaStatic<T: SkipBridgable>(functionName: String = #function, _ args: SkipBridgable..., implementation: () throws -> ()) throws -> T {
+        fatalError("SwiftURLBridge does not have any bridged static Java functions")
+    }
+
+    /// Call from Swift into a static Java function using JNI
+    public static func invokeJavaStaticVoid(functionName: String = #function, _ args: SkipBridgable..., implementation: () throws -> ()) throws {
+        fatalError("SwiftURLBridge does not have any bridged static Java functions")
     }
 }
 #else

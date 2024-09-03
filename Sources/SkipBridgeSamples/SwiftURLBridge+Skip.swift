@@ -35,14 +35,24 @@ extension SwiftURLBridge : SkipReferenceBridgable {
     public func invokeJava<T: SkipBridgable>(functionName: String = #function, _ args: SkipBridgable..., implementation: () throws -> ()) throws -> T {
         fatalError("SwiftURLBridge does not have any bridged Java functions")
     }
+
+    /// Call from Swift into a static Java function using JNI
+    public static func invokeJavaStatic<T: SkipBridgable>(functionName: String = #function, _ args: SkipBridgable..., implementation: () throws -> ()) throws -> T {
+        fatalError("SwiftURLBridge does not have any bridged static Java functions")
+    }
+
+    /// Call from Swift into a static Java function using JNI
+    public static func invokeJavaStaticVoid(functionName: String = #function, _ args: SkipBridgable..., implementation: () throws -> ()) throws {
+        fatalError("SwiftURLBridge does not have any bridged static Java functions")
+    }
 }
 #endif
 
 // MARK: skipstone-generated JNI bridging
 
 #if SKIP
-public extension SwiftURLBridge {
-    /* SKIP EXTERN */ func createSwiftURLBridge() -> Int64 { }
+extension SwiftURLBridge {
+    /* SKIP EXTERN */ public func createSwiftURLBridge() -> Int64 { }
 }
 #else
 @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_createSwiftURLBridge")
@@ -53,8 +63,8 @@ internal func Java_skip_bridge_samples_SwiftURLBridge_createSwiftURLBridge(_ env
 
 
 #if SKIP
-public extension SwiftURLBridge {
-    /* SKIP EXTERN */ func invokeSwift_setURLString(_ swiftPeer: SwiftObjectPointer, _ value: String) { }
+extension SwiftURLBridge {
+    /* SKIP EXTERN */ public func invokeSwift_setURLString(_ swiftPeer: SwiftObjectPointer, _ value: String) { }
 }
 #else
 @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1setURLString__JLjava_lang_String_2")
@@ -71,8 +81,8 @@ internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1setURLString_
 
 
 #if SKIP
-public extension SwiftURLBridge {
-    /* SKIP EXTERN */ func invokeSwift_isFileURL(_ swiftPeer: SwiftObjectPointer) -> Bool { }
+extension SwiftURLBridge {
+    /* SKIP EXTERN */ public func invokeSwift_isFileURL(_ swiftPeer: SwiftObjectPointer) -> Bool { }
 }
 #else
 @_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL__J")
@@ -84,7 +94,7 @@ internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1isFileURL__J(
 
 
 #if SKIP
-public extension SwiftURLBridge {
+extension SwiftURLBridge {
     /* SKIP EXTERN */ public func invokeSwift_toJavaFileBridge(_ swiftPeer: SwiftObjectPointer) -> JavaFileBridge { }
 }
 #else
@@ -103,7 +113,20 @@ internal func Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1toJavaFileBri
 
 
 #if SKIP
-public extension SwiftURLBridge {
+extension SwiftURLBridge {
+    /* SKIP EXTERN */ public static func invokeSwift_host(forURL: String) -> String? { }
+}
+#else
+/// `skip.bridge.samples.SwiftURLBridge$Companion.invokeSwift_host()`
+@_cdecl("Java_skip_bridge_samples_SwiftURLBridge_00024Companion_invokeSwift_1host__Ljava_lang_String_2")
+internal func Java_skip_bridge_samples_SwiftURLBridge_00024Companion_invokeSwift_1host__Ljava_lang_String_2(_ env: JNIEnvPointer, _ cls: JavaClassPointer?, _ url: JavaString) -> JavaString? {
+    SwiftURLBridge.host(forURL: try! String.fromJavaObject(url))?.toJavaObject()
+}
+#endif
+
+
+#if SKIP
+extension SwiftURLBridge {
     /* SKIP EXTERN */ public static func invokeSwift_fromJavaFileBridge(fileBridge: JavaFileBridge) -> SwiftURLBridge { }
 }
 #else
@@ -119,8 +142,8 @@ internal func Java_skip_bridge_samples_SwiftURLBridge_00024Companion_invokeSwift
 
 
 //#if SKIP
-//public extension SwiftURLBridge {
-//    /* SKIP EXTERN */ func invokeSwift_readContents(_ swiftPeer: SwiftObjectPointer, _ callback: JavaCallback) { }
+//extension SwiftURLBridge {
+//    /* SKIP EXTERN */ public func invokeSwift_readContents(_ swiftPeer: SwiftObjectPointer, _ callback: JavaCallback) { }
 //}
 //#else
 //@_cdecl("Java_skip_bridge_samples_SwiftURLBridge_invokeSwift_1readContents__JLskip_bridge_JavaCallback_2")

@@ -51,6 +51,26 @@ extension JavaFileBridge : SkipReferenceBridgable {
             fatalError("could not identify which function called invokeJava for: \(functionName)")
         }
     }
+
+    /// Call from Swift into a static Java function using JNI
+    public static func invokeJavaStatic<T: SkipBridgable>(functionName: String = #function, _ args: SkipBridgable..., implementation: () throws -> ()) throws -> T {
+        switch functionName {
+        case "separatorString()":
+            return try callJavaST(functionName: "separatorString", signature: "()Ljava/lang/String;", on: javaClass, arguments: args)
+        case "separatorChar()":
+            return try callJavaST(functionName: "separatorChar", signature: "()C", on: javaClass, arguments: args)
+        default:
+            fatalError("could not identify which function called invokeJavaStatic for: \(functionName)")
+        }
+    }
+
+    /// Call from Swift into a static Java function using JNI
+    public static func invokeJavaStaticVoid(functionName: String = #function, _ args: SkipBridgable..., implementation: () throws -> ()) throws {
+        switch functionName {
+        default:
+            fatalError("could not identify which function called invokeJavaStatic for: \(functionName)")
+        }
+    }
 }
 
 #endif

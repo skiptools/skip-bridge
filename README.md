@@ -220,6 +220,13 @@ From the Java side, this error can be checked with the `popSwiftErrorMessageFrom
 function, which will check whether an error occurred as a result of the most
 recent invocation, and if so, convert it into a Swift error.
 
+#### Static functions
+
+Static functions are implemented similarly to instance functions, with the exception
+that since the Java side is transpiled Kotlin (unannotated by `@JvmStatic`),
+the Swift invocation side needs to look up the `Companion` instance of the
+Java class and invoke the method on the companion.
+
 #### Closure parameters and state
 
 TBD
@@ -228,7 +235,7 @@ TBD
 
 TBD
 
-#### Static functions
+#### @Composable functions
 
 TBD
 

@@ -57,4 +57,26 @@ public class JavaFileBridge : SkipBridge {
             #endif
         }
     }
+
+    public static func separatorString() throws -> String {
+        try invokeJavaStatic() {
+            #if SKIP
+            java.io.File.separator
+            #endif
+        }
+    }
+
+    #if SKIP
+    public typealias Char = kotlin.Char
+    #else
+    public typealias Char = UInt16
+    #endif
+
+    public static func separatorChar() throws -> Char {
+        try invokeJavaStatic() {
+            #if SKIP
+            java.io.File.separatorChar
+            #endif
+        }
+    }
 }
