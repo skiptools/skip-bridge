@@ -181,7 +181,7 @@ Any bridged function parameters and return values must be either a primitive or 
 that is handled by JNI, with the following mapping:
 
 | Swift  | Java    |
-+--------+---------+
+|--------|---------|
 | Int8   | jbyte   |
 | Int16  | jshort  |
 | UInt16 | jchar   |
