@@ -6,7 +6,6 @@
 #if !SKIP
 @_exported import Foundation
 import SkipJNI
-import os
 #else
 public protocol JConvertible { }
 public protocol JObjectConvertible { }

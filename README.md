@@ -253,3 +253,9 @@ how will @Composable functions be supported?
 **TBD**: Should bridges be allowed to subclassed, or should they have to
 be `final`? Similarly, should bridge class be able to have extensions,
 either in the same module or in external modules?
+
+#### Array/Collection parameters and return values
+
+**TBD**: Should we bridge all Sequence/Collection types into their
+JNI equivalent (e.g., Set), or only bridge Swift.Array to
+Java arrays?

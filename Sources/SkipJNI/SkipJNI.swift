@@ -84,11 +84,11 @@ extension JNI {
             //}
 
             // so instead we register a cleanup function for removing the environment when the thread exits, otherwise we will leak the thread
-            func JNI_DetachCurrentThread(_ ptr: UnsafeMutableRawPointer) {
-                _ = jni._jvm.pointee?.pointee.DetachCurrentThread(jni._jvm)
-            }
             let keyCreated = withUnsafeMutablePointer(to: &jniEnvKey, {
-                pthread_key_create($0, JNI_DetachCurrentThread) // thread destructor callback
+                pthread_key_create($0, { _ in
+                    // thread destructor callback
+                    _ = jni._jvm.pointee?.pointee.DetachCurrentThread(jni._jvm)
+                })
             })
             if keyCreated != 0 {
                 fatalError("SkipJNI: pthread_key_create failed")
@@ -1816,7 +1816,13 @@ final class NullTerminatedCString {
 private func loadLibJava() throws -> UnsafeMutableRawPointer {
     // if JAVA_HOME is unset, default to the Homebrew installation
     if getenv("JAVA_HOME") == nil {
-        setenv("JAVA_HOME", "/opt/homebrew/opt/java", 0)
+        if FileManager.default.fileExists(atPath: "/opt/homebrew/opt/java") {
+            setenv("JAVA_HOME", "/opt/homebrew/opt/java", 0) // Homebrew ARM location
+        } else if FileManager.default.fileExists(atPath: "/usr/local/opt/java") {
+            setenv("JAVA_HOME", "/usr/local/opt/java", 0) // Homebrew Intel location
+        } else {
+            throw JVMError(description: "No JAVA_HOME set, and could not locate default Java installation")
+        }
     }
     let JAVA_HOME = getenv("JAVA_HOME")!
     let javaHome = URL(fileURLWithPath: String(validatingUTF8: JAVA_HOME)!)
