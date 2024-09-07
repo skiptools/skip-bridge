@@ -8,6 +8,7 @@ let package = Package(
         .library(name: "SkipJNI", type: .dynamic, targets: ["SkipJNI"]),
         .library(name: "SkipBridge", type: .dynamic, targets: ["SkipBridge"]),
         .library(name: "SkipBridgeSamples", type: .dynamic, targets: ["SkipBridgeSamples"]),
+        .library(name: "SkipBridgeSamples2", type: .dynamic, targets: ["SkipBridgeSamples2"]),
     ],
     dependencies: [
         .package(url: "https://source.skip.tools/skip.git", from: "1.0.0"),
@@ -22,6 +23,9 @@ let package = Package(
             dependencies: ["SkipJNI", .product(name: "SkipLib", package: "skip-lib")],
             plugins: [.plugin(name: "skipstone", package: "skip")]),
         .target(name: "SkipBridgeSamples",
+            dependencies: ["SkipBridge", .product(name: "SkipFoundation", package: "skip-foundation")],
+            plugins: [.plugin(name: "skipstone", package: "skip")]),
+        .target(name: "SkipBridgeSamples2",
             dependencies: ["SkipBridge", .product(name: "SkipFoundation", package: "skip-foundation")],
             plugins: [.plugin(name: "skipstone", package: "skip")]),
         .testTarget(name: "SkipBridgeSamplesTests",
