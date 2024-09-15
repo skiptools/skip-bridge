@@ -4,12 +4,6 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
-
-
-// enum parameter/return types
-// enum w/ associated parameter/return types
-// generic parameter/return types
-
 // class
 // struct
 // mutable struct
@@ -109,9 +103,9 @@ fun transpiledClassesFunc(p: TranspiledClass): TranspiledClass {
 
  S:
 public func transpiledClassesFunc(p: TranspiledClass) -> TranspiledClass {
-    let p_javaPeer = p._javaPeer // Get Java ptr from native wrapper
-    let ret_javaPeer: JavaObject = // Call transpiledClassesFunc(p: p_javaPeer) via JNI
-    return TranspiledClass(_javaPeer: ret_javaPeer) // Wrap Java ptr in native wrapper
+    let p_jvm = p._javaPeer // Get Java ptr from native wrapper
+    let ret_jvm: JavaObject = // Call transpiledClassesFunc(p: p_jvm) via JNI
+    return TranspiledClass(_javaPeer: p_jvm) // Wrap Java ptr in native wrapper
 }
  */
 
@@ -134,9 +128,9 @@ fun transpiledStructsFunc(p: TranspiledStruct): TranspiledStruct {
 
  S:
 public func transpiledStructsFunc(p: TranspiledStruct) -> TranspiledStruct {
-    let p_javaPeer = p._javaPeer // Get Java ptr from native wrapper
-    let ret_javaPeer: JavaObject = // Call transpiledStructsFunc(p: p_javaPeer) via JNI. Will sref() return value
-    return TranspiledStruct(_javaPeer: ret_javaPeer) // Wrap Java ptr in native wrapper
+    let p_jvm = p._javaPeer // Get Java ptr from native wrapper
+    let ret_jvm: JavaObject = // Call transpiledStructsFunc(p: p_jvm) via JNI. Will sref() return value
+    return TranspiledStruct(_javaPeer: ret_jvm) // Wrap Java ptr in native wrapper
 }
  */
 
@@ -155,12 +149,12 @@ fun compiledClassesFunc(p: CompiledClass): CompiledClass {
 
  S:
 public func compiledClassesFunc(p: CompiledClass) -> CompiledClass {
-    let p_swiftPeer = registerSwift(object: p) // Get handle for native object
-    let p_jvm = // Use JNI to construct CompiledClass's JVM wrapper with p_swiftPeer
+    let p_swift = registerSwift(object: p) // Get handle for native object
+    let p_jvm = // Use JNI to construct CompiledClass's JVM wrapper with p_swift
     let ret_jvm: JavaObject = // Call compiledClassesFunc(p: p_jvm) via JNI
     // Note: Do we need to somehow make sure ret_jvm isn't GC'd before we get its swiftPeer
-    let ret_swiftPeer = // Use JNI to get _swiftPeer from ret_jvm
-    guard let ret = registeredSwiftObject(forPeer: ret_swiftPeer) else { // Lookup native object for handle
+    let ret_swift = // Use JNI to get _swiftPeer from ret_jvm
+    guard let ret = registeredSwiftObject(forPeer: ret_swift) else { // Lookup native object for handle
         throw JNIError(...)
     }
     return ret
@@ -187,16 +181,47 @@ fun compiledStructsFunc(p: CompiledStruct): CompiledStruct {
 
  S:
 public func compiledStructsFunc(p: CompiledStruct) -> CompiledStruct {
-    let p_swiftPeer = registerSwift(object: p) // Get handle for native object
-    let p_jvm = // Use JNI to construct CompiledClass's JVM wrapper with p_swiftPeer
+    let p_swift = registerSwift(object: p) // Get handle for native object
+    let p_jvm = // Use JNI to construct CompiledClass's JVM wrapper with p_swift
     let ret_jvm: JavaObject = // Call compiledStructsFunc(p: p_jvm) via JNI
     // Note: Do we need to somehow make sure ret_jvm isn't GC'd before we get its swiftPeere
-    let ret_swiftPeer = // Use JNI to get _swiftPeer from ret_jvm
-    guard let ret = registeredSwiftObject(forPeer: ret_swiftPeer) else { // Lookup native object for handle
+    let ret_swift = // Use JNI to get _swiftPeer from ret_jvm
+    guard let ret = registeredSwiftObject(forPeer: ret_swift) else { // Lookup native object for handle
         throw JNIError(...)
     }
     return ret
 }
+ */
+
+// Generic parameter/return type
+// =================
+
+// SKIP @bridge
+public func genericsFunc<T>(p: T) -> T {
+    return p
+}
+/*
+ K:
+fun <T> genericsFunc(p: T): T {
+    return p
+}
+
+ S:
+ public func genericsFunc<T>(p: T) -> T {
+    let ret_jvm: JavaObject
+    if p is _TranspiledType {
+        let p_jvm = p._javaPeer // Get Java ptr from native wrapper
+        ret_jvm = // Call genericsFunc(p: p_jvm) via JNI.
+    } else {
+        let p_swift = registerSwift(object: p) // Get handle for native object
+        let p_jvm = // Use JNI to construct type(of: p)'s JVM wrapper with p_swift
+        ret_jvm = // Call genericsFunc(p: p_jvm) via JNI
+    }
+    let ret_jvmType = // Use JNI to get class of ret_jvm
+    // TODO: What to do here? Technically we know all bridged types from CodebaseInfo.
+    // Maybe each module generates a function that takes an object and its JVM type and
+    // returns the proper native version, or nil?
+ }
  */
 
 // Protocol parameter/return type
@@ -216,21 +241,19 @@ fun protocolsFunc(p: BridgedProtocol): BridgedProtocol {
 public func protocolsFunc(p: BridgedProtocol) -> BridgedProtocol {
     let ret_jvm: JavaObject
     if p is _TranspiledType {
-        let p_javaPeer = p._javaPeer // Get Java ptr from native wrapper
-        ret_jvm = // Call protocolsFunc(p: p_javaPeer) via JNI.
+        let p_jvm = p._javaPeer // Get Java ptr from native wrapper
+        ret_jvm = // Call protocolsFunc(p: p_jvm) via JNI.
     } else {
-        let p_swiftPeer = registerSwift(object: p) // Get handle for native object
-        let p_jvm = // Use JNI to construct type(of: p)'s JVM wrapper with p_swiftPeer
+        let p_swift = registerSwift(object: p) // Get handle for native object
+        let p_jvm = // Use JNI to construct type(of: p)'s JVM wrapper with p_swift
         ret_jvm = // Call protocolsFunc(p: p_jvm) via JNI
     }
     let ret_jvmType = // Use JNI to get class of ret_jvm
-    switch ret_jvmType {
-        // Switch on all of our known implementors of protocol and wrap them
-        // in native wrapper
-        default:
-            // Wrap in general protocl wrapper that we generate that implements protocol and
-            // passes through protocol API via JNI
-    }
+    // TODO: Same situation as with genericsFunc above. But now we can offer an additional fallback:
+    // The returned object does NOT actually have to be a bridged type. For protocols we could generate
+    // A generic implementor (in this case i.e. AnyBridgedProtocol) that wraps any JVM object that we
+    // know also implements the protocol and passes through calls via JNI. So if we can't find a concrete
+    // bridged type for the returned Java type, we could use our generic implementor.
  }
  */
 
@@ -243,7 +266,7 @@ public func arraysFunc(p: [TranspiledClass]) -> [Int] {
 }
 /*
  K:
-fun public func arraysFunc(p: Array<TranspiledClass>): Array<Int> {
+fun arraysFunc(p: Array<TranspiledClass>): Array<Int> {
     return p.map { it.i }
 }
 
@@ -264,7 +287,7 @@ public func tuplesFunc(p: (Int, TranspiledClass)) -> (Int, TranspiledClass) {
 }
 /*
  K:
-fun public func tuplesFunc(p: Tuple2<Int, TranspiledClass>): Tuple2<Int, TranspiledClass> {
+fun tuplesFunc(p: Tuple2<Int, TranspiledClass>): Tuple2<Int, TranspiledClass> {
     return p
 }
 
@@ -273,8 +296,8 @@ public func tuplesFunc(p: (Int, TranspiledClass)) -> (Int, TranspiledClass) {
     let p_jvm = jvmTuple(for: (p.0, p.1._javaPeer)) // Creates skip.lib.Tuple2
     let ret_jvm = // Use JNI to call tuplesFunc(p: p_jvm)
     let ret_0 = // Use JNI to get ret_jvm.element0
-    let ret_1_javaPeer = // Use JNI to get ret_jvm.element1
-    return (ret_0, TranspiledClass(_javaPeer: ret_1_javaPeer))
+    let ret_1_jvm = // Use JNI to get ret_jvm.element1
+    return (ret_0, TranspiledClass(_javaPeer: ret_1_jvm))
 }
  */
 
@@ -294,6 +317,49 @@ fun closuresFunc(p: (Int, TranspiledClass) -> TranspiledClass): (Int, Transpiled
  S:
 public func closuresFunc(p: (Int, TranspiledClass) -> TranspiledClass) -> (Int, TranspiledClass) -> TranspiledClass {
     // TODO: I don't understand how to use JavaCallback
+}
+ */
+
+// Enum parameter/return type
+// =================
+
+// SKIP @bridge
+public func enumsFunc(p: TranspiledEnum) -> TranspiledEnum {
+    return p
+}
+/*
+ K:
+fun enumsFunc(p: TranspiledEnum): TranspiledEnum {
+    return p
+}
+
+ S:
+public func enumsFunc(p: TranspiledEnum) -> TranspiledEnum {
+    let p_jvm = p._bridge_toJVM // Generated property on bridged enums; invokes TranspiledEnum.<caseName> via JNI
+    let ret_jvm = // Use JNI to call enumsFunc(p: p_jvm)
+    return TranspiledEnum(_javaValue: ret_jvm) // Generated static to return Swift case from ret_jvm.name
+}
+ */
+
+// Enum w/ associated values parameter/return type
+// =================
+
+// SKIP @bridge
+public func enumsAssociatedValuesFunc(p: TranspiledAssociatedValuesEnum) -> TranspiledAssociatedValuesEnum {
+    return p
+}
+/*
+ K:
+fun enumsAssociatedValuesFunc(p: TranspiledAssociatedValuesEnum): TranspiledAssociatedValuesEnum {
+    return p
+}
+
+ S:
+public func enumsAssociatedValuesFunc(p: TranspiledAssociatedValuesEnum) -> TranspiledAssociatedValuesEnum {
+    let p_jvm = p._bridge_toJVM // Generated property on bridged enums; invokes TranspiledEnum.<caseName>(values) via JNI
+    let ret_jvm = // Use JNI to call enumsAssociatedValuesFunc(p: p_jvm)
+    return TranspiledAssociatedValuesEnum(_javaValue: ret_jvm) // Generated static to return Swift case; can check the
+        // JVM value type, and from the type, know what values to extract
 }
  */
 
@@ -359,10 +425,45 @@ fun _bridge_suspendFunc(_isMain: Bool, completion: (Result<Int, String>) -> Void
  }
  */
 
+// Suspend function
+// =================
+
 // SKIP @bridge(.all)
 public class TranspiledClass {
     var i = 1
 }
+/*
+ K:
+class TranspiledClass {
+    var i = 1
+}
+
+ S:
+ public class TranspiledClass: _TranspiledType {
+    let _javaPeer: JavaObject
+
+    init() {
+        _javaPeer = // Create instance via JNI
+    }
+
+    init(_javaPeer: JavaObject) {
+        self._javaPeer = _javaPeer
+    }
+
+    deinit {
+        // Release _javaPeer
+    }
+
+    var i: Int {
+        get {
+            // Access _javaPeer.i via JNI
+        }
+        set {
+            // Set _javaPeer.i via JNI
+        }
+    }
+ }
+*/
 
 // SKIP @bridge(.all)
 public struct TranspiledStruct {
@@ -383,3 +484,112 @@ public class CompiledStruct {
 public protocol BridgedProtocol {
     func f() -> Int
 }
+/*
+ K:
+ interface BridgedProtocol {
+     fun f(): Int
+ }
+
+ S:
+ public protocol BridgedProtocol {
+     func f() -> Int
+ }
+ // Used to wrap unknow JavaObject implementors
+ public struct BridgedProtocol_bridge: BridgedProtocol {
+    let _javaPeer: JavaObject
+
+    init(_javaPeer: JavaObject) {
+        self._javaPeer = _javaPeer
+    }
+
+    deinit {
+        // Release _javaPeer
+    }
+
+    func f() -> Int {
+        // Call _javaPeer.f() via JNI
+    }
+ }
+*/
+
+// SKIP @bridge(.all)
+public enum TranspiledEnum {
+    case a, b, c
+}
+/*
+ K:
+ enum TranspiledEnum {
+    a, b, c
+ }
+
+ S:
+ public enum TranspiledEnum {
+     case a, b, c
+
+    init(_javaValue: JavaObject) {
+        let caseName = // Use JNI to access _javaValue.name built-in enum property
+        switch caseName {
+        case "a":
+            self = a
+        case "b":
+            self = b
+        case "c":
+            self = c
+        }
+    }
+
+    func _bridge_toJVM() -> JavaObject {
+        switch self {
+        case a:
+            // Use JNI to return TranspiledEnum.a
+        case b:
+            // Use JNI to return TranspiledEnum.b
+        case c:
+            // Use JNI to return TranspiledEnum.c
+        }
+    }
+ }
+*/
+
+// SKIP @bridge(.all)
+public enum TranspiledAssociatedValuesEnum {
+    case a(Int)
+    case b(String)
+    case c
+}
+/*
+ K:
+...
+
+ S:
+ public enum TranspiledAssociatedValuesEnum {
+    case a(Int)
+    case b(String)
+    case c
+
+    init(_javaValue: JavaObject) {
+        let caseName = // Use JNI to access _javaValue.name built-in enum property
+        switch caseName {
+        case "a":
+            let e0 = // Use JNI to access _javaValue.element0
+            self = a(e0)
+        case "b":
+            let e0 = // Use JNI to access _javaValue.element0
+            self = b(e0)
+        case "c":
+            self = c
+        }
+    }
+
+    func _bridge_toJVM() -> JavaObject {
+        switch self {
+        case a(let e0):
+            // Use JNI to return TranspiledEnum.a
+        case b(let e0):
+            // Use JNI to return TranspiledEnum.b
+        case c:
+            // Use JNI to return TranspiledAssociatedValuesEnum.c()
+        }
+    }
+ }
+*/
