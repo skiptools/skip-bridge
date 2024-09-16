@@ -4,15 +4,6 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
-// class
-// struct
-// mutable struct
-// enum
-// enum w/ associated
-// protocol
-// generic type
-
-
 // Global stored let
 // =================
 
@@ -425,9 +416,6 @@ fun _bridge_suspendFunc(_isMain: Bool, completion: (Result<Int, String>) -> Void
  }
  */
 
-// Suspend function
-// =================
-
 // SKIP @bridge(.all)
 public class TranspiledClass {
     var i = 1
@@ -469,16 +457,55 @@ class TranspiledClass {
 public struct TranspiledStruct {
 
 }
+// Similar to class
 
 // SKIP @bridge(.all)
-public class CompiledClass {
+public class TranspiledGenericClass<T> {
+    let t: T
 
+    init(t: T) {
+        self.t = t
+    }
+}
+/*
+ K:
+class TranspiledGenericClass<T> {
+    val t: T
+
+    constructor(t: T) {
+        this.t = t
+    }
 }
 
-// SKIP @bridge(.all)
-public class CompiledStruct {
+ S:
+ public class TranspiledGenericClass<T>: _TranspiledType {
+    let _javaPeer: JavaObject
 
-}
+    init(t: T) {
+        // See strategy for generic arguments
+        _javaPeer = // Create instance via JNI
+    }
+
+    init(_javaPeer: JavaObject) {
+        // Note: we'll have to specify the generic type explicitly when constructing via this constructor,
+        // i.e. TranspiledGenericClass<Int>(_javaPeer: ...)
+        self._javaPeer = _javaPeer
+    }
+
+    deinit {
+        // Release _javaPeer
+    }
+
+    var t: T {
+        get {
+            // Access _javaPeer.t via JNI. See strategy for generic return types
+        }
+        set {
+            // Set _javaPeer.t via JNI. See strategy for generic arguments
+        }
+    }
+ }
+*/
 
 // SKIP @bridge(.all)
 public protocol BridgedProtocol {
