@@ -1,12 +1,8 @@
+// Copyright 2024 Skip
 //
-//  File.swift
-//  
-//
-//  Created by Abe White on 9/15/24.
-//
-
-import Foundation
-
+// This is free software: you can redistribute and/or modify it
+// under the terms of the GNU Lesser General Public License 3.0
+// as published by the Free Software Foundation https://fsf.org
 
 // SKIP @bridge(.all)
 public class CompiledClass {
