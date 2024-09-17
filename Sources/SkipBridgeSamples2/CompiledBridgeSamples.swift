@@ -213,7 +213,7 @@ func Java_skip_bridge_samples_CompiledBridgeSamples_genericsFunc(_ env: JNIEnvPo
 // =================
 
 // SKIP @bridge
-public func protocolsFunc(p: BridgedProtocol) -> BridgedProtocol {
+public func protocolsFunc2(p: BridgedProtocol) -> BridgedProtocol {
     return p
 }
 /*
@@ -245,7 +245,7 @@ extern fun protocolsFunc(p: BridgedProtocol): BridgedProtocol
 // =================
 
 // SKIP @bridge
-public func arraysFunc(p: [TranspiledClass]) -> [Int] {
+public func arraysFunc2(p: [TranspiledClass]) -> [Int] {
     return p.map(\.i)
 }
 /*
