@@ -7,7 +7,7 @@
 // Global stored let
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public let globalLet2 = 1
 /*
  K:
@@ -27,7 +27,7 @@ extern fun _bridge_globalLet(): Int
 // Global stored var
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public var globalVar2 = 1
 /*
  K:
@@ -54,7 +54,7 @@ extern fun _bridge_set_globalVar(value: Int)
 // Global computed var
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public var globalComputedVar2: Int {
     return 1
 }
@@ -75,7 +75,7 @@ extern fun _bridge_globalComputedVar(): Int
 // Global function
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func globalFunc2() -> Int {
     return 1
 }
@@ -93,7 +93,7 @@ extern fun globalFunc(): Int
 // Transpiled class parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func transpiledClassesFunc2(p: TranspiledClass) -> TranspiledClass {
     return p
 }
@@ -113,7 +113,7 @@ func Java_skip_bridge_samples_CompiledBridgeSamples_transpiledClassesFunc(_ env:
 // Transpiled struct parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func transpiledStructsFunc2(p: TranspiledStruct) -> TranspiledStruct {
     return p
 }
@@ -133,7 +133,7 @@ func Java_skip_bridge_samples_CompiledBridgeSamples_transpiledStructsFunc(_ env:
 // Compiled class parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func compiledClassesFunc2(p: CompiledClass) -> CompiledClass {
     return p
 }
@@ -156,7 +156,7 @@ extern fun compiledClassesFunc(p: CompiledClass): CompiledClass
 // Compiled struct parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func compiledStructsFunc2(p: CompiledStruct) -> CompiledStruct {
     return p
 }
@@ -179,7 +179,7 @@ extern fun compiledStructsFunc(p: CompiledStruct): CompiledStruct
 // Generic parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func genericsFunc2<T>(p: T) -> T {
     return p
 }
@@ -212,7 +212,7 @@ func Java_skip_bridge_samples_CompiledBridgeSamples_genericsFunc(_ env: JNIEnvPo
 // Protocol parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func protocolsFunc2(p: BridgedProtocol) -> BridgedProtocol {
     return p
 }
@@ -244,7 +244,7 @@ extern fun protocolsFunc(p: BridgedProtocol): BridgedProtocol
 // Array parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func arraysFunc2(p: [TranspiledClass]) -> [Int] {
     return p.map(\.i)
 }
@@ -267,7 +267,7 @@ extern fun _bridge_arraysFunc(p: Java array [TranspiledClass]): Java array [Int]
  */
 
 
-// SKIP @bridge(.all)
+//- SKIP @bridge(.all)
 public class CompiledClass {
     var i = 0
 }
@@ -301,7 +301,7 @@ class CompiledClass {
  // @cdecls for members and inits and release ref
 */
 
-// SKIP @bridge(.all)
+//- SKIP @bridge(.all)
 public class CompiledStruct {
 
 }

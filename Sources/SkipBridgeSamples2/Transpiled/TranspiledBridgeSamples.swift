@@ -4,26 +4,35 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
+#if !SKIP
+import SkipJNI
+
+let Java_fileClass = try! JClass(name: "skip.bridge.samples2.TranspiledBridgeSamplesKt")
+#endif
+
 // Global stored let
 // =================
 
-// SKIP @bridge
+#if SKIP
+//- SKIP @bridge
 public let globalLet = 1
-/*
- K:
-val globalLet = 1
 
- S:
-public var globalLet: Int {
-    // Access globalLet via JNI. For primitive types, we could also just re-declare on the swift side
-}
- */
+#else
 
+// NOTES:
+// - We use a "let" rather than a computed property because there are cases where the Swift compiler requires a constant
+// - For constant primitives we could also just mirror the value on the Swift side
+public let globalLet: Int = {
+    let ret: Int32 = try! Java_fileClass.getStatic(field: Java_globalLet_fieldID)
+    return Int(ret)
+}()
+private let Java_globalLet_fieldID = Java_fileClass.getStaticFieldID(name: "globalLet", sig: "I")!
+#endif
 
 // Global stored var
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public var globalVar = 1
 /*
  K:
@@ -43,7 +52,7 @@ public var globalVar: Int {
 // Global computed var
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public var globalComputed: Int {
     get {
         return 1
@@ -63,7 +72,7 @@ public var globalComputed: Int {
 // Global function
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func globalFunc() -> Int {
     return 1
 }
@@ -82,7 +91,7 @@ public func globalFunc() -> Int {
 // Transpiled class parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func transpiledClassesFunc(p: TranspiledClass) -> TranspiledClass {
     return p
 }
@@ -107,7 +116,7 @@ public func transpiledClassesFunc(p: TranspiledClass) -> TranspiledClass {
 // copies of that wrapper will still point to the same _javaPeer. I don't believe there is any
 // way to copy the Java instance whenever the swift struct is copied.
 
-// SKIP @bridge
+//- SKIP @bridge
 public func transpiledStructsFunc(p: TranspiledStruct) -> TranspiledStruct {
     return p
 }
@@ -128,7 +137,7 @@ public func transpiledStructsFunc(p: TranspiledStruct) -> TranspiledStruct {
 // Compiled class parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func compiledClassesFunc(p: CompiledClass) -> CompiledClass {
     return p
 }
@@ -160,7 +169,7 @@ public func compiledClassesFunc(p: CompiledClass) -> CompiledClass {
 // if we use the object with non-Swift-transpiled code that does not make sref() copies. But that
 // is also the case with passing our transpiled structs to Java/Kotlin code today.
 
-// SKIP @bridge
+//- SKIP @bridge
 public func compiledStructsFunc(p: CompiledStruct) -> CompiledStruct {
     return p
 }
@@ -187,7 +196,7 @@ public func compiledStructsFunc(p: CompiledStruct) -> CompiledStruct {
 // Generic parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func genericsFunc<T>(p: T) -> T {
     return p
 }
@@ -218,7 +227,7 @@ fun <T> genericsFunc(p: T): T {
 // Protocol parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func protocolsFunc(p: BridgedProtocol) -> BridgedProtocol {
     return p
 }
@@ -251,7 +260,7 @@ public func protocolsFunc(p: BridgedProtocol) -> BridgedProtocol {
 // Array parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func arraysFunc(p: [TranspiledClass]) -> [Int] {
     return p.map(\.i)
 }
@@ -278,7 +287,7 @@ public func arraysFunc(p: [TranspiledClass]) -> [Int] {
 // Tuple parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func tuplesFunc(p: (Int, TranspiledClass)) -> (Int, TranspiledClass) {
     return p
 }
@@ -301,7 +310,7 @@ public func tuplesFunc(p: (Int, TranspiledClass)) -> (Int, TranspiledClass) {
 // Closure parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func closuresFunc(p: @escaping (Int, TranspiledClass) -> TranspiledClass) -> (Int, TranspiledClass) -> TranspiledClass {
     return p
 }
@@ -320,7 +329,7 @@ public func closuresFunc(p: (Int, TranspiledClass) -> TranspiledClass) -> (Int, 
 // Enum parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func enumsFunc(p: TranspiledEnum) -> TranspiledEnum {
     return p
 }
@@ -341,7 +350,7 @@ public func enumsFunc(p: TranspiledEnum) -> TranspiledEnum {
 // Enum w/ associated values parameter/return type
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func enumsAssociatedValuesFunc(p: TranspiledAssociatedValuesEnum) -> TranspiledAssociatedValuesEnum {
     return p
 }
@@ -363,7 +372,7 @@ public func enumsAssociatedValuesFunc(p: TranspiledAssociatedValuesEnum) -> Tran
 // Throwing function
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func throwingFunc() throws -> Int {
     return 1
 }
@@ -387,7 +396,7 @@ public func throwingFunc() throws -> Int {
 // Suspend function
 // =================
 
-// SKIP @bridge
+//- SKIP @bridge
 public func suspendFunc() async -> Int {
     return 1
 }
@@ -422,7 +431,7 @@ fun _bridge_suspendFunc(_isMain: Bool, completion: (Result<Int, String>) -> Void
  }
  */
 
-// SKIP @bridge(.all)
+//- SKIP @bridge(.all)
 public class TranspiledClass {
     var i = 1
 }
@@ -459,13 +468,13 @@ class TranspiledClass {
  }
 */
 
-// SKIP @bridge(.all)
+//- SKIP @bridge(.all)
 public struct TranspiledStruct {
 
 }
 // Similar to class
 
-// SKIP @bridge(.all)
+//- SKIP @bridge(.all)
 public class TranspiledGenericClass<T> {
     let t: T
 
@@ -513,7 +522,7 @@ class TranspiledGenericClass<T> {
  }
 */
 
-// SKIP @bridge(.all)
+//- SKIP @bridge(.all)
 public protocol BridgedProtocol {
     func f() -> Int
 }
@@ -545,7 +554,7 @@ public protocol BridgedProtocol {
  }
 */
 
-// SKIP @bridge(.all)
+//- SKIP @bridge(.all)
 public enum TranspiledEnum {
     case a, b, c
 }
@@ -584,7 +593,7 @@ public enum TranspiledEnum {
  }
 */
 
-// SKIP @bridge(.all)
+//- SKIP @bridge(.all)
 public enum TranspiledAssociatedValuesEnum {
     case a(Int)
     case b(String)
