@@ -16,8 +16,15 @@ final class SkipBridgeSamplesTests: XCTestCase {
         XCTAssertEqual(1 + 1, 2)
     }
 
-    func testGlobalLet() {
-        XCTAssertEqual(globalLet, 1)
+    func testTranspiledGlobalLet() {
+        XCTAssertEqual(transpiledGlobalLet, 1)
+    }
+
+    func testTranspiledGlobalVar() {
+        transpiledGlobalVar = 1
+        XCTAssertEqual(transpiledGlobalVar, 1)
+        transpiledGlobalVar = 100
+        XCTAssertEqual(transpiledGlobalVar, 100)
     }
 
     #if !SKIP

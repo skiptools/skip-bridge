@@ -15,39 +15,41 @@ let Java_fileClass = try! JClass(name: "skip.bridge.samples2.TranspiledBridgeSam
 
 #if SKIP
 //- SKIP @bridge
-public let globalLet = 1
+public let transpiledGlobalLet = 1
 
 #else
 
 // NOTES:
 // - We use a "let" rather than a computed property because there are cases where the Swift compiler requires a constant
 // - For constant primitives we could also just mirror the value on the Swift side
-public let globalLet: Int = {
-    let ret: Int32 = try! Java_fileClass.getStatic(field: Java_globalLet_fieldID)
+public let transpiledGlobalLet: Int = {
+    let ret: Int32 = try! Java_fileClass.getStatic(field: Java_transpiledGlobalLet_fieldID)
     return Int(ret)
 }()
-private let Java_globalLet_fieldID = Java_fileClass.getStaticFieldID(name: "globalLet", sig: "I")!
+private let Java_transpiledGlobalLet_fieldID = Java_fileClass.getStaticFieldID(name: "transpiledGlobalLet", sig: "I")!
 #endif
 
 // Global stored var
 // =================
 
+#if SKIP
 //- SKIP @bridge
-public var globalVar = 1
-/*
- K:
-var globalVar = 1
+public var transpiledGlobalVar = 1
 
- S:
-public var globalVar: Int {
+#else
+
+public var transpiledGlobalVar: Int {
     get {
-        // Access globalVar via JNI
+        let ret_java: Int32 = try! Java_fileClass.getStatic(field: Java_transpiledGlobalVar_fieldID)
+        return Int(ret_java)
     }
     set {
-        // Set globalVar via JNI
+        let newValue_java = Int32(newValue)
+        Java_fileClass.setStatic(field: Java_transpiledGlobalVar_fieldID, value: newValue_java)
     }
 }
- */
+private let Java_transpiledGlobalVar_fieldID = Java_fileClass.getStaticFieldID(name: "transpiledGlobalVar", sig: "I")!
+#endif
 
 // Global computed var
 // =================
