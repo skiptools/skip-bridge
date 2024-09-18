@@ -51,6 +51,39 @@ public var transpiledGlobalVar: Int {
 private let Java_transpiledGlobalVar_fieldID = Java_fileClass.getStaticFieldID(name: "transpiledGlobalVar", sig: "I")!
 #endif
 
+// Global function
+// =================
+
+#if SKIP
+//- SKIP @bridge
+public func transpiledGlobalFunc(i: Int) -> Int {
+    return i
+}
+
+//- SKIP @bridge
+public func transpiledGlobalVoidFunc(i: Int) {
+}
+
+#else
+
+public func transpiledGlobalFunc(i: Int) -> Int {
+    let i_java = Int32(i).toJavaParameter()
+    let ret_java: Int32 = try! Java_fileClass.callStatic(method: Java_transpiledGlobalFunc_methodID, [i_java])
+    return Int(ret_java)
+}
+private let Java_transpiledGlobalFunc_methodID = Java_fileClass.getStaticMethodID(name: "transpiledGlobalFunc", sig: "(I)I")!
+
+public func transpiledGlobalVoidFunc(i: Int) {
+    let i_java = Int32(i).toJavaParameter()
+    try! Java_fileClass.callStatic(method: Java_transpiledGlobalVoidFunc_methodID, [i_java])
+}
+private let Java_transpiledGlobalVoidFunc_methodID = Java_fileClass.getStaticMethodID(name: "transpiledGlobalVoidFunc", sig: "(I)V")!
+#endif
+
+// =================
+// =================
+// =================
+
 // Global computed var
 // =================
 
@@ -68,25 +101,6 @@ val globalComputed: Int
  S:
 public var globalComputed: Int {
     // Access globalComputed via JNI
-}
- */
-
-// Global function
-// =================
-
-//- SKIP @bridge
-public func globalFunc() -> Int {
-    return 1
-}
-/*
- K:
-fun globalFunc(): Int {
-    return 1
-}
-
- S:
-public func globalFunc() -> Int {
-    // Call globalFunc via JNI
 }
  */
 

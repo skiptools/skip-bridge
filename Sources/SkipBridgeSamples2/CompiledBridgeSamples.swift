@@ -4,52 +4,105 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
+#if !SKIP
+import SkipJNI
+#endif
+
+// NOTES: Who calls SkipBridge2.loadLibrary? It would be too expensive to auto-call on every bridging invocation
+
 // Global stored let
 // =================
 
+#if !SKIP
 //- SKIP @bridge
-public let globalLet2 = 1
-/*
- K:
-val globalLet: Int
-    get() = _bridge_globalLet() // For primitive types, we could also just re-declare on the swift side
+public let compiledGlobalLet = 1
 
-extern fun _bridge_globalLet(): Int
+@_cdecl("Java_skip_bridge_samples2_CompiledBridgeSamplesKt_Swift_1compiledGlobalLet")
+func Java_skip_bridge_samples_CompiledBridgeSamplesKt_Swift_compiledGlobalLet(_ env: JNIEnvPointer, _ target: JavaObjectPointer) -> Int32 {
+    let ret_java = Int32(compiledGlobalLet)
+    return ret_java
+}
 
- S:
- @_cdecl("Java_skip_bridge_samples_CompiledBridgeSamples__1bridge_1globalLet")
- func Java_skip_bridge_samples_CompiledBridgeSamples__bridge_globalLet(_ env: JNIEnvPointer, _ target: JavaObjectPointer) -> Int {
-    return globalLet
- }
- */
+#else
 
+// NOTES:
+// - We use a constant rather than a computed property because there are cases where the Kotlin compiler requires a constant
+// - For constant primitives we could also just mirror the value on the Kotlin side
+/* SKIP INSERT:
+val compiledGlobalLet = Swift_compiledGlobalLet()
+external private fun Swift_compiledGlobalLet(): Int
+*/
+#endif
 
 // Global stored var
 // =================
 
+#if !SKIP
 //- SKIP @bridge
-public var globalVar2 = 1
-/*
- K:
-val globalVar: Int
-    get() = _bridge_globalVar()
+public var compiledGlobalVar = 1
+
+@_cdecl("Java_skip_bridge_samples2_CompiledBridgeSamplesKt_Swift_1compiledGlobalVar")
+func Java_skip_bridge_samples_CompiledBridgeSamplesKt_Swift_compiledGlobalVar(_ env: JNIEnvPointer, _ target: JavaObjectPointer) -> Int32 {
+    let ret_java = Int32(compiledGlobalVar)
+    return ret_java
+}
+@_cdecl("Java_skip_bridge_samples2_CompiledBridgeSamplesKt_Swift_1set_1compiledGlobalVar__I")
+func Java_skip_bridge_samples_CompiledBridgeSamplesKt_Swift_set_compiledGlobalVar(_ env: JNIEnvPointer, _ target: JavaObjectPointer, _ value: Int32) {
+    let value_swift = Int(value)
+    compiledGlobalVar = value_swift
+}
+
+#else
+
+/* SKIP INSERT:
+var compiledGlobalVar: Int
+    get() = Swift_compiledGlobalVar()
     set(newValue) {
-        _bridge_set_globalVar(newValue)
+        Swift_set_compiledGlobalVar(newValue)
     }
+external private fun Swift_compiledGlobalVar(): Int
+external private fun Swift_set_compiledGlobalVar(value: Int)
+*/
+#endif
 
-extern fun _bridge_globalVar(): Int
-extern fun _bridge_set_globalVar(value: Int)
+// Global function
+// =================
 
- S:
- @_cdecl("Java_skip_bridge_samples_CompiledBridgeSamples__1bridge_1globalVar")
- func Java_skip_bridge_samples_CompiledBridgeSamples__bridge_globalVar(_ env: JNIEnvPointer, _ target: JavaObjectPointer) -> Int {
-    return globalVar
- }
- @_cdecl("Java_skip_bridge_samples_CompiledBridgeSamples__1bridge_1set_1globalVar")
- func Java_skip_bridge_samples_CompiledBridgeSamples__bridge_set_globalVar(_ env: JNIEnvPointer, _ target: JavaObjectPointer, _ value: Int) {
-    globalVar = value
- }
- */
+#if !SKIP
+//- SKIP @bridge
+public func compiledGlobalFunc(i: Int) -> Int {
+    return i
+}
+
+//- SKIP @bridge
+public func compiledGlobalVoidFunc(i: Int) {
+}
+
+@_cdecl("Java_skip_bridge_samples2_CompiledBridgeSamplesKt_compiledGlobalFunc__I")
+func Java_skip_bridge_samples_CompiledBridgeSamplesKt_compiledGlobalFunc(_ env: JNIEnvPointer, _ target: JavaObjectPointer, i: Int32) -> Int32 {
+    let i_swift = Int(i)
+    let ret_swift = compiledGlobalFunc(i: i_swift)
+    let ret_java = Int32(ret_swift)
+    return ret_java
+}
+
+@_cdecl("Java_skip_bridge_samples2_CompiledBridgeSamplesKt_compiledGlobalVoidFunc__I")
+func Java_skip_bridge_samples_CompiledBridgeSamplesKt_compiledGlobalVoidFunc(_ env: JNIEnvPointer, _ target: JavaObjectPointer, i: Int32) {
+    let i_swift = Int(i)
+    compiledGlobalVoidFunc(i: i_swift)
+}
+
+#else
+
+/* SKIP INSERT:
+external fun compiledGlobalFunc(i: Int): Int
+external fun compiledGlobalVoidFunc(i: Int)
+*/
+#endif
+
+// =================
+// =================
+// =================
 
 // Global computed var
 // =================
@@ -69,24 +122,6 @@ extern fun _bridge_globalComputedVar(): Int
  @_cdecl("Java_skip_bridge_samples_CompiledBridgeSamples__1bridge_1globalComputedVar")
  func Java_skip_bridge_samples_CompiledBridgeSamples__bridge_globalComputedVar(_ env: JNIEnvPointer, _ target: JavaObjectPointer) -> Int {
     return globalComputedVar
- }
- */
-
-// Global function
-// =================
-
-//- SKIP @bridge
-public func globalFunc2() -> Int {
-    return 1
-}
-/*
- K:
-extern fun globalFunc(): Int
-
- S:
- @_cdecl("Java_skip_bridge_samples_CompiledBridgeSamples_globalFunc")
- func Java_skip_bridge_samples_CompiledBridgeSamples_globalFunc(_ env: JNIEnvPointer, _ target: JavaObjectPointer) -> Int {
-    return globalFunc()
  }
  */
 
@@ -265,7 +300,6 @@ extern fun _bridge_arraysFunc(p: Java array [TranspiledClass]): Java array [Int]
     // Return JNI-compat array
  }
  */
-
 
 //- SKIP @bridge(.all)
 public class CompiledClass {

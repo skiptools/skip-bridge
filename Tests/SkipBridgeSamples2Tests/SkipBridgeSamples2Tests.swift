@@ -5,10 +5,15 @@
 // as published by the Free Software Foundation https://fsf.org
 
 import Foundation
+import SkipBridge2
 import SkipBridgeSamples2
 import XCTest
 #if !SKIP
 import SkipJNI
+#endif
+
+#if SKIP
+var isLibraryLoaded = false
 #endif
 
 final class SkipBridgeSamplesTests: XCTestCase {
@@ -27,8 +32,36 @@ final class SkipBridgeSamplesTests: XCTestCase {
         XCTAssertEqual(transpiledGlobalVar, 100)
     }
 
-    #if !SKIP
+    func testTranspiledGlobalFunc() {
+        XCTAssertEqual(transpiledGlobalFunc(i: 1), 1)
+        XCTAssertEqual(transpiledGlobalFunc(i: 99), 99)
+        transpiledGlobalVoidFunc(i: 100)
+    }
+
+    func testCompiledGlobalLet() {
+        XCTAssertEqual(compiledGlobalLet, 1)
+    }
+
+    func testCompiledGlobalVar() {
+        compiledGlobalVar = 1
+        XCTAssertEqual(compiledGlobalVar, 1)
+        compiledGlobalVar = 100
+        XCTAssertEqual(compiledGlobalVar, 100)
+    }
+
+    func testCompiledGlobalFunc() {
+        XCTAssertEqual(compiledGlobalFunc(i: 1), 1)
+        XCTAssertEqual(compiledGlobalFunc(i: 99), 99)
+        compiledGlobalVoidFunc(i: 100)
+    }
+
     override func setUp() {
+        #if SKIP
+        if !isLibraryLoaded {
+            isLibraryLoaded = true
+            loadLibrary("SkipBridgeSamples2")
+        }
+        #else
         if jni == nil {
             // TODO: need to figure out how to get the classpath from the prior gradle run so we can have access to the transpiled classes
             let home = URL.homeDirectory.path
@@ -67,6 +100,6 @@ final class SkipBridgeSamplesTests: XCTestCase {
             try! launchJavaVM(options: opts)
             XCTAssertNotNil(jni, "jni context should have been created")
         }
+        #endif
     }
-    #endif
 }
