@@ -16,7 +16,7 @@ import SkipJNI
 var isLibraryLoaded = false
 #endif
 
-final class SkipBridgeSamplesTests: XCTestCase {
+final class SkipBridgeSamples2Tests: XCTestCase {
     func testPlaceholder() {
         XCTAssertEqual(1 + 1, 2)
     }
@@ -94,13 +94,17 @@ final class SkipBridgeSamplesTests: XCTestCase {
             let gradleCaches = "\(home)/.gradle/caches"
 
             // XCTestBundlePath=~/Library/Developer/Xcode/DerivedData/Skip-Everything-aqywrhrzhkbvfseiqgxuufbdwdft/Build/Products/Debug/SkipBridgeSamplesTests.xctest
-            let skipstoneFolder: String
+            var skipstoneFolder: String
             if let testBundlePath = ProcessInfo.processInfo.environment["XCTestBundlePath"] {
                 let projectPath = testBundlePath + "/../../../.."
                 let output = "\(projectPath)/SourcePackages/plugins/skip-jni.output"
                 skipstoneFolder = "\(output)/SkipBridgeSamples2Tests/skipstone"
             } else {
                 skipstoneFolder = "\(URL.currentDirectory().path)/.build/plugins/outputs/skip-jni/SkipBridgeSamples2Tests/skipstone"
+                if !FileManager.default.fileExists(atPath: skipstoneFolder) {
+                    // add destination/ folder for Swift6
+                    skipstoneFolder = "\(URL.currentDirectory().path)/.build/plugins/outputs/skip-jni/SkipBridgeSamples2Tests/destination/skipstone"
+                }
             }
 
             if !FileManager.default.fileExists(atPath: skipstoneFolder) {

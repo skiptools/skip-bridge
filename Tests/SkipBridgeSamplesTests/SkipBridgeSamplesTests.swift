@@ -8,6 +8,7 @@ import Foundation
 import SkipBridge
 import SkipBridgeSamples
 
+// NOTE: these tests are disabled in Package.swift because they conflict with SkipBridgeSamples2Tests
 final class SkipBridgeSamplesTests: XCTestCase {
     func testMathBridge() throws {
         let math = try MathBridge()
@@ -123,13 +124,17 @@ extension SkipBridgeSamplesTests {
             let gradleCaches = "\(home)/.gradle/caches"
 
             // XCTestBundlePath=~/Library/Developer/Xcode/DerivedData/Skip-Everything-aqywrhrzhkbvfseiqgxuufbdwdft/Build/Products/Debug/SkipBridgeSamplesTests.xctest
-            let skipstoneFolder: String
+            var skipstoneFolder: String
             if let testBundlePath = ProcessInfo.processInfo.environment["XCTestBundlePath"] {
                 let projectPath = testBundlePath + "/../../../.."
                 let output = "\(projectPath)/SourcePackages/plugins/skip-jni.output"
                 skipstoneFolder = "\(output)/SkipBridgeSamplesTests/skipstone"
             } else {
                 skipstoneFolder = "\(URL.currentDirectory().path)/.build/plugins/outputs/skip-jni/SkipBridgeSamplesTests/skipstone"
+                if !FileManager.default.fileExists(atPath: skipstoneFolder) {
+                    // add destination/ folder for Swift6
+                    skipstoneFolder = "\(URL.currentDirectory().path)/.build/plugins/outputs/skip-jni/SkipBridgeSamplesTests/destination/skipstone"
+                }
             }
 
             if !FileManager.default.fileExists(atPath: skipstoneFolder) {
