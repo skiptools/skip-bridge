@@ -4,11 +4,10 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
+import SkipBridge2
 #if !SKIP
 import SkipJNI
 #endif
-
-// NOTES: Who calls SkipBridge2.loadLibrary? It would be too expensive to auto-call on every bridging invocation
 
 // Global stored let
 // =================
@@ -18,7 +17,7 @@ import SkipJNI
 public let compiledGlobalLet = 1
 
 @_cdecl("Java_skip_bridge_samples2_CompiledBridgeSamplesKt_Swift_1compiledGlobalLet")
-func Java_skip_bridge_samples_CompiledBridgeSamplesKt_Swift_compiledGlobalLet(_ env: JNIEnvPointer, _ target: JavaObjectPointer) -> Int32 {
+func Java_skip_bridge_samples_CompiledBridgeSamplesKt_Swift_compiledGlobalLet(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer) -> Int32 {
     let ret_java = Int32(compiledGlobalLet)
     return ret_java
 }
@@ -42,12 +41,12 @@ external private fun Swift_compiledGlobalLet(): Int
 public var compiledGlobalVar = 1
 
 @_cdecl("Java_skip_bridge_samples2_CompiledBridgeSamplesKt_Swift_1compiledGlobalVar")
-func Java_skip_bridge_samples_CompiledBridgeSamplesKt_Swift_compiledGlobalVar(_ env: JNIEnvPointer, _ target: JavaObjectPointer) -> Int32 {
+func Java_skip_bridge_samples_CompiledBridgeSamplesKt_Swift_compiledGlobalVar(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer) -> Int32 {
     let ret_java = Int32(compiledGlobalVar)
     return ret_java
 }
 @_cdecl("Java_skip_bridge_samples2_CompiledBridgeSamplesKt_Swift_1set_1compiledGlobalVar__I")
-func Java_skip_bridge_samples_CompiledBridgeSamplesKt_Swift_set_compiledGlobalVar(_ env: JNIEnvPointer, _ target: JavaObjectPointer, _ value: Int32) {
+func Java_skip_bridge_samples_CompiledBridgeSamplesKt_Swift_set_compiledGlobalVar(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ value: Int32) {
     let value_swift = Int(value)
     compiledGlobalVar = value_swift
 }
@@ -78,16 +77,17 @@ public func compiledGlobalFunc(i: Int) -> Int {
 public func compiledGlobalVoidFunc(i: Int) {
 }
 
-@_cdecl("Java_skip_bridge_samples2_CompiledBridgeSamplesKt_compiledGlobalFunc__I")
-func Java_skip_bridge_samples_CompiledBridgeSamplesKt_compiledGlobalFunc(_ env: JNIEnvPointer, _ target: JavaObjectPointer, i: Int32) -> Int32 {
+// NOTE: Also encode parameter types into name if overloaded
+@_cdecl("Java_skip_bridge_samples2_CompiledBridgeSamplesKt_compiledGlobalFunc")
+func Java_skip_bridge_samples_CompiledBridgeSamplesKt_compiledGlobalFunc(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, i: Int32) -> Int32 {
     let i_swift = Int(i)
     let ret_swift = compiledGlobalFunc(i: i_swift)
     let ret_java = Int32(ret_swift)
     return ret_java
 }
 
-@_cdecl("Java_skip_bridge_samples2_CompiledBridgeSamplesKt_compiledGlobalVoidFunc__I")
-func Java_skip_bridge_samples_CompiledBridgeSamplesKt_compiledGlobalVoidFunc(_ env: JNIEnvPointer, _ target: JavaObjectPointer, i: Int32) {
+@_cdecl("Java_skip_bridge_samples2_CompiledBridgeSamplesKt_compiledGlobalVoidFunc")
+func Java_skip_bridge_samples_CompiledBridgeSamplesKt_compiledGlobalVoidFunc(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, i: Int32) {
     let i_swift = Int(i)
     compiledGlobalVoidFunc(i: i_swift)
 }
@@ -98,6 +98,140 @@ func Java_skip_bridge_samples_CompiledBridgeSamplesKt_compiledGlobalVoidFunc(_ e
 external fun compiledGlobalFunc(i: Int): Int
 external fun compiledGlobalVoidFunc(i: Int)
 */
+#endif
+
+// Compiled class
+// =================
+
+#if !SKIP
+//- SKIP @bridge(.all)
+public class CompiledClass {
+    public var i: Int
+    public var s: String
+
+    public init(i: Int, s: String) {
+        self.i = i
+        self.s = s
+    }
+
+    public func iplus(_ value: Int) -> Int {
+        return i + value
+    }
+}
+
+@_cdecl("Java_skip_bridge_samples2_CompiledClass_Swift_1ptrref")
+func Java_skip_bridge_samples_CompiledClass_Swift_ptrref(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, Swift_peer: SwiftObjectPtr) -> SwiftObjectPtr {
+    return refSwift(Swift_peer, type: CompiledClass.self)
+}
+
+@_cdecl("Java_skip_bridge_samples2_CompiledClass_Swift_1ptrderef")
+func Java_skip_bridge_samples_CompiledClass_Swift_ptrderef(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, Swift_peer: SwiftObjectPtr) {
+    derefSwift(Swift_peer, type: CompiledClass.self)
+}
+
+@_cdecl("Java_skip_bridge_samples2_CompiledClass_Swift_1constructor")
+func Java_skip_bridge_samples_CompiledClass_Swift_constructor(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, i: Int32, s: JavaString) -> SwiftObjectPtr {
+    let i_swift = Int(i)
+    let s_swift = try! String.fromJavaObject(s)
+    let ret_swift = CompiledClass(i: i_swift, s: s_swift)
+    return SwiftObjectPtr.forSwift(ret_swift, retain: true)
+}
+
+@_cdecl("Java_skip_bridge_samples2_CompiledClass_Swift_1i")
+func Java_skip_bridge_samples_CompiledClass_Swift_i(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, Swift_peer: SwiftObjectPtr) -> Int32 {
+    let peer_swift: CompiledClass = Swift_peer.toSwift()
+    let ret_swift = peer_swift.i
+    return Int32(ret_swift)
+}
+
+@_cdecl("Java_skip_bridge_samples2_CompiledClass_Swift_1set_1i")
+func Java_skip_bridge_samples_CompiledClass_Swift_set_i(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, Swift_peer: SwiftObjectPtr, value: Int32) {
+    let peer_swift: CompiledClass = Swift_peer.toSwift()
+    let value_swift = Int(value)
+    peer_swift.i = value_swift
+}
+
+@_cdecl("Java_skip_bridge_samples2_CompiledClass_Swift_1s")
+func Java_skip_bridge_samples_CompiledClass_Swift_s(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, Swift_peer: SwiftObjectPtr) -> JavaString {
+    let peer_swift: CompiledClass = Swift_peer.toSwift()
+    let ret_swift = peer_swift.s
+    return ret_swift.toJavaObject()!
+}
+
+@_cdecl("Java_skip_bridge_samples2_CompiledClass_Swift_1set_1s")
+func Java_skip_bridge_samples_CompiledClass_Swift_set_s(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, Swift_peer: SwiftObjectPtr, value: JavaString) {
+    let peer_swift: CompiledClass = Swift_peer.toSwift()
+    let value_swift = try! String.fromJavaObject(value)
+    peer_swift.s = value_swift
+}
+
+@_cdecl("Java_skip_bridge_samples2_CompiledClass_Swift_1iplus")
+func Java_skip_bridge_samples_CompiledClass_Swift_iplus(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, Swift_peer: SwiftObjectPtr, value: Int32) -> Int32 {
+    let peer_swift: CompiledClass = Swift_peer.toSwift()
+    let value_swift = Int(value)
+    let ret_swift = peer_swift.iplus(value_swift)
+    return Int32(ret_swift)
+}
+
+#else
+
+/* SKIP INSERT:
+class CompiledClass {
+    var Swift_peer: SwiftObjectPtr
+
+    constructor(Swift_peer: SwiftObjectPtr) {
+        this.Swift_peer = Swift_ptrref(Swift_peer)
+    }
+    private external fun Swift_ptrref(Swift_peer: SwiftObjectPtr): SwiftObjectPtr
+
+    fun finalize() {
+        Swift_ptrderef(Swift_peer)
+        Swift_peer = SwiftObjectNil
+    }
+    private external fun Swift_ptrderef(Swift_peer: SwiftObjectPtr)
+
+    constructor(i: Int, s: String) {
+        val i_swift = i
+        val s_swift = s
+        Swift_peer = Swift_constructor(i_swift, s_swift)
+    }
+    // NOTE: Also encode parameter types into name if multiple constructors
+    private external fun Swift_constructor(i: Int, s: String): SwiftObjectPtr
+
+    var i: Int
+        get() {
+            val ret_swift = Swift_i(Swift_peer)
+            return ret_swift
+        }
+        set(newValue) {
+            val newValue_swift = newValue
+            Swift_set_i(Swift_peer, newValue_swift)
+        }
+    private external fun Swift_i(Swift_peer: SwiftObjectPtr): Int
+    private external fun Swift_set_i(Swift_peer: SwiftObjectPtr, value: Int)
+
+    var s: String
+        get() {
+            val ret_swift = Swift_s(Swift_peer)
+            return ret_swift
+        }
+        set(newValue) {
+            val newValue_swift = newValue
+            Swift_set_s(Swift_peer, newValue_swift)
+        }
+    private external fun Swift_s(Swift_peer: SwiftObjectPtr): String
+    private external fun Swift_set_s(Swift_peer: SwiftObjectPtr, value: String)
+
+    fun iplus(value: Int): Int {
+        val value_swift = value
+        val ret_swift = Swift_iplus(Swift_peer, value_swift)
+        return ret_swift
+    }
+    // NOTE: Also encode parameter types into name if overloaded
+    private external fun Swift_iplus(Swift_peer: SwiftObjectPtr, value: Int): Int
+}
+*/
+
 #endif
 
 // =================
@@ -300,40 +434,6 @@ extern fun _bridge_arraysFunc(p: Java array [TranspiledClass]): Java array [Int]
     // Return JNI-compat array
  }
  */
-
-//- SKIP @bridge(.all)
-public class CompiledClass {
-    var i = 0
-}
-/*
- K:
-class CompiledClass {
-    val _swiftPeer: ULong
-
-    init() {
-        _swiftPeer = // Invoke @cdecl factory function
-    }
-
-    init(_swiftPeer: _SwiftPeer) { // Use unique type to avoid signature conflicts with constructors
-        _swiftPeer = _swiftPeer.value
-    }
-
-    fun finalize() {
-        // Invoke @cdecl to release our reference to _swiftPeer
-    }
-
-    var i: Int
-        get() {
-            // Invoke _cdecl func pass _swiftPeer
-        }
-        set(newValue) {
-            // Invoke _cdecl func pass _swiftPeer
-        }
-}
-
- S:
- // @cdecls for members and inits and release ref
-*/
 
 //- SKIP @bridge(.all)
 public class CompiledStruct {

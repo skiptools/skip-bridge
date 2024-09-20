@@ -71,6 +71,7 @@ public func transpiledGlobalFunc(i: Int) -> Int {
     let ret_java: Int32 = try! Java_fileClass.callStatic(method: Java_transpiledGlobalFunc_methodID, [i_java])
     return Int(ret_java)
 }
+// NOTE: Also encode parameter types into name if overloaded
 private let Java_transpiledGlobalFunc_methodID = Java_fileClass.getStaticMethodID(name: "transpiledGlobalFunc", sig: "(I)I")!
 
 public func transpiledGlobalVoidFunc(i: Int) {
@@ -79,6 +80,80 @@ public func transpiledGlobalVoidFunc(i: Int) {
 }
 private let Java_transpiledGlobalVoidFunc_methodID = Java_fileClass.getStaticMethodID(name: "transpiledGlobalVoidFunc", sig: "(I)V")!
 #endif
+
+// Class
+// =================
+
+#if SKIP
+//- SKIP @bridge(.all)
+public class TranspiledClass {
+    public var i: Int
+    public var s: String
+
+    public init(i: Int, s: String) {
+        self.i = i
+        self.s = s
+    }
+
+    public func iplus(_ value: Int) -> Int {
+        return i + value
+    }
+}
+
+#else
+
+public class TranspiledClass {
+    private static let Java_class = try! JClass(name: "skip.bridge.samples2.TranspiledClass")
+    public let Java_peer: JObject
+
+    public init(Java_ptr: JavaObjectPointer) {
+        Java_peer = JObject(Java_ptr)
+    }
+
+    public init(i: Int, s: String) {
+        let ptr = try! Self.Java_class.create(ctor: Self.Java_init_methodID, [i.toJavaParameter(), s.toJavaParameter()])
+        Java_peer = JObject(ptr)
+    }
+    // NOTE: Also encode parameter types into name if multiple constructors
+    private static let Java_init_methodID = Java_class.getMethodID(name: "<init>", sig: "(ILjava/lang/String;)V")!
+
+    public var i: Int {
+        get {
+            let i_java: Int32 = try! Java_peer.get(field: Self.Java_i_fieldID)
+            return Int(i_java)
+        }
+        set {
+            let i_java = Int32(newValue)
+            Java_peer.set(field: Self.Java_i_fieldID, value: i_java)
+        }
+    }
+    private static let Java_i_fieldID = Java_class.getFieldID(name: "i", sig: "I")!
+
+    public var s: String {
+        get {
+            let s_java: String = try! Java_peer.get(field: Self.Java_s_fieldID)
+            return s_java
+        }
+        set {
+            let s_java = newValue
+            Java_peer.set(field: Self.Java_s_fieldID, value: s_java)
+        }
+    }
+    private static let Java_s_fieldID = Java_class.getFieldID(name: "s", sig: "Ljava/lang/String;")!
+
+    public func iplus(_ value: Int) -> Int {
+        let value_java = Int32(value)
+        let ret_java: Int32 = try! Java_peer.call(method: Self.Java_iplus_methodID, [value_java.toJavaParameter()])
+        return Int(ret_java)
+    }
+    // NOTE: Also encode parameter types into name if overloaded
+    private static let Java_iplus_methodID = Java_class.getMethodID(name: "iplus", sig: "(I)I")!
+}
+
+#endif
+
+//~~~ TODO: Interact with other objects and their peers
+//~~~ TODO: THROWING FUNC
 
 // =================
 // =================
@@ -446,43 +521,6 @@ fun _bridge_suspendFunc(_isMain: Bool, completion: (Result<Int, String>) -> Void
     }
  }
  */
-
-//- SKIP @bridge(.all)
-public class TranspiledClass {
-    var i = 1
-}
-/*
- K:
-class TranspiledClass {
-    var i = 1
-}
-
- S:
- public class TranspiledClass: _JavaType {
-    let _javaPeer: JavaObject
-
-    init() {
-        _javaPeer = // Create instance via JNI
-    }
-
-    init(_javaPeer: JavaObject) {
-        self._javaPeer = _javaPeer
-    }
-
-    deinit {
-        // Release _javaPeer
-    }
-
-    var i: Int {
-        get {
-            // Access _javaPeer.i via JNI
-        }
-        set {
-            // Set _javaPeer.i via JNI
-        }
-    }
- }
-*/
 
 //- SKIP @bridge(.all)
 public struct TranspiledStruct {

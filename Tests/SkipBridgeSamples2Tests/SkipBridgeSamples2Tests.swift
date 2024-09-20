@@ -55,6 +55,32 @@ final class SkipBridgeSamplesTests: XCTestCase {
         compiledGlobalVoidFunc(i: 100)
     }
 
+    func testTranspiledClass() {
+        let obj = TranspiledClass(i: 99, s: "str")
+        XCTAssertEqual(obj.i, 99)
+        XCTAssertEqual(obj.s, "str")
+        XCTAssertEqual(100, obj.iplus(1))
+
+        obj.i = 9
+        obj.s = "s"
+        XCTAssertEqual(obj.i, 9)
+        XCTAssertEqual(obj.s, "s")
+        XCTAssertEqual(19, obj.iplus(10))
+    }
+
+    func testCompiledClass() {
+        let obj = CompiledClass(i: 99, s: "str")
+        XCTAssertEqual(obj.i, 99)
+        XCTAssertEqual(obj.s, "str")
+        XCTAssertEqual(100, obj.iplus(1))
+
+        obj.i = 9
+        obj.s = "s"
+        XCTAssertEqual(obj.i, 9)
+        XCTAssertEqual(obj.s, "s")
+        XCTAssertEqual(19, obj.iplus(10))
+    }
+
     override func setUp() {
         #if SKIP
         if !isLibraryLoaded {

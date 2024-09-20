@@ -56,3 +56,44 @@ public func loadLibrary(_ libName: String) {
     }
     #endif
 }
+
+/// An opaque reference to a Swift object.
+public typealias SwiftObjectPtr = Int64
+public let SwiftObjectNil = Int64(0)
+
+#if !SKIP
+extension SwiftObjectPtr {
+    /// Get a pointer to the given object.
+    public static func forSwift<T: AnyObject>(_ obj: T, retain: Bool) -> SwiftObjectPtr {
+        let unmanaged = retain ? Unmanaged.passRetained(obj) : Unmanaged.passUnretained(obj)
+        let rawPtr = unmanaged.toOpaque()
+        return SwiftObjectPtr(Int(bitPattern: rawPtr))
+    }
+
+    /// Return the object for this pointer.
+    public func toSwift<T: AnyObject>() -> T {
+        assert(self != SwiftObjectNil, "SkipBridge.toSwift() called on nil pointer")
+        let rawPtr = UnsafeMutableRawPointer(bitPattern: Int(self))!
+        return Unmanaged<T>.fromOpaque(rawPtr).takeUnretainedValue()
+    }
+}
+
+/// Increment the reference count for a Swift object held by Java.
+public func refSwift<T: AnyObject>(_ ptr: SwiftObjectPtr, type: T.Type) -> SwiftObjectPtr {
+    guard ptr != SwiftObjectNil, let rawPtr = UnsafeMutableRawPointer(bitPattern: Int(ptr)) else {
+        return ptr
+    }
+    let unmanaged = Unmanaged<T>.fromOpaque(rawPtr)
+    let refUnmanaged = unmanaged.retain()
+    return SwiftObjectPtr(Int(bitPattern: refUnmanaged.toOpaque()))
+}
+
+/// Decrement the reference count for a Swift object held by Java.
+public func derefSwift<T: AnyObject>(_ ptr: SwiftObjectPtr, type: T.Type) {
+    guard ptr != SwiftObjectNil, let rawPtr = UnsafeMutableRawPointer(bitPattern: Int(ptr)) else {
+        return
+    }
+    let unmanaged = Unmanaged<T>.fromOpaque(rawPtr)
+    unmanaged.release()
+}
+#endif
