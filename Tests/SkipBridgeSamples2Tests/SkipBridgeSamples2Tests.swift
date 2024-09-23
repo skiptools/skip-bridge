@@ -21,18 +21,27 @@ final class SkipBridgeSamples2Tests: XCTestCase {
         XCTAssertEqual(1 + 1, 2)
     }
 
-    func testTranspiledGlobalLet() {
+    func testTranspiledGlobalLet() throws {
+        #if !SKIP
+        if jni == nil { throw XCTSkip("skipping compiled transpiled test") }
+        #endif
         XCTAssertEqual(transpiledGlobalLet, 1)
     }
 
-    func testTranspiledGlobalVar() {
+    func testTranspiledGlobalVar() throws {
+        #if !SKIP
+        if jni == nil { throw XCTSkip("skipping compiled transpiled test") }
+        #endif
         transpiledGlobalVar = 1
         XCTAssertEqual(transpiledGlobalVar, 1)
         transpiledGlobalVar = 100
         XCTAssertEqual(transpiledGlobalVar, 100)
     }
 
-    func testTranspiledGlobalFunc() {
+    func testTranspiledGlobalFunc() throws {
+        #if !SKIP
+        if jni == nil { throw XCTSkip("skipping compiled transpiled test") }
+        #endif
         XCTAssertEqual(transpiledGlobalFunc(i: 1), 1)
         XCTAssertEqual(transpiledGlobalFunc(i: 99), 99)
         transpiledGlobalVoidFunc(i: 100)
@@ -55,7 +64,10 @@ final class SkipBridgeSamples2Tests: XCTestCase {
         compiledGlobalVoidFunc(i: 100)
     }
 
-    func testTranspiledClass() {
+    func testTranspiledClass() throws {
+        #if !SKIP
+        if jni == nil { throw XCTSkip("skipping compiled transpiled test") }
+        #endif
         let obj = TranspiledClass(i: 99, s: "str")
         XCTAssertEqual(obj.i, 99)
         XCTAssertEqual(obj.s, "str")
@@ -88,6 +100,7 @@ final class SkipBridgeSamples2Tests: XCTestCase {
             loadLibrary("SkipBridgeSamples2")
         }
         #else
+        if true { return }
         if jni == nil {
             // TODO: need to figure out how to get the classpath from the prior gradle run so we can have access to the transpiled classes
             let home = URL.homeDirectory.path

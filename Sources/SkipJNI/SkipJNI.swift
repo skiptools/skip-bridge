@@ -989,7 +989,23 @@ extension String: JObjectConvertible, JNullInitializable {
     }
 
     public func toJavaObject() -> JavaString? {
-        jni.withEnv { $0.NewStringUTF($1, self) }
+        jni.withEnv { jni, env in
+            // NewStringUTF would be more efficient than converting the string to UTF-16, but NewStringUTF uses Java's "modified UTF-8", which doesn't encode characters outside of the BMP in the way Swift expects
+            // we could theoretically scan the string to check whether the string can be represented
+
+            // return jni.NewStringUTF(env, self)
+
+            let chars = self.utf16
+            let count = jsize(chars.count)
+
+            // withContiguousStorageIfAvailable often returns nil,
+            // so fall back to using a ContiguousArray
+            return chars.withContiguousStorageIfAvailable {
+                return jni.NewString(env, $0.baseAddress, count)
+            } ?? ContiguousArray(chars).withUnsafeBufferPointer {
+                return jni.NewString(env, $0.baseAddress, count)
+            }
+        }
     }
 }
 
