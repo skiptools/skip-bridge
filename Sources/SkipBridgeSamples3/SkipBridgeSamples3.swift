@@ -23,6 +23,10 @@ public let globalBridgeUTF8String2Field = "🚀"
 // SKIP @bridge
 public let globalBridgeUTF8String3Field = "😀" + "🚀"
 
+// SKIP @bridge
+public let globalJavaGetFileSeparator: String = try! getJavaProperty("file.separator")
+
+
 protocol Multiplex {
     func multiplex(with: Self) -> Self
 }
@@ -43,3 +47,14 @@ extension UInt32 : Multiplex { }
 extension UInt64 : Multiplex { }
 extension Float : Multiplex { }
 extension Double : Multiplex { }
+
+#if canImport(SkipJNI)
+import SkipJNI
+
+private func getJavaProperty(_ propertyName: String) throws -> String {
+    let systemClass = try JClass(name: "java.lang.System")
+    let getProperty = systemClass.getStaticMethodID(name: "getProperty", sig: "(Ljava/lang/String;)Ljava/lang/String;")!
+    return try systemClass.callStatic(method: getProperty, [propertyName.toJavaParameter()])
+}
+#endif
+

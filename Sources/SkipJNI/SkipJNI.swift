@@ -1300,7 +1300,6 @@ public struct JavaException: Error, CustomStringConvertible {
 
 // MARK: Class book-keeping
 
-fileprivate var __javaClasses = Dictionary<String, JClass>()
 fileprivate var __classnameToSwiftClass = Dictionary<String, AnyClass>()
 fileprivate var __swiftClassToClassname = Dictionary<ObjectIdentifier, String>()
 
@@ -1311,13 +1310,8 @@ public func registerJavaClass<T: ObjectProtocol>(_ type: T.Type, fqn: String) ->
 
 
 public func findJavaClass(fqn: String) -> JClass? {
-    if let cls = __javaClasses[fqn] {
-        return cls
-    }
-
     if let jcls = jni.findClass(fqn) {
         let cls = JClass(jcls, name: fqn)
-        __javaClasses[fqn] = cls
         return cls
     } else {
         jni.checkExceptionAndClear()
@@ -1716,8 +1710,35 @@ public func JNI_OnLoad(jvm: UnsafeMutablePointer<JavaVM?>, reserved: UnsafeMutab
 
 /// If the JNI context is nil (e.g., we are running on macOS rather than Android), starts up an embedded JVM process and sets the JNI context from that.
 /// - Parameter options: the options that will be used when launching the Java VM
-public func ensureJVMAttached(options: JVMOptions = .default) throws {
-    if jni == nil {
+public func ensureJVMAttached(options: JVMOptions = .default, launch: Bool = false) throws {
+    if jni != nil {
+        return
+    }
+
+    // we need to get the host JVM using JNI_GetCreatedJavaVMs, but it is not exported in jni.h,
+    // so we need to dlsym it from some library, which has changed over various Android APIs
+    // libnativehelper.so added in API 31 (https://github.com/android/ndk/issues/1320) to work around "libart.so" no longer being allowed to load
+    for libname in [nil, "libnativehelper.so", "libart.so", "libdvm.so"] {
+        let lib = dlopen(libname, RTLD_NOW)
+        typealias JavaVMPtr = UnsafeMutablePointer<JavaVM?>
+        typealias GetCreatedJavaVMs = @convention(c) (_ pvm: UnsafeMutablePointer<JavaVMPtr?>, _ count: Int32, _ num: UnsafeMutablePointer<Int32>) -> jint
+
+        guard let getCreatedJavaVMs = dlsym(lib, "JNI_GetCreatedJavaVMs").map({ unsafeBitCast($0, to: (GetCreatedJavaVMs).self) }) else {
+            continue
+        }
+
+        // check to see if we are already running inside of a VM; if so, return the existing VM
+        var runningCount: Int32 = 0
+        var jvm: JavaVMPtr?
+        if getCreatedJavaVMs(&jvm, 1, &runningCount) == JNI_OK, let jvm = jvm {
+            jni = JNI(jvm: jvm)
+            return
+        } else {
+            fatalError("unable to invoke getCreatedJavaVMs for lib: \(libname ?? "")")
+        }
+    }
+
+    if jni == nil && launch{
         #if os(macOS)
         try launchJavaVM(options: options)
         #elseif os(Android)

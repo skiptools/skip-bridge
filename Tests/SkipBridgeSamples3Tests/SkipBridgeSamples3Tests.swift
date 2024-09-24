@@ -43,6 +43,13 @@ final class SkipBridgeSamples3Tests: XCTestCase {
         XCTAssertEqual([240, 159], codePoints)
         #endif
     }
+
+    func testBridgedBackIntoJava() throws {
+        #if SKIP
+        // this test calls from transpiled Kotlin into Swift, and then back out the Java to get the System property
+        XCTAssertEqual("/", globalJavaGetFileSeparator)
+        #endif
+    }
 }
 
 #if SKIP
