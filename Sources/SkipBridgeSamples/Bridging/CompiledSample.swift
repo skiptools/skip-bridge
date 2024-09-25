@@ -15,10 +15,10 @@ public let globalBridgeUInt8Field: UInt8 = UInt8(16).multiplex(with: UInt8(15))
 public let globalBridgeStringField = "abc" + "123"
 
 // SKIP @bridge
-public let globalBridgeUTF8String1Field = "😀"
+public let globalBridgeUTF8String1Field = "😀" + ""
 
 // SKIP @bridge
-public let globalBridgeUTF8String2Field = "🚀"
+public let globalBridgeUTF8String2Field = "🚀" + "123"
 
 // SKIP @bridge
 public let globalBridgeUTF8String3Field = "😀" + "🚀"
@@ -48,8 +48,8 @@ extension UInt64 : Multiplex { }
 extension Float : Multiplex { }
 extension Double : Multiplex { }
 
-#if canImport(SkipJNI)
-import SkipJNI
+#if canImport(SkipBridge)
+import SkipBridge
 
 private func getJavaProperty(_ propertyName: String) throws -> String {
     let systemClass = try JClass(name: "java.lang.System")

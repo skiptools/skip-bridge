@@ -3,163 +3,97 @@
 // This is free software: you can redistribute and/or modify it
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
-import XCTest
-import Foundation
-import SkipBridge
+
 import SkipBridgeSamples
+import XCTest
 
-// NOTE: these tests are disabled in Package.swift because they conflict with SkipBridgeSamples2Tests
+// XXXSKIP INSERT: @org.junit.runner.RunWith(androidx.test.ext.junit.runners.AndroidJUnit4::class)
 final class SkipBridgeSamplesTests: XCTestCase {
-    func testMathBridge() throws {
-        let math = try MathBridge()
-        XCTAssertEqual(4.0, math.callPurePOW(2.0, power: 2.0)) // Java -> Java + Swift -> Swift
-        XCTAssertEqual(64.0, math.callSwiftPOW(2.0, power: 6.0)) // Java+Swift -> Swift
-        XCTAssertEqual(32.0, try math.callJavaPOW(2.0, power: 5.0)) // Swift+Java -> Java
-    }
-
-    func testSwiftURLBridge() throws {
-        let url = try SwiftURLBridge(urlString: "https://skip.tools")
-        XCTAssertFalse(url.isFileURL())
-    }
-
-    func testJavaFileBridge() throws {
-        let tmpName = "/tmp/skipbridge-" + UUID().uuidString
-        let file = try JavaFileBridge(filePath: tmpName)
-        XCTAssertFalse(try file.exists())
-        XCTAssertTrue(try file.createNewFile())
-        XCTAssertTrue(try file.exists())
-
-        let url: SwiftURLBridge = try file.toSwiftURLBridge()
-        XCTAssertTrue(url.isFileURL())
-
-        let file2 = try url.toJavaFileBridge()
-        XCTAssertTrue(try file2.exists())
-        XCTAssertTrue(try file2.delete())
-        XCTAssertFalse(try file2.exists())
-    }
-
-    func testStaticSwiftFunction() throws {
-        XCTAssertEqual("www.skip.tools", SwiftURLBridge.host(forURL: "https://www.skip.tools/docs"))
-    }
-
-    func testStaticJavaFunction() throws {
-        XCTAssertEqual("/", try JavaFileBridge.separatorString())
-        XCTAssertEqual(JavaFileBridge.Char(47), try JavaFileBridge.separatorChar())
-    }
-
-    func testStaticStateFunctions() throws {
-        let tmpName = "/tmp/skipbridge-" + UUID().uuidString
-        let file = try JavaFileBridge(filePath: tmpName)
-        #if !SKIP
-        // FIXME: fromJavaFileBridge allocates a new Swift instance which is immediately deallocated…
-        let result = try SwiftURLBridge.fromJavaFileBridge(file).isFileURL()
-        XCTAssertTrue(result)
-        #else
-        // FIXME: java.lang.RuntimeException: Could not lookup method id: toSwiftURLBridge with signature: ()Lskip/bridge/samples/SwiftURLBridge;
-        // or crash in CI…
-        throw XCTSkip("TODO: fix peer setup for static functions")
-        #endif
-    }
-
-    func testAsyncFunctions() async throws {
-        let tmpName = "/tmp/skipbridge-" + UUID().uuidString
-        try "ABC".write(toFile: tmpName, atomically: false, encoding: .utf8)
-        let urlBridge = try SwiftURLBridge(urlString: "file:" + tmpName)
-        #if SKIP
-        throw XCTSkip("TODO: implement async on the Java side")
-        #else
-        let contents = try await urlBridge.readContents()
-        XCTAssertEqual("ABC", contents)
-        _ = try JavaFileBridge(filePath: tmpName).delete()
-        #endif
-    }
-
-    func testThrowingSwiftFunctions() throws {
-        let math = try MathBridge()
-        do {
-            try math.callSwiftThrowing(message: "ABC")
-            XCTFail("callSwiftThrowing should have thrown an error")
-        } catch {
-            #if SKIP
-            XCTAssertEqual("skip.lib.ErrorException: java.lang.RuntimeException: ABC", "\(error)")
-            #else
-            XCTAssertEqual("ABC", "\(error)")
-            #endif
-        }
-    }
-
-    func testThrowingJavaFunctions() throws {
-        let math = try MathBridge()
-        do {
-            try math.callJavaThrowing(message: "XYZ")
-            XCTFail("callJavaThrowing should have thrown an error")
-        } catch {
-            XCTAssertEqual("XYZ", "\(error)")
-        }
-    }
-}
-
-#if os(macOS)
-import SkipJNI
-
-extension SkipBridgeSamplesTests {
-
-    func testArrayJNI() throws {
-        let array: JavaFloatArray = try XCTUnwrap(Float.createArray(len: 5))
-        Float.setArrayRegion(values: [1.1, 2.2, 3.3], into: array, offset: 1)
-        XCTAssertEqual([0.0, 1.1, 2.2, 3.3, 0.0], Float.getArrayElements(from: array))
-    }
-
-    /// On macOS, start up an embedded JVM so we can test the Swift side of the SkipJNI bridge.
-    ///
-    /// This setup is very delicate, because it relies on the assumed paths of the dependent jars in the `~/.gradle/caches/` folder, among other things.
-    /// One potential solution might be to try to get the runtime classpath by forking `gradle` with a custom task that prints out the classpath for the transpiled project, and then using that classpath directly.
     override func setUp() {
-        if jni == nil {
+        #if SKIP
+        loadPeerLibrary("SkipBridgeSamples")
+        #endif
+    }
 
-            //print("env: " + ProcessInfo.processInfo.environment.map({ $0 + "=" + $1 }).joined(separator: "\n").description)
+    func testBridgedNumbers() throws {
+        XCTAssertEqual(Int64(56088), globalBridgeInt64Field)
+        XCTAssertEqual(Double(56088), globalBridgeDoubleField)
+        XCTAssertEqual(Int8(112), globalBridgeInt8Field)
+        XCTAssertEqual(UInt8(240), globalBridgeUInt8Field)
+    }
 
-            // TODO: need to figure out how to get the classpath from the prior gradle run so we can have access to the transpiled classes
-            let home = URL.homeDirectory.path
-            let gradleCaches = "\(home)/.gradle/caches"
+    func testBridgedStrings() throws {
+        XCTAssertEqual("abc123", globalBridgeStringField)
 
-            // XCTestBundlePath=~/Library/Developer/Xcode/DerivedData/Skip-Everything-aqywrhrzhkbvfseiqgxuufbdwdft/Build/Products/Debug/SkipBridgeSamplesTests.xctest
-            var skipstoneFolder: String
-            if let testBundlePath = ProcessInfo.processInfo.environment["XCTestBundlePath"] {
-                let projectPath = testBundlePath + "/../../../.."
-                let output = "\(projectPath)/SourcePackages/plugins/skip-jni.output"
-                skipstoneFolder = "\(output)/SkipBridgeSamplesTests/skipstone"
-            } else {
-                skipstoneFolder = "\(URL.currentDirectory().path)/.build/plugins/outputs/skip-jni/SkipBridgeSamplesTests/skipstone"
-                if !FileManager.default.fileExists(atPath: skipstoneFolder) {
-                    // add destination/ folder for Swift6
-                    skipstoneFolder = "\(URL.currentDirectory().path)/.build/plugins/outputs/skip-jni/SkipBridgeSamplesTests/destination/skipstone"
-                }
-            }
+        XCTAssertEqual("😀", globalBridgeUTF8String1Field)
+        XCTAssertEqual("🚀123", globalBridgeUTF8String2Field)
 
-            if !FileManager.default.fileExists(atPath: skipstoneFolder) {
-                XCTFail("Expected build path did not exist at: \(skipstoneFolder)")
-            }
+        XCTAssertEqual("😀🚀", globalBridgeUTF8String3Field)
 
-            let cp = [
-                "\(skipstoneFolder)/SkipBridgeSamples/.build/SkipBridgeSamples/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar",
-                "\(skipstoneFolder)/SkipBridge/.build/SkipBridgeSamples/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar",
-                "\(skipstoneFolder)/SkipLib/.build/SkipBridgeSamples/intermediates/runtime_library_classes_jar/debug/bundleLibRuntimeToJarDebug/classes.jar", // java.lang.ClassNotFoundException: skip.lib.StructKt
-                "\(gradleCaches)/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.0.0/b48df2c4aede9586cc931ead433bc02d6fd7879e/kotlin-stdlib-2.0.0.jar", // java.lang.NoClassDefFoundError: kotlin/jvm/functions/Function0
-            ]
+        #if !SKIP
+        let codePoints: [UInt8] = Array(globalBridgeUTF8String3Field.utf8)
+        #else
+        let codePoints: [UInt8] = Array(globalBridgeUTF8String3Field.toByteArray(Charsets.UTF_8).toList().map({ UByte($0) }))
+        #endif
+        XCTAssertEqual([240, 159, 152, 128, 240, 159, 154, 128], codePoints.map({ Int($0) }))
 
-            for path in cp {
-                if !FileManager.default.fileExists(atPath: path) {
-                    XCTFail("Classpath element did not exist: \(path)")
-                }
-            }
-            
-            var opts = JVMOptions.default
-            opts.classPath = cp
-            //opts.verboseJNI = true
-            try! launchJavaVM(options: opts)
-            XCTAssertNotNil(jni, "jni context should have been created")
-        }
+        #if SKIP && false
+        // when we just use NewStringUTF, this is how strings fail
+        XCTAssertNotEqual("😀🚀", globalBridgeUTF8String3Field)
+        XCTAssertEqual([240, 159], codePoints)
+        #endif
+    }
+
+    func testBridgedBackIntoJava() throws {
+        #if SKIP
+        // this test calls from transpiled Kotlin into Swift, and then back out the Java to get the System property
+        XCTAssertEqual("/", globalJavaGetFileSeparator)
+        #endif
     }
 }
+
+#if SKIP
+/// In order to use JNI to access the Swift side of the bridge, we need to first manually load the library.
+/// This only works on macOS; Android will need to load the .so from the embedded jni library path.
+///
+/// When searching for the library to load, there are four scenarios we need to handle,
+/// each of which has different paths that need to be searched:
+///
+/// 1. Xcode-launched Swift tests where the embedded JVM needs to load the Xcode-created library ("SkipBridgeSamples.framework/SkipBridgeSamples")
+/// 2. Xcode-launched Skip gradle tests, where gradle's JVM needs to load the Xcode created-library ("SkipBridgeSamples.framework/SkipBridgeSamples")
+/// 3. SwiftPM-launched Swift tests where the embedded JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
+/// 4. SwiftPM-launched Skip gradle tests, where gradle's JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
+func loadPeerLibrary(_ libName: String) {
+    //print("System.getenv(): \(System.getenv())")
+
+    // Xcode output for dynamic library
+    // user.dir: ~/Developer/Xcode/DerivedData/ProjectName/SourcePackages/plugins/skip-jni.output/SkipBridgeSamplesTests/skipstone/SkipBridgeSamples
+    // framework dylib: ~/Library/Developer/Xcode/DerivedData/ProjectName/Build/Products/Debug/PackageFrameworks/SkipBridgeSamples.framework/Versions/A/SkipBridgeSamples
+
+    // XCTestBundlePath=/Users/marc/Library/Developer/Xcode/DerivedData/Skip-Everything-aqywrhrzhkbvfseiqgxuufbdwdft/Build/Products/Debug/SkipBridgeSamplesTests.xctest
+    var libraryPath: String
+    if let testBundlePath = System.getenv()["XCTestBundlePath"] { // running from within Xcode
+        libraryPath = testBundlePath + "/../PackageFrameworks/\(libName).framework/Versions/A/\(libName)"
+    } else {
+        let cwd = System.getProperty("user.dir")
+        // from gradle: /opt/src/github/skiptools/skip-jni/.build/plugins/outputs/skip-jni/SkipBridgeSamplesTests/skipstone
+        // from swiftPM CLI: /opt/src/github/skiptools/skip-jni
+        let dylib = "lib\(libName).dylib"
+        let arch = System.getProperty("os.arch") == "aarch64" ? "arm64-apple-macosx" : "x86_64-apple-macosx"
+        libraryPath = cwd + "/.build/\(arch)/debug/\(dylib)" // Swift-launched JVM
+        if !java.io.File(libraryPath).isFile() {
+            libraryPath = cwd + "/../../../../../../\(arch)/debug/\(dylib)" // gradle-launched JVM
+        }
+    }
+
+    // load the native library that contains the function implementations
+    if !java.io.File(libraryPath).isFile() {
+        fatalError("error: missing library: \(libraryPath)")
+    } else {
+        print("note: loading library: \(libraryPath)")
+        System.load(libraryPath)
+        print("note: loaded library: \(libraryPath)")
+    }
+}
+
 #endif

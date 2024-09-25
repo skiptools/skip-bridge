@@ -3,17 +3,15 @@
 // This is free software: you can redistribute and/or modify it
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
+
+//import Foundation
+
 #if os(macOS)
 import SkipTest
 
-/// Note: this class is usually called `XCSkipTests` so it runs last;
-/// instead, we call it `A1_XCSkipTests` so it runs first.
-/// This is so when the Swift test is run, the Kotlin has already been compiled,
-/// and we can load it in the embedded JVM
-
 /// This test case will run the transpiled tests for the Skip module.
 @available(macOS 13, macCatalyst 16, *)
-final class A1_XCSkipTests: XCTestCase, XCGradleHarness {
+final class XCSkipTests: XCTestCase, XCGradleHarness {
     public func testSkipModule() async throws {
         // Run the transpiled JUnit tests for the current test module.
         // These tests will be executed locally using Robolectric.
