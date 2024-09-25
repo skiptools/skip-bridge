@@ -5,8 +5,8 @@ let package = Package(
     name: "skip-bridge",
     platforms: [.iOS(.v16), .macOS(.v13)],
     products: [
-        .library(name: "SkipBridge", targets: ["SkipBridge"]),
-        .library(name: "SkipBridgeSamples", targets: ["SkipBridgeSamples"]),
+        .library(name: "SkipBridge", type: .dynamic, targets: ["SkipBridge"]),
+        .library(name: "SkipBridgeSamples", type: .dynamic, targets: ["SkipBridgeSamples"]),
     ],
     dependencies: [
         .package(url: "https://source.skip.tools/skip.git", from: "1.0.0"),

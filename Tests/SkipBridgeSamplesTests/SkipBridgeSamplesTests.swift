@@ -50,6 +50,12 @@ final class SkipBridgeSamplesTests: XCTestCase {
         XCTAssertEqual("/", globalJavaGetFileSeparator)
         #endif
     }
+
+    func testTranspiledToCompiledCall() throws {
+        #if SKIP
+        XCTAssertEqual(3.100000023841858, globalCompiledtoTranspiledCall)
+        #endif
+    }
 }
 
 #if SKIP
@@ -73,7 +79,7 @@ func loadPeerLibrary(_ libName: String) {
     // XCTestBundlePath=/Users/marc/Library/Developer/Xcode/DerivedData/Skip-Everything-aqywrhrzhkbvfseiqgxuufbdwdft/Build/Products/Debug/SkipBridgeSamplesTests.xctest
     var libraryPath: String
     if let testBundlePath = System.getenv()["XCTestBundlePath"] { // running from within Xcode
-        libraryPath = testBundlePath + "/../PackageFrameworks/\(libName).framework/Versions/A/\(libName)"
+        libraryPath = testBundlePath + "/../PackageFrameworks/\(libName).framework/\(libName)"
     } else {
         let cwd = System.getProperty("user.dir")
         // from gradle: /opt/src/github/skiptools/skip-jni/.build/plugins/outputs/skip-jni/SkipBridgeSamplesTests/skipstone

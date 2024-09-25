@@ -26,6 +26,8 @@ public let globalBridgeUTF8String3Field = "😀" + "🚀"
 // SKIP @bridge
 public let globalJavaGetFileSeparator: String = try! getJavaProperty("file.separator")
 
+// SKIP @bridge
+public let globalCompiledtoTranspiledCall = transpiledGlobalFuction(n1: 1.1, n2: 2)
 
 protocol Multiplex {
     func multiplex(with: Self) -> Self
