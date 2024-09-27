@@ -56,16 +56,16 @@ public func loadLibrary(_ libName: String) {
 }
 
 /// An opaque reference to a Swift object.
-public typealias SwiftObjectPtr = Int64
+public typealias SwiftObjectPointer = Int64
 public let SwiftObjectNil = Int64(0)
 
 #if !SKIP
-extension SwiftObjectPtr {
+extension SwiftObjectPointer {
     /// Get a pointer to the given object.
-    public static func forSwift<T: AnyObject>(_ obj: T, retain: Bool) -> SwiftObjectPtr {
+    public static func forSwift<T: AnyObject>(_ obj: T, retain: Bool) -> SwiftObjectPointer {
         let unmanaged = retain ? Unmanaged.passRetained(obj) : Unmanaged.passUnretained(obj)
         let rawPtr = unmanaged.toOpaque()
-        return SwiftObjectPtr(Int(bitPattern: rawPtr))
+        return SwiftObjectPointer(Int(bitPattern: rawPtr))
     }
 
     /// Return the object for this pointer.
@@ -77,17 +77,17 @@ extension SwiftObjectPtr {
 }
 
 /// Increment the reference count for a Swift object held by Java.
-public func refSwift<T: AnyObject>(_ ptr: SwiftObjectPtr, type: T.Type) -> SwiftObjectPtr {
+public func refSwift<T: AnyObject>(_ ptr: SwiftObjectPointer, type: T.Type) -> SwiftObjectPointer {
     guard ptr != SwiftObjectNil, let rawPtr = UnsafeMutableRawPointer(bitPattern: Int(ptr)) else {
         return ptr
     }
     let unmanaged = Unmanaged<T>.fromOpaque(rawPtr)
     let refUnmanaged = unmanaged.retain()
-    return SwiftObjectPtr(Int(bitPattern: refUnmanaged.toOpaque()))
+    return SwiftObjectPointer(Int(bitPattern: refUnmanaged.toOpaque()))
 }
 
 /// Decrement the reference count for a Swift object held by Java.
-public func derefSwift<T: AnyObject>(_ ptr: SwiftObjectPtr, type: T.Type) {
+public func derefSwift<T: AnyObject>(_ ptr: SwiftObjectPointer, type: T.Type) {
     guard ptr != SwiftObjectNil, let rawPtr = UnsafeMutableRawPointer(bitPattern: Int(ptr)) else {
         return
     }
