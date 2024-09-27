@@ -29,14 +29,13 @@ public let globalJavaGetFileSeparator: String = try! getJavaProperty("file.separ
 // SKIP @bridge
 public let globalCompiledtoTranspiledCall = transpiledGlobalFuction(n1: 1.1, n2: 2)
 
-//// SKIP @bridge
-//public class CompiledClass {
-//    public static var publicStaticVar: String = "publicStaticVar"
-//    public var publicVar: String = "publicVar"
-//
-//    public init() {
-//    }
-//}
+// SKIP @bridge
+public class CompiledClass {
+    public var publicVar: String = "publicVar"
+
+    public init() {
+    }
+}
 
 protocol Multiplex {
     func multiplex(with: Self) -> Self
