@@ -88,7 +88,7 @@ extension Double : Multiplex { }
 import SkipBridge
 
 private func getJavaProperty(_ propertyName: String) throws -> String {
-    let systemClass = try JClass(name: "java.lang.System")
+    let systemClass = try JClass(name: "java/lang/System")
     let getProperty = systemClass.getStaticMethodID(name: "getProperty", sig: "(Ljava/lang/String;)Ljava/lang/String;")!
     return try systemClass.callStatic(method: getProperty, [propertyName.toJavaParameter()])
 }
