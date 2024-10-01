@@ -42,12 +42,18 @@ public typealias JavaFieldID = jfieldID
 public typealias JavaMethodID = jmethodID
 public typealias JavaParameter = jvalue
 
+extension JavaBoolean : ExpressibleByBooleanLiteral {
+    public init(booleanLiteral value: Bool) {
+        self = value ? JavaBoolean(JNI_TRUE) : JavaBoolean(JNI_FALSE)
+    }
+}
+
 // MARK: JNI
 
 /// The single shared singleton JNI instance for the process
 public private(set) var jni: JNI! // this gets set "OnLoad" so should always exist
 
-
+/// Gateway to JVM and JNI functionality
 public class JNI {
     /// Our reference to the Java Virtual Machine, to be set on init
     let _jvm: UnsafeMutablePointer<JavaVM?>
@@ -120,7 +126,7 @@ extension JNI {
     public func checkExceptionAndThrow() throws {
         if let throwable = self.exceptionOccurred() {
             self.exceptionClear()
-            throw Throwable(throwable).toError()
+            throw JThrowable(throwable).toError()
         }
     }
 
@@ -135,7 +141,7 @@ extension JNI {
 }
 
 /// Thread cleanup
-fileprivate var jniEnvKey = pthread_key_t()
+private var jniEnvKey = pthread_key_t()
 
 extension JNI {
     /// The JNI version in effect
@@ -216,15 +222,7 @@ extension JNI {
     }
 }
 
-
-
 // MARK: Errors
-
-extension JavaBoolean : ExpressibleByBooleanLiteral {
-    public init(booleanLiteral value: Bool) {
-        self = value ? JavaBoolean(JNI_TRUE) : JavaBoolean(JNI_FALSE)
-    }
-}
 
 /// A system-level error relating to interacting with the Java Virtual Machine
 public struct JVMError: Error, CustomStringConvertible {
@@ -244,6 +242,7 @@ public struct ClassNotFoundError: Error, CustomStringConvertible {
     }
 }
 
+/// An unexpected JNI error
 public struct JNIError: Error, CustomStringConvertible {
     public var description: String
 
@@ -257,11 +256,15 @@ public struct JNIError: Error, CustomStringConvertible {
     }
 }
 
-// MARK: JConvertible
+/// An error from a Java Throwable.
+public struct ThrowableError: Error, CustomStringConvertible {
+    public let description: String
+}
 
-public protocol JConvertible: JParameterConvertible {
-    static var jsig: String { get }
+// MARK: Convertions
 
+/// Type that can be converted to and from Java.
+public protocol JConvertible {
     static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Self
     static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Self
 
@@ -274,114 +277,245 @@ public protocol JConvertible: JParameterConvertible {
     static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> Self
     func toJavaObject() -> JavaObjectPointer?
 
-    //  static func fromJavaArray(_ arr: JavaArray?) -> [Self]
-    //  static func toJavaArray(_ arr: [Self]) -> JavaArray?
+    func toJavaParameter() -> JavaParameter
 }
 
-
-public protocol JNullInitializable: JConvertible {
-    init()
-    static func fromJavaObject(_ obj: JavaObjectPointer) throws -> Self
+/// Type represented by a Java object.
+public protocol JObjectProtocol {
 }
 
+extension JConvertible where Self: JObjectProtocol {
+    public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Self {
+        try fromJavaObject(try jni.withEnvThrowing { $0.CallObjectMethodA($1, obj, method, args) })
+    }
 
-extension JNullInitializable {
+    public static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Self {
+        try fromJavaObject(try jni.withEnvThrowing { $0.CallStaticObjectMethodA($1, cls, method, args) })
+    }
+
+    public static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) throws -> Self {
+        try fromJavaObject(jni.withEnv { $0.GetObjectField($1, obj, field) })
+    }
+
+    public func store(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Void {
+        jni.withEnv { $0.SetObjectField($1, obj, field, toJavaObject()) }
+    }
+
+    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) throws -> Self {
+        try fromJavaObject(jni.withEnv { $0.GetStaticObjectField($1, cls, field) })
+    }
+
+    public func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Void {
+        jni.withEnv { $0.SetStaticObjectField($1, cls, field, toJavaObject()) }
+    }
+
+    public func toJavaParameter() -> JavaParameter {
+        return JavaParameter(l: toJavaObject())
+    }
+}
+
+/// All optionals are represented by Java objects
+extension Optional: JObjectProtocol {
+}
+
+extension Optional: JConvertible where Wrapped: JConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> Self {
-        if let _obj = obj {
-            return try fromJavaObject(_obj)
-        } else {
-            return Self()
-        }
-    }
-}
-
-
-extension Optional: JObjectConvertible, JConvertible, JParameterConvertible where Wrapped: JObjectConvertible {
-    public static var javaClass: JClass {
-        return Wrapped.javaClass
-    }
-
-    public static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> Optional<Wrapped> {
-        if let _obj = obj {
-            return try Wrapped.fromJavaObject(_obj)
-        }
-        return nil
+        return obj == nil ? nil : try Wrapped.fromJavaObject(obj)
     }
 
     public func toJavaObject() -> JavaObjectPointer? {
-        if let this = self {
-            return this.toJavaObject()
+        if let self {
+            return self.toJavaObject()
+        } else {
+            return nil
         }
-        return nil
     }
 }
 
+extension JavaObjectPointer: JObjectProtocol {
+}
 
-// MARK: JPrimitiveObjectProtocol
+extension JavaObjectPointer: JConvertible {
+    public static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> JavaObjectPointer {
+        return obj!
+    }
 
-public protocol JPrimitiveObjectProtocol: ObjectProtocol {
+    public func toJavaObject() -> JavaObjectPointer? {
+        return self
+    }
+}
+
+/// A Java primitive wrapper, e.g. java/lang/Integer
+public protocol JPrimitiveWrapperProtocol: JObjectProtocol {
+    static var javaClass: JClass { get }
+    static var initWithPrimitiveValueMethodID: JavaMethodID { get }
+    static var primitiveValueMethodID: JavaMethodID { get }
+
     associatedtype ConvertibleType: JConvertible
     var value: ConvertibleType { get throws }
     init(_ value: ConvertibleType)
     init(_ obj: JavaObjectPointer)
 }
 
-
-fileprivate protocol JPrimitiveObjectInternalProtocol: JPrimitiveObjectProtocol {
-    static var __method__init : JavaMethodID { get }
-    static var __method__value : JavaMethodID { get }
-}
-
-
-extension JPrimitiveObjectInternalProtocol {
+extension JPrimitiveWrapperProtocol where Self: JObject {
     public init(_ value: ConvertibleType) {
         // we force try because primitive wrapper initializers should never fail
-        try! self.init(Self.javaClass.create(ctor: Self.__method__init, value))
+        try! self.init(Self.javaClass.create(ctor: Self.initWithPrimitiveValueMethodID, [value.toJavaParameter()]))
     }
 
     public var value: ConvertibleType {
         get throws {
-            return try self.javaObject.call(method: Self.__method__value)
+            return try call(method: Self.primitiveValueMethodID, [])
         }
     }
 }
 
-
-public protocol JPrimitiveConvertible : JNullInitializable {
-    associatedtype PrimitiveType: JPrimitiveObjectProtocol
-    associatedtype ArrayType
-
-    static func createArray(len: jsize) -> ArrayType?
-    static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]?
-    static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize)
+/// A Java primitive
+public protocol JPrimitiveProtocol: JConvertible {
+    associatedtype WrapperType: JPrimitiveWrapperProtocol
 }
 
-extension JPrimitiveConvertible where PrimitiveType.ConvertibleType == Self {
+extension JPrimitiveProtocol where WrapperType.ConvertibleType == Self {
+    public static func fromJavaObject(_ ptr: JavaObjectPointer?) -> Self {
+        return try! WrapperType.init(ptr!).value
+    }
+
     public func toJavaObject() -> JavaObjectPointer? {
-        return PrimitiveType(self).javaObject.ptr
-    }
-
-    public static func fromJavaObject(_ obj: JavaObjectPointer) throws -> Self {
-        return try PrimitiveType(obj).value
+        return (WrapperType.init(self) as? JObject)?.ptr
     }
 }
 
+// MARK: Object Wrappers
 
+public class JObject: JObjectProtocol {
+    public let ptr: JavaObjectPointer
 
-// MARK: Boolean
+    public init(_ ptr: JavaObjectPointer) {
+        self.ptr = jni.newGlobalRef(ptr)
+    }
 
-final public class JBoolean: Object, JPrimitiveObjectInternalProtocol {
+    public convenience init?(_ ptr: JavaObjectPointer?) {
+        if let ptr {
+            self.init(ptr as JavaObjectPointer)
+        } else {
+            return nil
+        }
+    }
+
+    deinit {
+        jni.deleteGlobalRef(ptr)
+    }
+
+    public func get<T: JConvertible>(field: JavaFieldID) throws -> T {
+        return try T.load(field, of: ptr)
+    }
+
+    public func set<T: JConvertible>(field: JavaFieldID, value: T) {
+        value.store(field, of: ptr)
+    }
+
+    public func call(method: JavaMethodID, _ args : [JavaParameter]) throws -> Void {
+        try jni.withEnvThrowing { $0.CallVoidMethodA($1, ptr, method, args) }
+    }
+
+    public func call<T>(method: JavaMethodID, _ args: [JavaParameter]) throws -> T where T: JConvertible {
+        return try T.call(method, on: ptr, args: args)
+    }
+}
+
+public final class JClass : JObject {
+    public let name: String
+
+    public init(_ ptr: JavaObjectPointer, name: String) {
+        self.name = name
+        super.init(ptr)
+    }
+
+    public convenience init(name: String) throws {
+        guard let cls = jni.findClass(name) else {
+            throw ClassNotFoundError(name: name)
+        }
+        self.init(cls, name: name)
+    }
+
+    public func getFieldID(name: String, sig: String) -> JavaFieldID? {
+        defer { jni.checkExceptionAndClear() }
+        return jni.withEnv { $0.GetFieldID($1, self.ptr, name, sig) }
+    }
+
+    public func getStaticFieldID(name: String, sig: String) -> JavaFieldID? {
+        defer { jni.checkExceptionAndClear() }
+        return jni.withEnv { $0.GetStaticFieldID($1, self.ptr, name, sig) }
+    }
+
+    public func getMethodID(name: String, sig: String) -> JavaMethodID? {
+        defer { jni.checkExceptionAndClear() }
+        return jni.withEnv { $0.GetMethodID($1, self.ptr, name, sig) }
+    }
+
+    public func getStaticMethodID(name: String, sig: String) -> JavaMethodID? {
+        defer { jni.checkExceptionAndClear() }
+        return jni.withEnv { $0.GetStaticMethodID($1, self.ptr, name, sig) }
+    }
+
+    public func create(ctor: JavaMethodID, _ args: [JavaParameter]) throws -> JavaObjectPointer {
+        guard let obj = try jni.withEnvThrowing({ $0.NewObjectA($1, self.ptr, ctor, args) }) else {
+            throw JNIError(clear: true) // init should never return nil
+        }
+        return obj
+    }
+
+    public func getStatic<T: JConvertible>(field: JavaFieldID) throws -> T {
+        return try T.loadStatic(field, of: ptr)
+    }
+
+    public func setStatic<T: JConvertible>(field: JavaFieldID, value: T) {
+        value.storeStatic(field, of: self.ptr)
+    }
+
+    public func callStatic(method: JavaMethodID, _ args : [JavaParameter]) throws -> Void {
+        try jni.withEnvThrowing { $0.CallStaticVoidMethodA($1, self.ptr, method, args) }
+    }
+
+    public func callStatic<T: JConvertible>(method: JavaMethodID, _ args: [JavaParameter]) throws -> T {
+        return try T.callStatic(method, on: self.ptr, args: args)
+    }
+}
+
+public final class JThrowable: JObject {
+    private static let javaClass = try! JClass(name: "java/lang/Throwable")
+
+    public func getMessage() throws -> String? {
+        try call(method: Self.getMessageID, [])
+    }
+    private static let getMessageID = javaClass.getMethodID(name: "getMessage", sig: "()Ljava/lang/String;")!
+
+    public func getLocalizedMessage() throws -> String? {
+        try call(method: Self.getLocalizedMessageID, [])
+    }
+    private static let getLocalizedMessageID = javaClass.getMethodID(name: "getLocalizedMessage", sig: "()Ljava/lang/String;")!
+
+    public func toString() throws -> String? {
+        try call(method: Self.toStringID, [])
+    }
+    private static let toStringID = javaClass.getMethodID(name: "toString", sig: "()Ljava/lang/String;")!
+
+    public func toError() -> ThrowableError {
+        return ThrowableError(description: (try? toString()) ?? "A java exception occurred, and an error was raised when trying to get the exception message")
+    }
+}
+
+// MARK: Primitives
+
+public final class JBoolean: JObject, JPrimitiveWrapperProtocol {
     public typealias ConvertibleType = Bool
-    public final override class var javaClass: JClass { return __class }
-    fileprivate static let __class = findJavaClass(fqn: "java/lang/Boolean")!
-    fileprivate static let __method__init = __class.getMethodID(name: "<init>", sig: "(Z)V")!
-    fileprivate static let __method__value = __class.getMethodID(name: "booleanValue", sig: "()Z")!
+    public static let javaClass = try! JClass(name: "java/lang/Boolean")
+    public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(Z)V")!
+    public static let primitiveValueMethodID = javaClass.getMethodID(name: "booleanValue", sig: "()Z")!
 }
 
-extension Bool: JPrimitiveConvertible {
-    public typealias PrimitiveType = JBoolean
-    public typealias ArrayType = JavaBooleanArray
-    public static let jsig = "Z"
+extension Bool: JPrimitiveProtocol {
+    public typealias WrapperType = JBoolean
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Bool {
         try jni.withEnvThrowing { $0.CallBooleanMethodA($1, obj, method, args) == JNI_TRUE }
@@ -407,39 +541,20 @@ extension Bool: JPrimitiveConvertible {
         jni.withEnv { $0.SetBooleanField($1, cls, field, (self) ? 1 : 0) }
     }
 
-    public static func createArray(len: jsize) -> JavaBooleanArray? {
-        jni.withEnv { $0.NewBooleanArray($1, len) }
-    }
-    
-    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
-        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetBooleanArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))).map({ $0 != 0 }) }
-    }
-
-    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
-        jni.withEnv { $0.SetBooleanArrayRegion($1, array, offset, jsize(values.count), values) }
-    }
-
     public func toJavaParameter() -> JavaParameter {
         return JavaParameter(z: (self) ? 1 : 0)
     }
 }
 
-
-// MARK: Byte
-
-final public class JByte: Object, JPrimitiveObjectInternalProtocol {
+final public class JByte: JObject, JPrimitiveWrapperProtocol {
     public typealias ConvertibleType = Int8
-    public final override class var javaClass: JClass { return __class }
-    fileprivate static let __class = findJavaClass(fqn: "java/lang/Byte")!
-    fileprivate static let __method__init = __class.getMethodID(name: "<init>", sig: "(B)V")!
-    fileprivate static let __method__value = __class.getMethodID(name: "byteValue", sig: "()B")!
+    public static let javaClass = try! JClass(name: "java/lang/Byte")
+    public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(B)V")!
+    public static let primitiveValueMethodID = javaClass.getMethodID(name: "byteValue", sig: "()B")!
 }
 
-
-extension Int8: JPrimitiveConvertible {
-    public typealias PrimitiveType = JByte
-    public typealias ArrayType = JavaByteArray
-    public static let jsig = "B"
+extension Int8: JPrimitiveProtocol {
+    public typealias WrapperType = JByte
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int8 {
         try jni.withEnvThrowing { $0.CallByteMethodA($1, obj, method, args) }
@@ -465,38 +580,20 @@ extension Int8: JPrimitiveConvertible {
         jni.withEnv { $0.SetStaticByteField($1, cls, field, self) }
     }
 
-    public static func createArray(len: jsize) -> JavaByteArray? {
-        jni.withEnv { $0.NewByteArray($1, len) }
-    }
-
-    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
-        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetByteArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
-    }
-
-    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
-        jni.withEnv { $0.SetByteArrayRegion($1, array, offset, jsize(values.count), values) }
-    }
-
     public func toJavaParameter() -> JavaParameter {
         return JavaParameter(b: self)
     }
 }
 
-// MARK: Char
-
-final public class JChar: Object, JPrimitiveObjectInternalProtocol {
+public final class JChar: JObject, JPrimitiveWrapperProtocol {
     public typealias ConvertibleType = UInt16
-    public final override class var javaClass: JClass { return __class }
-    fileprivate static let __class = findJavaClass(fqn: "java/lang/Character")!
-    fileprivate static let __method__init = __class.getMethodID(name: "<init>", sig: "(C)V")!
-    fileprivate static let __method__value = __class.getMethodID(name: "charValue", sig: "()C")!
+    public static let javaClass = try! JClass(name: "java/lang/Character")
+    public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(C)V")!
+    public static let primitiveValueMethodID = javaClass.getMethodID(name: "charValue", sig: "()C")!
 }
 
-
-extension UInt16: JPrimitiveConvertible {
-    public typealias PrimitiveType = JChar
-    public typealias ArrayType = JavaCharArray
-    public static let jsig = "C"
+extension UInt16: JPrimitiveProtocol {
+    public typealias WrapperType = JChar
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> UInt16 {
         try jni.withEnvThrowing { $0.CallCharMethodA($1, obj, method, args) }
@@ -522,38 +619,20 @@ extension UInt16: JPrimitiveConvertible {
         jni.withEnv { $0.SetStaticCharField($1, cls, field, self) }
     }
 
-    public static func createArray(len: jsize) -> JavaCharArray? {
-        jni.withEnv { $0.NewCharArray($1, len) }
-    }
-
-    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
-        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetCharArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
-    }
-
-    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
-        jni.withEnv { $0.SetCharArrayRegion($1, array, offset, jsize(values.count), values) }
-    }
-
     public func toJavaParameter() -> JavaParameter {
         return JavaParameter(c: self)
     }
 }
 
-// MARK: Short
-
-final public class JShort: Object, JPrimitiveObjectInternalProtocol {
+public final class JShort: JObject, JPrimitiveWrapperProtocol {
     public typealias ConvertibleType = Int16
-    public final override class var javaClass: JClass { return __class }
-    fileprivate static let __class = findJavaClass(fqn: "java/lang/Short")!
-    fileprivate static let __method__init = __class.getMethodID(name: "<init>", sig: "(S)V")!
-    fileprivate static let __method__value = __class.getMethodID(name: "shortValue", sig: "()S")!
+    public static let javaClass = try! JClass(name: "java/lang/Short")
+    public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(S)V")!
+    public static let primitiveValueMethodID = javaClass.getMethodID(name: "shortValue", sig: "()S")!
 }
 
-
-extension Int16: JPrimitiveConvertible {
-    public typealias PrimitiveType = JShort
-    public typealias ArrayType = JavaShortArray
-    public static let jsig = "S"
+extension Int16: JPrimitiveProtocol {
+    public typealias WrapperType = JShort
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int16 {
         try jni.withEnvThrowing { $0.CallShortMethodA($1, obj, method, args) }
@@ -579,39 +658,20 @@ extension Int16: JPrimitiveConvertible {
         jni.withEnv { $0.SetStaticShortField($1, cls, field, self) }
     }
 
-    public static func createArray(len: jsize) -> JavaShortArray? {
-        jni.withEnv { $0.NewShortArray($1, len) }
-    }
-
-    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
-        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetShortArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
-    }
-
-    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
-        jni.withEnv { $0.SetShortArrayRegion($1, array, offset, jsize(values.count), values) }
-    }
-
     public func toJavaParameter() -> JavaParameter {
         return JavaParameter(s: self)
     }
 }
 
-
-// MARK: Integer
-
-final public class JInteger: Object, JPrimitiveObjectInternalProtocol {
+public final class JInteger: JObject, JPrimitiveWrapperProtocol {
     public typealias ConvertibleType = Int32
-    public final override class var javaClass: JClass { return __class }
-    fileprivate static let __class = findJavaClass(fqn: "java/lang/Integer")!
-    fileprivate static let __method__init = __class.getMethodID(name: "<init>", sig: "(I)V")!
-    fileprivate static let __method__value = __class.getMethodID(name: "intValue", sig: "()I")!
+    public static let javaClass = try! JClass(name: "java/lang/Integer")
+    public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(I)V")!
+    public static let primitiveValueMethodID = javaClass.getMethodID(name: "intValue", sig: "()I")!
 }
 
-
-extension Int32: JPrimitiveConvertible {
-    public typealias PrimitiveType = JInteger
-    public typealias ArrayType = JavaIntArray
-    public static let jsig = "I"
+extension Int32: JPrimitiveProtocol {
+    public typealias WrapperType = JInteger
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int32 {
         try jni.withEnvThrowing { $0.CallIntMethodA($1, obj, method, args) }
@@ -637,39 +697,20 @@ extension Int32: JPrimitiveConvertible {
         jni.withEnv { $0.SetStaticIntField($1, cls, field, self) }
     }
 
-    public static func createArray(len: jsize) -> JavaIntArray? {
-        jni.withEnv { $0.NewIntArray($1, len) }
-    }
-
-    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
-        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetIntArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
-    }
-
-    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
-        jni.withEnv { $0.SetIntArrayRegion($1, array, offset, jsize(values.count), values) }
-    }
-
     public func toJavaParameter() -> JavaParameter {
         return JavaParameter(i: self)
     }
 }
 
-
-// MARK: Long
-
-final public class JLong: Object, JPrimitiveObjectInternalProtocol {
+public final class JLong: JObject, JPrimitiveWrapperProtocol {
     public typealias ConvertibleType = Int64
-    public final override class var javaClass: JClass { return __class }
-    fileprivate static let __class = findJavaClass(fqn: "java/lang/Long")!
-    fileprivate static let __method__init = __class.getMethodID(name: "<init>", sig: "(J)V")!
-    fileprivate static let __method__value = __class.getMethodID(name: "longValue", sig: "()J")!
+    public static let javaClass = try! JClass(name: "java/lang/Long")
+    public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(J)V")!
+    public static let primitiveValueMethodID = javaClass.getMethodID(name: "longValue", sig: "()J")!
 }
 
-
-extension Int64: JPrimitiveConvertible {
-    public typealias PrimitiveType = JLong
-    public typealias ArrayType = JavaLongArray
-    public static let jsig = "J"
+extension Int64: JPrimitiveProtocol {
+    public typealias WrapperType = JLong
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int64 {
         try jni.withEnvThrowing { $0.CallLongMethodA($1, obj, method, args) }
@@ -695,42 +736,37 @@ extension Int64: JPrimitiveConvertible {
         jni.withEnv { $0.SetStaticLongField($1, cls, field, self) }
     }
 
-    public static func createArray(len: jsize) -> JavaLongArray? {
-        jni.withEnv { $0.NewLongArray($1, len) }
-    }
-
-    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
-        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetLongArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
-    }
-
-    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
-        jni.withEnv { $0.SetLongArrayRegion($1, array, offset, jsize(values.count), values) }
-    }
-
     public func toJavaParameter() -> JavaParameter {
         return JavaParameter(j: self)
     }
 }
 
-
-// MARK: Int
-
-extension Int: JPrimitiveConvertible {
+extension Int: JPrimitiveProtocol {
     #if arch(x86_64) || arch(arm64)
-    public typealias PrimitiveType = JLong
-    public typealias ArrayType = JavaLongArray
+    public typealias WrapperType = JLong
     private typealias Convertible = Int64
-    public static let jsig = "J"
-    #else
-    public typealias PrimitiveType = JInteger
-    public typealias ArrayType = JavaIntArray
-    private typealias Convertible = Int32
-    public static let jsig = "I"
-    #endif
 
-    public static func fromJavaObject(_ obj: JavaObjectPointer) throws -> Int {
-        return Int(try Convertible.fromJavaObject(obj))
+    public static func fromJavaObject(_ ptr: JavaObjectPointer?) -> Self {
+        return try! Int(JLong(ptr!).value)
     }
+
+    public func toJavaObject() -> JavaObjectPointer? {
+        return JLong(Int64(self)).ptr
+    }
+    
+    #else
+
+    public typealias WrapperType = JInteger
+    private typealias Convertible = Int32
+    
+    public static func fromJavaObject(_ ptr: JavaObjectPointer?) -> Self {
+        return try! Int(JInteger(ptr!).value)
+    }
+
+    public func toJavaObject() -> JavaObjectPointer? {
+        return JInteger(Int32(self)).ptr
+    }
+    #endif
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int {
         return Int(try Convertible.call(method, on: obj, args: args))
@@ -756,54 +792,20 @@ extension Int: JPrimitiveConvertible {
         Convertible(self).storeStatic(field, of: cls)
     }
 
-    public func toJavaObject() -> JavaObjectPointer? {
-        return PrimitiveType(PrimitiveType.ConvertibleType(self)).javaObject.ptr
-    }
-
-    public static func createArray(len: jsize) -> ArrayType? {
-        #if arch(x86_64) || arch(arm64)
-        jni.withEnv { $0.NewLongArray($1, len) }
-        #else
-        jni.withEnv { $0.NewIntArray($1, len) }
-        #endif
-    }
-
-    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
-        #if arch(x86_64) || arch(arm64)
-        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetLongArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
-        #else
-        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetIntArratElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
-        #endif
-    }
-
-    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
-        #if arch(x86_64) || arch(arm64)
-        jni.withEnv { $0.SetLongArrayRegion($1, array, offset, jsize(values.count), values) }
-        #else
-        jni.withEnv { $0.SetIntArrayRegion($1, array, offset, jsize(values.count), values) }
-        #endif
-    }
-
     public func toJavaParameter() -> JavaParameter {
         return Convertible(self).toJavaParameter()
     }
 }
 
-
-// MARK: Float
-
-final public class JFloat: Object, JPrimitiveObjectInternalProtocol {
+public final class JFloat: JObject, JPrimitiveWrapperProtocol {
     public typealias ConvertibleType = Float
-    public final override class var javaClass: JClass { return __class }
-    fileprivate static let __class = findJavaClass(fqn: "java/lang/Float")!
-    fileprivate static let __method__init = __class.getMethodID(name: "<init>", sig: "(F)V")!
-    fileprivate static let __method__value = __class.getMethodID(name: "floatValue", sig: "()F")!
+    public static let javaClass = try! JClass(name: "java/lang/Float")
+    public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(F)V")!
+    public static let primitiveValueMethodID = javaClass.getMethodID(name: "floatValue", sig: "()F")!
 }
 
-extension Float: JPrimitiveConvertible {
-    public typealias PrimitiveType = JFloat
-    public typealias ArrayType = JavaFloatArray
-    public static let jsig = "F"
+extension Float: JPrimitiveProtocol {
+    public typealias WrapperType = JFloat
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Float {
         try jni.withEnvThrowing { $0.CallFloatMethodA($1, obj, method, args) }
@@ -829,38 +831,20 @@ extension Float: JPrimitiveConvertible {
         jni.withEnv { $0.SetStaticFloatField($1, cls, field, self) }
     }
 
-    public static func createArray(len: jsize) -> JavaFloatArray? {
-        jni.withEnv { $0.NewFloatArray($1, len) }
-    }
-
-    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
-        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetFloatArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
-    }
-
-    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
-        jni.withEnv { $0.SetFloatArrayRegion($1, array, offset, jsize(values.count), values) }
-    }
-
     public func toJavaParameter() -> JavaParameter {
         return JavaParameter(f: self)
     }
 }
 
-
-// MARK: Double
-
-final public class JDouble: Object, JPrimitiveObjectInternalProtocol {
+public final class JDouble: JObject, JPrimitiveWrapperProtocol {
     public typealias ConvertibleType = Double
-    public final override class var javaClass: JClass { return __class }
-    fileprivate static let __class = findJavaClass(fqn: "java/lang/Double")!
-    fileprivate static let __method__init = __class.getMethodID(name: "<init>", sig: "(D)V")!
-    fileprivate static let __method__value = __class.getMethodID(name: "doubleValue", sig: "()D")!
+    public static let javaClass = try! JClass(name: "java/lang/Double")
+    public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(D)V")!
+    public static let primitiveValueMethodID = javaClass.getMethodID(name: "doubleValue", sig: "()D")!
 }
 
-extension Double: JPrimitiveConvertible {
-    public typealias PrimitiveType = JDouble
-    public typealias ArrayType = JavaDoubleArray
-    public static let jsig = "D"
+extension Double: JPrimitiveProtocol {
+    public typealias WrapperType = JDouble
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Double {
         try jni.withEnvThrowing { $0.CallDoubleMethodA($1, obj, method, args) }
@@ -886,101 +870,15 @@ extension Double: JPrimitiveConvertible {
         jni.withEnv { $0.SetStaticDoubleField($1, cls, field, self) }
     }
 
-    public static func createArray(len: jsize) -> JavaDoubleArray? {
-        jni.withEnv { $0.NewDoubleArray($1, len) }
-    }
-
-    public static func getArrayElements(from array: ArrayType) -> [PrimitiveType.ConvertibleType]? {
-        jni.withEnv { Array(UnsafeBufferPointer(start: $0.GetDoubleArrayElements($1, array, nil), count: Int($0.GetArrayLength($1, array)))) }
-    }
-
-    public static func setArrayRegion(values: [PrimitiveType.ConvertibleType], into array: ArrayType, offset: jsize) {
-        jni.withEnv { $0.SetDoubleArrayRegion($1, array, offset, jsize(values.count), values) }
-    }
-
     public func toJavaParameter() -> JavaParameter {
         return JavaParameter(d: self)
     }
 }
 
+extension String: JObjectProtocol, JConvertible {
+    private static let javaClass = try! JClass(name: "java/lang/String")
 
-// MARK: JObjectConvertible
-
-public protocol JObjectConvertible: JConvertible {
-    static var javaClass: JClass { get }
-}
-
-extension JObjectConvertible {
-    public static var jsig: String {
-        return "L\(try! javaClass.jniName);"
-    }
-
-    public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Self {
-        try fromJavaObject(try jni.withEnvThrowing { $0.CallObjectMethodA($1, obj, method, args) })
-    }
-
-    public static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Self {
-        try fromJavaObject(try jni.withEnvThrowing { $0.CallStaticObjectMethodA($1, cls, method, args) })
-    }
-
-    public static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) throws -> Self {
-        try fromJavaObject(jni.withEnv { $0.GetObjectField($1, obj, field) })
-    }
-
-    public func store(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Void {
-        jni.withEnv { $0.SetObjectField($1, obj, field, toJavaObject()) }
-    }
-
-    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) throws -> Self {
-        try fromJavaObject(jni.withEnv { $0.GetStaticObjectField($1, cls, field) })
-    }
-
-    public func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Void {
-        jni.withEnv { $0.SetStaticObjectField($1, cls, field, toJavaObject()) }
-    }
-
-    //  public static func toJavaArray(_ arr: [Self]) -> JavaArray? {
-    //    let res = jni.NewObjectArray(env, jsize(arr.count), javaClass.javaObject, nil)
-    //    for (index, element) in arr.enumerated() {
-    //      if let obj = element.toJavaObject() {
-    //        jni.SetObjectArrayElement(env, res, jsize(index), obj)
-    //        jni.DeleteLocalRef(env, obj)
-    //      }
-    //    }
-    //    return res
-    //  }
-
-    //  public static func fromJavaArray(_ arr: JavaArray?) -> [Self] {
-    //    var res: [Self] = []
-    //    let count = Int(jni.GetArrayLength(env, arr))
-    //
-    //    res.reserveCapacity(count)
-    //
-    //    for i in 0 ..< count{
-    //      let obj = jni.GetObjectArrayElement(env, arr, jsize(i))
-    //      res.append(fromJavaObject(obj))
-    //      if obj != nil {
-    //        jni.DeleteLocalRef(env, obj)
-    //      }
-    //    }
-    //    return res
-    //  }
-
-    public func toJavaParameter() -> JavaParameter {
-        return JavaParameter(l: toJavaObject())
-    }
-}
-
-// MARK: String
-
-extension String: JObjectConvertible, JNullInitializable {
-    fileprivate static let __class = findJavaClass(fqn: "java/lang/String")!
-
-    public static var javaClass: JClass {
-        return __class
-    }
-
-    public static func fromJavaObject(_ obj: JavaObjectPointer) throws -> String {
+    public static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> String {
         try jni.withEnv { jnii, env in
             guard let chars = jnii.GetStringUTFChars(env, obj, nil) else {
                 throw JNIError(description: "Could not get characters from String", clear: false)
@@ -1013,688 +911,6 @@ extension String: JObjectConvertible, JNullInitializable {
         }
     }
 }
-
-// MARK: JObject
-
-public class JObject : @unchecked Sendable {
-    public let ptr: JavaObjectPointer
-
-    fileprivate static let Object__getClass = Object._class.getMethodID(name: "getClass", sig: "()Ljava/lang/Class;")!
-
-    private lazy var _cls = Result {
-        JClass(try jni.synchronized(ptr) { try jni.withEnvThrowing { $0.CallObjectMethodA($1, ptr, Self.Object__getClass, []) } }!)
-    }
-
-    public var cls: JClass { get { try! _cls.get() } } // force-unwrap because it is common and should always work
-
-    public init(_ ptr: JavaObjectPointer) {
-        self.ptr = jni.newGlobalRef(ptr)
-    }
-
-    public convenience init?(_ ptr: JavaObjectPointer?) {
-        if let _ptr = ptr {
-            self.init(_ptr as JavaObjectPointer)
-        } else {
-            return nil
-        }
-    }
-
-    deinit {
-        jni.deleteGlobalRef(ptr)
-    }
-
-
-    public func get<T: JConvertible>(field: JavaFieldID) throws -> T {
-        return try T.load(field, of: ptr)
-    }
-
-    public func get<T: JConvertible>(field: String, sig: String) throws -> T {
-        guard let fieldId = cls.getFieldID(name: field, sig: sig) else {
-            throw JNIError(description: "Cannot find field \(field) with signature \(sig)", clear: true)
-        }
-        return try self.get(field: fieldId)
-    }
-
-    public func get<T: JConvertible>(field: String) throws -> T {
-        return try self.get(field: field, sig: T.jsig)
-    }
-
-
-    public func set<T: JConvertible>(field: JavaFieldID, value: T) {
-        value.store(field, of: ptr)
-    }
-
-    public func set<T: JConvertible>(field: String, sig: String, value: T) throws {
-        guard let fieldId = cls.getFieldID(name: field, sig: sig) else {
-            throw JNIError(description: "Cannot find field \(field) with signature \(sig)", clear: true)
-        }
-        value.store(fieldId, of: ptr)
-    }
-
-    public func set<T: JConvertible>(field: String, value: T) throws {
-        try self.set(field: field, sig: T.jsig, value: value)
-    }
-
-
-    public func call(method: JavaMethodID, _ args : [JavaParameter]) throws -> Void {
-        try jni.withEnvThrowing { $0.CallVoidMethodA($1, ptr, method, args) }
-    }
-
-    public func call(method: JavaMethodID, _ args : JParameterConvertible...) throws -> Void {
-        try call(method: method, args.map { $0.toJavaParameter() }) as Void
-    }
-
-    public func call(method: String, _ args : JConvertible...) throws -> Void {
-        let sig = "(\(args.reduce("", { $0 + type(of: $1).jsig})))V"
-        guard let methodId = cls.getMethodID(name: method, sig: sig) else  {
-            throw JNIError(description: "Cannot find method \(method) with signature \(sig)", clear: true)
-        }
-        return try call(method: methodId, args.map { $0.toJavaParameter() }) as Void
-    }
-
-
-    public func call<T>(method: JavaMethodID, _ args: [JavaParameter]) throws -> T where T: JConvertible {
-        return try T.call(method, on: ptr, args: args)
-    }
-
-    public func call<T>(method: JavaMethodID, _ args: JParameterConvertible...) throws -> T where T: JConvertible {
-        return try call(method: method, args.map { $0.toJavaParameter() })
-    }
-
-    public func call<T>(method: String, _ args : JConvertible...) throws -> T where T: JConvertible {
-        let sig = "(\(args.reduce("", { $0 + type(of: $1).jsig})))\(T.jsig)"
-        guard let methodId = cls.getMethodID(name: method, sig: sig) else  {
-            throw JNIError(description: "Cannot find method \(method) with signature \(sig)", clear: true)
-        }
-        return try call(method: methodId, args.map { $0.toJavaParameter() })
-    }
-}
-
-
-extension JObject : JParameterConvertible {
-    public func toJavaParameter() -> JavaParameter {
-        return JavaParameter(l: ptr)
-    }
-}
-
-// MARK: JClass
-
-public final class JClass : JObject {
-    fileprivate static let _getName = Class__class.getMethodID(name: "getName", sig: "()Ljava/lang/String;")!
-
-    private lazy var _name: Result<String, Error> = Result { try call(method: Self._getName) }
-
-    public var name: String {
-        get throws {
-            try _name.get()
-        }
-    }
-
-    public var jniName: String {
-        get throws {
-            try name.split(separator: ".").joined(separator: "/")
-        }
-    }
-
-    fileprivate convenience init(_ obj: JavaObjectPointer, name: String) {
-        self.init(obj)
-    }
-
-    public convenience init(name: String) throws {
-        let jniName = name.split(separator: ".").joined(separator: "/")
-
-        guard let jclazz = jni.findClass(jniName) else {
-            throw ClassNotFoundError(name: name)
-        }
-
-        self.init(jclazz, name: name)
-    }
-
-    public func getFieldID(name: String, sig: String) -> JavaFieldID? {
-        defer { jni.checkExceptionAndClear() }
-        return jni.withEnv { $0.GetFieldID($1, self.ptr, name, sig) }
-    }
-
-    public func getStaticFieldID(name: String, sig: String) -> JavaFieldID? {
-        defer { jni.checkExceptionAndClear() }
-        return jni.withEnv { $0.GetStaticFieldID($1, self.ptr, name, sig) }
-    }
-
-
-    public func getMethodID(name: String, sig: String) -> JavaMethodID? {
-        defer { jni.checkExceptionAndClear() }
-        return jni.withEnv { $0.GetMethodID($1, self.ptr, name, sig) }
-    }
-
-    public func getStaticMethodID(name: String, sig: String) -> JavaMethodID? {
-        defer { jni.checkExceptionAndClear() }
-        return jni.withEnv { $0.GetStaticMethodID($1, self.ptr, name, sig) }
-    }
-
-    public func create(ctor: JavaMethodID, _ args: [JavaParameter]) throws -> JavaObjectPointer {
-        guard let obj = try jni.withEnvThrowing({ $0.NewObjectA($1, self.ptr, ctor, args) }) else {
-            throw JNIError(clear: true) // init should never return nil
-        }
-        return obj
-    }
-
-    public func create(ctor: JavaMethodID, _ params: JavaParameter...) throws -> JavaObjectPointer {
-        try create(ctor: ctor, params)
-    }
-
-    public func create(ctor: JavaMethodID, _ args: JParameterConvertible...) throws -> JavaObjectPointer {
-        try create(ctor: ctor, args.map { $0.toJavaParameter() })
-    }
-
-    public func create(_ args: JConvertible...) throws -> JavaObjectPointer {
-        let sig = args.reduce("", { $0 + type(of: $1).jsig })
-        guard let ctorId = getMethodID(name: "<init>", sig: "(\(sig))V") else {
-            throw JNIError(description: "Cannot find constructor with signature (\(sig))V", clear: true)
-        }
-        return try create(ctor: ctorId, args.map { $0.toJavaParameter() })
-    }
-
-
-    public func getStatic<T: JConvertible>(field: JavaFieldID) throws -> T {
-        return try T.loadStatic(field, of: ptr)
-    }
-
-    public func getStatic<T: JConvertible>(field: String) throws -> T {
-        guard let fieldId = getStaticFieldID(name: field, sig: T.jsig) else {
-            throw JNIError(description: "Cannot find static field \(field) with signature \(T.jsig)", clear: true)
-        }
-        return try self.getStatic(field: fieldId)
-    }
-
-
-    public func setStatic<T: JConvertible>(field: JavaFieldID, value: T) {
-        value.storeStatic(field, of: self.ptr)
-    }
-
-    public func setStatic<T: JConvertible>(field: String, value: T) throws {
-        guard let fieldId = getStaticFieldID(name: field, sig: T.jsig) else {
-            throw JNIError(description: "Cannot find static field \(field) with signature \(T.jsig)", clear: true)
-        }
-        value.storeStatic(fieldId, of: self.ptr)
-    }
-
-    public func callStatic(method: JavaMethodID, _ args : [JavaParameter]) throws -> Void {
-        try jni.withEnvThrowing { $0.CallStaticVoidMethodA($1, self.ptr, method, args) }
-    }
-
-    public func callStatic(method: JavaMethodID, _ args : JParameterConvertible...) throws -> Void {
-        try callStatic(method: method, args.map { $0.toJavaParameter() })
-    }
-
-    public func callStatic(method: String, _ args : JConvertible...) throws -> Void {
-        try callStatic(method: method, args: args)
-    }
-
-    public func callStatic(method: String, args: [JConvertible]) throws -> Void {
-        let sig = "(\(args.reduce("", { $0 + type(of: $1).jsig})))V"
-        try callStatic(method: method, sig: sig, args: args) as Void
-    }
-
-    public func callStatic(method: String, sig: String, _ args : JConvertible...) throws -> Void {
-        try callStatic(method: method, sig: sig, args: args)
-    }
-
-    public func callStatic(method: String, sig: String, args : [JConvertible]) throws -> Void {
-        guard let methodId = getStaticMethodID(name: method, sig: sig) else  {
-            throw JNIError(description: "Cannot find static method \(method) with signature \(sig)", clear: true)
-        }
-        try callStatic(method: methodId, args.map { $0.toJavaParameter() }) as Void
-    }
-
-
-    public func callStatic<T: JConvertible>(method: JavaMethodID, _ args: [JavaParameter]) throws -> T {
-        return try T.callStatic(method, on: self.ptr, args: args)
-    }
-
-    public func callStatic<T: JConvertible>(method: JavaMethodID, _ args: JParameterConvertible...) throws -> T {
-        return try callStatic(method: method, args.map { $0.toJavaParameter() })
-    }
-
-    public func callStatic<T>(method: String, _ args : JConvertible...) throws -> T where T: JConvertible {
-        return try callStatic(method: method, args: args)
-    }
-
-    public func callStatic<T>(method: String, args: [JConvertible]) throws -> T where T: JConvertible {
-        let sig = "(\(args.reduce("", { $0 + type(of: $1).jsig})))\(T.jsig)"
-        return try callStatic(method: method, sig: sig, args: args)
-    }
-
-    public func callStatic<T>(method: String, sig: String, _ args : JConvertible...) throws -> T where T: JConvertible {
-        return try callStatic(method: method, sig: sig, args: args)
-    }
-
-    public func callStatic<T>(method: String, sig: String, args : [JConvertible]) throws -> T where T: JConvertible {
-        guard let methodId = getStaticMethodID(name: method, sig: sig) else  {
-            throw JNIError(description: "Cannot find static method \(method) with signature \(sig)", clear: true)
-        }
-        return try callStatic(method: methodId, args.map { $0.toJavaParameter() })
-    }
-}
-
-
-// MARK: JThrowable
-
-public final class Throwable: Object {
-    public final override class var javaClass: JClass { return __class }
-    fileprivate static let __class = findJavaClass(fqn: "java/lang/Throwable")!
-    fileprivate static let __method__init = __class.getMethodID(name: "<init>", sig: "()V")!
-    fileprivate static let __method__getMessage = __class.getMethodID(name: "getMessage", sig: "()Ljava/lang/String;")!
-    fileprivate static let __method__getLocalizedMessage = __class.getMethodID(name: "getLocalizedMessage", sig: "()Ljava/lang/String;")!
-
-    public func getMessage() throws -> String? {
-        try self.javaObject.call(method: Self.__method__getMessage, [])
-    }
-
-    public func getLocalizedMessage() throws -> String? {
-        try self.javaObject.call(method: Self.__method__getLocalizedMessage, [])
-    }
-
-    public func toError() -> JavaException {
-        return JavaException(description: (try? toString()) ?? "A java exception occurred, and an error was raised when trying to get the exception message")
-    }
-}
-
-public struct JavaException: Error, CustomStringConvertible {
-    public let description: String
-}
-
-// MARK: Class book-keeping
-
-fileprivate var __classnameToSwiftClass = Dictionary<String, AnyClass>()
-fileprivate var __swiftClassToClassname = Dictionary<ObjectIdentifier, String>()
-
-public func registerJavaClass<T: ObjectProtocol>(_ type: T.Type, fqn: String) -> Void {
-    __classnameToSwiftClass[fqn] = type
-    __swiftClassToClassname[ObjectIdentifier(type)] = fqn
-}
-
-
-public func findJavaClass(fqn: String) -> JClass? {
-    if let jcls = jni.findClass(fqn) {
-        let cls = JClass(jcls, name: fqn)
-        return cls
-    } else {
-        jni.checkExceptionAndClear()
-    }
-
-    return nil
-}
-
-
-internal func getJavaClass<T: ObjectProtocol>(from type: T.Type) throws -> JClass {
-    let typeId = ObjectIdentifier(type)
-    guard let fqn = __swiftClassToClassname[typeId] else {
-        let fqn = String(String(reflecting: type).map {
-            $0 == "." ? "/" : $0
-        })
-
-        guard let _cls = findJavaClass(fqn: fqn) else {
-            throw JNIError(description: "Cannot find Java class '\(fqn)'", clear: true)
-        }
-
-        __swiftClassToClassname[typeId] = fqn
-        __classnameToSwiftClass[fqn] = type
-
-        return _cls
-    }
-
-    guard let cls = findJavaClass(fqn: fqn) else {
-        throw JNIError(description: "Cannot find Java class '\(fqn)'", clear: true)
-    }
-
-    return cls
-}
-
-
-internal func mapJavaObject<T: ObjectProtocol>(_ obj: JavaObjectPointer) throws -> T {
-    guard let jcls = jni.getObjectClass(obj) else {
-        throw JNIError(description: "Cannot get Java class from Java object", clear: true)
-    }
-
-    let cls = JClass(jcls)
-    let fqn = try! String(cls.name.map{($0 == ".") ? "/" : $0})
-
-    if let clazz = __classnameToSwiftClass[fqn] {
-        return (clazz as! T.Type).init(obj)
-    } else {
-        return T.init(obj)
-    }
-}
-
-
-// MARK: ObjectProtocol
-
-public protocol ObjectProtocol: AnyObject, JObjectConvertible {
-    init(_ obj: JavaObjectPointer)
-    var javaObject: JObject { get }
-}
-
-
-public extension ObjectProtocol {
-    func toJavaObject() -> JavaObjectPointer? {
-        return javaObject.ptr
-    }
-
-    static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> Self {
-        guard let _obj = obj else {
-            throw JNIError(description: "Cannot instantiate non-null object from nil", clear: true)
-        }
-        return try mapJavaObject(_obj)
-    }
-}
-
-public extension ObjectProtocol {
-    static var JavaClass: Class<Self> {
-        return Class<Self>(self.javaClass.ptr)
-    }
-}
-
-// MARK: ObjectBase
-
-open class ObjectBase: ObjectProtocol {
-    public let javaObject: JObject
-
-    open class var javaClass: JClass {
-        return try! getJavaClass(from: self)
-    }
-
-    public required init(_ obj: JavaObjectPointer) {
-        javaObject = JObject(obj)
-    }
-
-    public required init(ctor: JavaMethodID, _ args: [JavaParameter]) throws {
-        let obj = try type(of: self).javaClass.create(ctor: ctor, args)
-        javaObject = JObject(obj)
-
-        if let ptr_field = javaObject.cls.getFieldID(name: "_ptr", sig: "J") {
-            let ptr = unsafeBitCast(self, to: Int.self)
-            javaObject.set(field: ptr_field, value: Int64(ptr))
-        }
-    }
-}
-
-
-extension ObjectBase: Equatable {
-    public static func == (lhs: ObjectBase, rhs: ObjectBase) -> Bool {
-        return jni.withEnv { $0.IsSameObject($1, lhs.javaObject.ptr, rhs.javaObject.ptr) != 0 }
-    }
-}
-
-
-public protocol JInterfaceProxy where Self: Object {
-    associatedtype Proto: JObjectConvertible
-}
-
-public func cast<T: JInterfaceProxy>(_ obj: Object?, to: T.Type) -> T.Proto? {
-    guard let _obj = obj else { return nil}
-
-    guard let proto = _obj as? T.Proto else  {
-        return T.init(_obj.javaObject.ptr) as? T.Proto
-    }
-
-    return proto
-}
-
-
-public func cast<T: JInterfaceProxy>(_ objs: [Object?], to type: T.Type) -> [T.Proto?] {
-    return objs.map{cast($0, to: type)}
-}
-
-public protocol JParameterConvertible {
-    func toJavaParameter() -> JavaParameter
-}
-
-
-// MARK: Object
-
-open class Object: ObjectBase {
-    fileprivate static let _class = JClass(jni.findClass("java/lang/Object")!)
-
-    fileprivate static let _init = _class.getMethodID(name: "<init>", sig: "()V")!
-
-    public init() throws {
-        try super.init(ctor: Self._init, [])
-    }
-
-    public required init(_ obj: JavaObjectPointer) {
-        super.init(obj)
-    }
-
-    public required init(ctor: JavaMethodID, _ args: [JavaParameter]) throws {
-        try super.init(ctor: ctor, args)
-    }
-
-    fileprivate static let _finalize = _class.getMethodID(name: "finalize", sig: "()V")!
-
-    open func finalize() throws {
-        try self.javaObject.call(method: Self._finalize, [])
-    }
-
-    fileprivate static let _getClass = _class.getMethodID(name: "getClass", sig: "()Ljava/lang/Class;")!
-
-    public func getClass<T0>() throws -> Class<T0>? where T0: Object {
-        try self.javaObject.call(method: Self._getClass, [])
-    }
-
-    fileprivate static let _hashCode = _class.getMethodID(name: "hashCode", sig: "()I")!
-
-    open func hashCode() throws -> Int32 {
-        try self.javaObject.call(method: Self._hashCode, [])
-    }
-
-    fileprivate static let _equals = _class.getMethodID(name: "equals", sig: "(Ljava/lang/Object;)Z")!
-
-    open func equals(obj: Object) throws -> Bool {
-        try self.javaObject.call(method: Self._equals, [obj.toJavaParameter()])
-    }
-
-    fileprivate static let _clone = _class.getMethodID(name: "clone", sig: "()Ljava/lang/Object;")!
-
-    open func clone() throws -> Object? {
-        try self.javaObject.call(method: Self._clone, [])
-    }
-
-    fileprivate static let _toString = _class.getMethodID(name: "toString", sig: "()Ljava/lang/String;")!
-
-    open func toString() throws -> String? {
-        try self.javaObject.call(method: Self._toString, [])
-    }
-
-    fileprivate static let _notify = _class.getMethodID(name: "notify", sig: "()V")!
-
-    public func notify() throws {
-        try self.javaObject.call(method: Self._notify, [])
-    }
-
-    fileprivate static let _notifyAll = _class.getMethodID(name: "notifyAll", sig: "()V")!
-
-    public func notifyAll() throws {
-        try self.javaObject.call(method: Self._notifyAll, [])
-    }
-
-    fileprivate static let _wait1 = _class.getMethodID(name: "wait", sig: "(J)V")!
-
-    public func wait(millis: Int64) throws {
-        try self.javaObject.call(method: Self._wait1, [millis.toJavaParameter()])
-    }
-
-    fileprivate static let _wait2 = _class.getMethodID(name: "wait", sig: "(JI)V")!
-
-    public func wait(millis: Int64, nanos: Int32) throws {
-        try self.javaObject.call(method: Self._wait2, [millis.toJavaParameter(), nanos.toJavaParameter()])
-    }
-
-    fileprivate static let _wait0 = _class.getMethodID(name: "wait", sig: "()V")!
-
-    public func wait() throws {
-        try self.javaObject.call(method: Self._wait0, [])
-    }
-}
-
-
-// MARK: Class
-
-open class Class<T: JObjectConvertible>: Object {
-    public static func forName<T0>(className: String) throws -> Class<T0>? where T0: Object {
-        try Class__class.callStatic(method: Class__method__0, [className.toJavaParameter()])
-    }
-
-    open func newInstance() throws -> T? {
-        try self.javaObject.call(method: Class__method__1, [])
-    }
-
-    open func isInstance(object: Object) throws -> Bool {
-        try self.javaObject.call(method: Class__method__2, [object.toJavaParameter()])
-    }
-
-    open func isAssignableFrom<T0>(c: Class<T0>) throws -> Bool where T0: Object {
-        try self.javaObject.call(method: Class__method__3, [c.toJavaParameter()])
-    }
-
-    open func isInterface() throws -> Bool {
-        try self.javaObject.call(method: Class__method__4, [])
-    }
-
-    open func isArray() throws -> Bool {
-        try self.javaObject.call(method: Class__method__5, [])
-    }
-
-    open func isPrimitive() throws -> Bool {
-        try self.javaObject.call(method: Class__method__6, [])
-    }
-
-    open func isAnnotation() throws -> Bool {
-        try self.javaObject.call(method: Class__method__7, [])
-    }
-
-    open func isSynthetic() throws -> Bool {
-        try self.javaObject.call(method: Class__method__8, [])
-    }
-
-    open func getName() throws -> String? {
-        try self.javaObject.call(method: Class__method__9, [])
-    }
-
-    open func getSuperclass<T0>() throws -> Class<T0>? where T0: Object {
-        try self.javaObject.call(method: Class__method__10, [])
-    }
-
-//    open func getInterfaces<T0>() throws -> [Class<T0>?] where T0: Object {
-//        try self.javaObject.call(method: Class__method__11, [])
-//    }
-
-    open func getComponentType<T0>() throws -> Class<T0>? where T0: Object {
-        try self.javaObject.call(method: Class__method__12, [])
-    }
-
-    open func getModifiers() throws -> Int32 {
-        try self.javaObject.call(method: Class__method__13, [])
-    }
-
-//    open func getSigners() throws -> [Object?] {
-//        try self.javaObject.call(method: Class__method__14, [])
-//    }
-
-    open func getDeclaringClass<T0>() throws -> Class<T0>? where T0: Object {
-        try self.javaObject.call(method: Class__method__15, [])
-    }
-
-    open func getEnclosingClass<T0>() throws -> Class<T0>? where T0: Object {
-        try self.javaObject.call(method: Class__method__16, [])
-    }
-
-    open func getSimpleName() throws -> String? {
-        try self.javaObject.call(method: Class__method__17, [])
-    }
-
-    open func getCanonicalName() throws -> String? {
-        try self.javaObject.call(method: Class__method__18, [])
-    }
-
-    open func isAnonymousClass() throws -> Bool {
-        try self.javaObject.call(method: Class__method__19, [])
-    }
-
-    open func isLocalClass() throws -> Bool {
-        try self.javaObject.call(method: Class__method__20, [])
-    }
-
-    open func isMemberClass() throws -> Bool {
-        try self.javaObject.call(method: Class__method__21, [])
-    }
-
-//    open func getClasses<T0>() throws -> [Class<T0>?] where T0: Object {
-//        try self.javaObject.call(method: Class__method__22, [])
-//    }
-
-//    open func getDeclaredClasses<T0>() throws -> [Class<T0>?] where T0: Object {
-//        try self.javaObject.call(method: Class__method__23, [])
-//    }
-
-//    open func getResource(name: String) throws -> URL? {
-//        try self.javaObject.call(method: Class__method__24, [name.toJavaParameter()])
-//    }
-
-    open func desiredAssertionStatus() throws -> Bool {
-        try self.javaObject.call(method: Class__method__25, [])
-    }
-
-    open func isEnum() throws -> Bool {
-        try self.javaObject.call(method: Class__method__26, [])
-    }
-
-//    open func getEnumConstants() throws -> [T?] {
-//        try self.javaObject.call(method: Class__method__27, [])
-//    }
-//
-//    open func cast(obj: Object?) throws -> T? {
-//        try self.javaObject.call(method: Class__method__28, [obj.toJavaParameter()])
-//    }
-//
-//    open func asSubclass<U, T0>(clazz: Class<U>?) throws -> Class<T0>? where U: Object, T0: Object {
-//        try self.javaObject.call(method: Class__method__29, [clazz.toJavaParameter()])
-//    }
-}
-
-
-private let Class__class = findJavaClass(fqn: "java/lang/Class")!
-
-private let Class__method__0 = Class__class.getStaticMethodID(name: "forName", sig: "(Ljava/lang/String;)Ljava/lang/Class;")!
-private let Class__method__1 = Class__class.getMethodID(name: "newInstance", sig: "()Ljava/lang/Object;")!
-private let Class__method__2 = Class__class.getMethodID(name: "isInstance", sig: "(Ljava/lang/Object;)Z")!
-private let Class__method__3 = Class__class.getMethodID(name: "isAssignableFrom", sig: "(Ljava/lang/Class;)Z")!
-private let Class__method__4 = Class__class.getMethodID(name: "isInterface", sig: "()Z")!
-private let Class__method__5 = Class__class.getMethodID(name: "isArray", sig: "()Z")!
-private let Class__method__6 = Class__class.getMethodID(name: "isPrimitive", sig: "()Z")!
-private let Class__method__7 = Class__class.getMethodID(name: "isAnnotation", sig: "()Z")!
-private let Class__method__8 = Class__class.getMethodID(name: "isSynthetic", sig: "()Z")!
-private let Class__method__9 = Class__class.getMethodID(name: "getName", sig: "()Ljava/lang/String;")!
-private let Class__method__10 = Class__class.getMethodID(name: "getSuperclass", sig: "()Ljava/lang/Class;")!
-private let Class__method__11 = Class__class.getMethodID(name: "getInterfaces", sig: "()[Ljava/lang/Class;")!
-private let Class__method__12 = Class__class.getMethodID(name: "getComponentType", sig: "()Ljava/lang/Class;")!
-private let Class__method__13 = Class__class.getMethodID(name: "getModifiers", sig: "()I")!
-private let Class__method__14 = Class__class.getMethodID(name: "getSigners", sig: "()[Ljava/lang/Object;")!
-private let Class__method__15 = Class__class.getMethodID(name: "getDeclaringClass", sig: "()Ljava/lang/Class;")!
-private let Class__method__16 = Class__class.getMethodID(name: "getEnclosingClass", sig: "()Ljava/lang/Class;")!
-private let Class__method__17 = Class__class.getMethodID(name: "getSimpleName", sig: "()Ljava/lang/String;")!
-private let Class__method__18 = Class__class.getMethodID(name: "getCanonicalName", sig: "()Ljava/lang/String;")!
-private let Class__method__19 = Class__class.getMethodID(name: "isAnonymousClass", sig: "()Z")!
-private let Class__method__20 = Class__class.getMethodID(name: "isLocalClass", sig: "()Z")!
-private let Class__method__21 = Class__class.getMethodID(name: "isMemberClass", sig: "()Z")!
-private let Class__method__22 = Class__class.getMethodID(name: "getClasses", sig: "()[Ljava/lang/Class;")!
-private let Class__method__23 = Class__class.getMethodID(name: "getDeclaredClasses", sig: "()[Ljava/lang/Class;")!
-private let Class__method__24 = Class__class.getMethodID(name: "getResource", sig: "(Ljava/lang/String;)Ljava/net/URL;")!
-private let Class__method__25 = Class__class.getMethodID(name: "desiredAssertionStatus", sig: "()Z")!
-private let Class__method__26 = Class__class.getMethodID(name: "isEnum", sig: "()Z")!
-private let Class__method__27 = Class__class.getMethodID(name: "getEnumConstants", sig: "()[Ljava/lang/Object;")!
-private let Class__method__28 = Class__class.getMethodID(name: "cast", sig: "(Ljava/lang/Object;)Ljava/lang/Object;")!
-private let Class__method__29 = Class__class.getMethodID(name: "asSubclass", sig: "(Ljava/lang/Class;)Ljava/lang/Class;")!
-
 
 // MARK: JVM Management
 

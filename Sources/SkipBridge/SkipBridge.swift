@@ -62,36 +62,42 @@ public let SwiftObjectNil = Int64(0)
 #if !SKIP
 extension SwiftObjectPointer {
     /// Get a pointer to the given object.
-    public static func forSwift<T: AnyObject>(_ obj: T, retain: Bool) -> SwiftObjectPointer {
-        let unmanaged = retain ? Unmanaged.passRetained(obj) : Unmanaged.passUnretained(obj)
+    public static func pointer<T: AnyObject>(to object: T?, retain: Bool) -> SwiftObjectPointer {
+        guard let object else {
+            return SwiftObjectNil
+        }
+        let unmanaged = retain ? Unmanaged.passRetained(object) : Unmanaged.passUnretained(object)
         let rawPtr = unmanaged.toOpaque()
         return SwiftObjectPointer(Int(bitPattern: rawPtr))
     }
 
     /// Return the object for this pointer.
-    public func toSwift<T: AnyObject>() -> T {
-        assert(self != SwiftObjectNil, "SkipBridge.toSwift() called on nil pointer")
+    public func pointee<T: AnyObject>() -> T? {
+        guard self != SwiftObjectNil else {
+            return nil
+        }
         let rawPtr = UnsafeMutableRawPointer(bitPattern: Int(self))!
         return Unmanaged<T>.fromOpaque(rawPtr).takeUnretainedValue()
     }
+
+    /// Increment the reference count for a Swift object held by Java.
+    public func retained<T: AnyObject>(as type: T.Type) -> SwiftObjectPointer {
+        guard self != SwiftObjectNil, let rawPtr = UnsafeMutableRawPointer(bitPattern: Int(self)) else {
+            return self
+        }
+        let unmanaged = Unmanaged<T>.fromOpaque(rawPtr)
+        let refUnmanaged = unmanaged.retain()
+        return SwiftObjectPointer(Int(bitPattern: refUnmanaged.toOpaque()))
+    }
+
+    /// Decrement the reference count for a Swift object held by Java.
+    public func release<T: AnyObject>(as type: T.Type) {
+        guard self != SwiftObjectNil, let rawPtr = UnsafeMutableRawPointer(bitPattern: Int(self)) else {
+            return
+        }
+        let unmanaged = Unmanaged<T>.fromOpaque(rawPtr)
+        unmanaged.release()
+    }
 }
 
-/// Increment the reference count for a Swift object held by Java.
-public func refSwift<T: AnyObject>(_ ptr: SwiftObjectPointer, type: T.Type) -> SwiftObjectPointer {
-    guard ptr != SwiftObjectNil, let rawPtr = UnsafeMutableRawPointer(bitPattern: Int(ptr)) else {
-        return ptr
-    }
-    let unmanaged = Unmanaged<T>.fromOpaque(rawPtr)
-    let refUnmanaged = unmanaged.retain()
-    return SwiftObjectPointer(Int(bitPattern: refUnmanaged.toOpaque()))
-}
-
-/// Decrement the reference count for a Swift object held by Java.
-public func derefSwift<T: AnyObject>(_ ptr: SwiftObjectPointer, type: T.Type) {
-    guard ptr != SwiftObjectNil, let rawPtr = UnsafeMutableRawPointer(bitPattern: Int(ptr)) else {
-        return
-    }
-    let unmanaged = Unmanaged<T>.fromOpaque(rawPtr)
-    unmanaged.release()
-}
 #endif
