@@ -35,10 +35,32 @@ public class CompiledClass {
 
     public init() {
     }
+}
 
-    public func compiledToTranspiled() -> Int64 {
-        TranspiledClass().transpiledFromCompiled()
-    }
+// Testing helpers: we can only access test transpiled-to-compiled bridging by going
+// through a compiled function
+// SKIP @bridge
+public func compiledFuncToTranspiledClassPublicVar(value: String) -> String {
+    let c = TranspiledClass()
+    c.publicVar = value
+    return c.publicVar
+}
+// SKIP @bridge
+public func compiledFuncToTranspiledVar(value: Int) -> Int {
+    transpiledVar = value
+    return transpiledVar
+}
+// SKIP @bridge
+public func compiledFuncToTranspiledComputedVar() -> Int {
+    return transpiledComputedVar
+}
+// SKIP @bridge
+public var compiledVarOfTranspiledType = TranspiledClass()
+// SKIP @bridge
+public func compiledFuncToTranspiledVarOfTranspiledType(value: Int) -> Int {
+    let c = compiledVarOfTranspiledType
+    c.helper.i = value
+    return c.helper.i
 }
 
 protocol Multiplex {
