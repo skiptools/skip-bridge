@@ -65,13 +65,11 @@ final class SkipBridgeSamplesTests: XCTestCase {
         XCTAssertEqual(c.publicVar, "yyy")
     }
 
-//    func testTranspiledClass() throws {
-//        let c = TranspiledClass()
-//        c.publicVar = "xxx"
-//        XCTAssertEqual(c.publicVar, "xxx")
-//        c.publicVar = "yyy"
-//        XCTAssertEqual(c.publicVar, "yyy")
-//    }
+    #if SKIP
+    func testTranspiledClass() throws {
+        XCTAssertEqual(Int64(123), TranspiledClass().callCompiledFunction())
+    }
+    #endif
 }
 
 #if SKIP
@@ -105,6 +103,9 @@ func loadPeerLibrary(_ libName: String) {
         libraryPath = cwd + "/.build/\(arch)/debug/\(dylib)" // Swift-launched JVM
         if !java.io.File(libraryPath).isFile() {
             libraryPath = cwd + "/../../../../../../\(arch)/debug/\(dylib)" // gradle-launched JVM
+        }
+        if !java.io.File(libraryPath).isFile() {
+            libraryPath = cwd + "/../../../../../../../\(arch)/debug/\(dylib)" // gradle-launched JVM (Swift 6)
         }
     }
 

@@ -35,6 +35,10 @@ public class CompiledClass {
 
     public init() {
     }
+
+    public func compiledToTranspiled() -> Int64 {
+        TranspiledClass().transpiledFromCompiled()
+    }
 }
 
 protocol Multiplex {

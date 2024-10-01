@@ -12,6 +12,15 @@ public class TranspiledClass {
 
     public init() {
     }
+
+    public func callCompiledFunction() -> Int64 {
+        let c = CompiledClass()
+        return c.compiledToTranspiled()
+    }
+
+    public func transpiledFromCompiled() -> Int64 {
+        return 123
+    }
 }
 
 #endif

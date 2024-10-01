@@ -5,6 +5,10 @@
 import CJNI
 import Foundation
 
+#if canImport(Android)
+import Android
+#endif
+
 // MARK: JNI Types
 
 public typealias JNIEnv = CJNI.JNIEnv
