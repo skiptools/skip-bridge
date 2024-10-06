@@ -90,10 +90,10 @@ final class SkipBridgeSamplesTests: XCTestCase {
         XCTAssertEqual(c2.publicVar, "fromcompiled")
     }
 
-//    func testTranspiledTypeTranspiledVar() throws {
-//        let i = compiledFuncToTranspiledVarOfTranspiledType(value: 101)
-//        XCTAssertEqual(i, 101)
-//    }
+    func testTranspiledTypeTranspiledVar() throws {
+        let i = compiledFuncToTranspiledVarOfTranspiledType(value: 101)
+        XCTAssertEqual(i, 101)
+    }
     #endif
 }
 
