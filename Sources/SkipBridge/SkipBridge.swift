@@ -59,7 +59,18 @@ public func loadLibrary(_ libName: String) {
 public typealias SwiftObjectPointer = Int64
 public let SwiftObjectNil = Int64(0)
 
-#if !SKIP
+#if SKIP
+/// Protocol added to the generated class for a Swift type bridged to Kotlin.
+public protocol SwiftPeerBridged {
+    func Swift_bridgedPeer() -> SwiftObjectPointer
+}
+
+/// Marker type used to guarantee uniqueness of our `Swift_peer` constructor.
+public final class SwiftPeerMarker {
+}
+
+#else
+
 extension SwiftObjectPointer {
     /// Get a pointer to the given object.
     public static func pointer<T: AnyObject>(to object: T?, retain: Bool) -> SwiftObjectPointer {
@@ -99,5 +110,14 @@ extension SwiftObjectPointer {
         unmanaged.release()
     }
 }
+
+extension SwiftObjectPointer {
+    /// Return the `Swift_peer` of the given `SwiftPeerBridged` object.
+    public static func peer(of bridged: JavaObjectPointer) -> SwiftObjectPointer {
+        return try! SwiftObjectPointer.call(Java_SwiftPeerBridged_peer_methodID, on: bridged, args: [])
+    }
+}
+private let Java_SwiftPeerBridged_class = try! JClass(name: "skip/bridge/SwiftPeerBridged")
+private let Java_SwiftPeerBridged_peer_methodID = Java_SwiftPeerBridged_class.getMethodID(name: "Swift_bridgedPeer", sig: "()J")!
 
 #endif
