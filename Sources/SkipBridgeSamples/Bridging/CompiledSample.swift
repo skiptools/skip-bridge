@@ -32,8 +32,18 @@ public let globalCompiledtoTranspiledCall = transpiledGlobalFuction(n1: 1.1, n2:
 // SKIP @bridge
 public class CompiledClass {
     public var publicVar: String = "publicVar"
+    public var helper = CompiledHelper(i: 99)
 
     public init() {
+    }
+}
+
+// SKIP @bridge
+public class CompiledHelper {
+    public var i: Int
+
+    public init(i: Int) {
+        self.i = i
     }
 }
 

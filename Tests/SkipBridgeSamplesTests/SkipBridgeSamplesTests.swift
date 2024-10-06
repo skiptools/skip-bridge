@@ -65,6 +65,15 @@ final class SkipBridgeSamplesTests: XCTestCase {
         XCTAssertEqual(c.publicVar, "yyy")
     }
 
+    func testCompiledMemberVar() throws {
+        let c = CompiledClass()
+        c.helper.i = 100
+        XCTAssertEqual(c.helper.i, 100)
+        let helper = CompiledHelper(i: 101)
+        c.helper = helper
+        XCTAssertEqual(c.helper.i, 101)
+    }
+
     #if SKIP
     func testTranspiledVar() throws {
         let i = compiledFuncToTranspiledVar(value: 99)
