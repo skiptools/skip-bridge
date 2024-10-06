@@ -55,12 +55,23 @@ public func compiledFuncToTranspiledComputedVar() -> Int {
     return transpiledComputedVar
 }
 // SKIP @bridge
+public func compiledFuncToTranspiledCompiledVar() -> String {
+    return transpiledCompiledVar.publicVar
+}
+// SKIP @bridge
 public var compiledVarOfTranspiledType = TranspiledClass()
 // SKIP @bridge
 public func compiledFuncToTranspiledVarOfTranspiledType(value: Int) -> Int {
     let c = compiledVarOfTranspiledType
     c.helper.i = value
     return c.helper.i
+}
+// SKIP @bridge
+public func compiledFuncToTranspiledVarOfCompiledType(value: String) -> String {
+    let c = compiledVarOfTranspiledType
+    c.compiled = CompiledClass()
+    c.compiled.publicVar = value
+    return c.compiled.publicVar
 }
 
 protocol Multiplex {

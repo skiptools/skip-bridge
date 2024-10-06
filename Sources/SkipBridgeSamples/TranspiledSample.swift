@@ -15,9 +15,13 @@ public var transpiledComputedVar: Int {
 }
 
 // SKIP @bridge
+public var transpiledCompiledVar = CompiledClass()
+
+// SKIP @bridge
 public class TranspiledClass {
     public var publicVar: String = "publicVar"
     public var helper = TranspiledHelper(i: 99)
+    public var compiled = CompiledClass()
 
     public init() {
     }

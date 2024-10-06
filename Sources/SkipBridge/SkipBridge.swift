@@ -62,7 +62,7 @@ public let SwiftObjectNil = Int64(0)
 #if SKIP
 /// Protocol added to the generated class for a Swift type bridged to Kotlin.
 public protocol SwiftPeerBridged {
-    var Swift_peer: SwiftObjectPointer { get }
+    func Swift_bridgedPeer() -> SwiftObjectPointer
 }
 
 /// Marker type used to guarantee uniqueness of our `Swift_peer` constructor.
@@ -117,7 +117,7 @@ extension SwiftObjectPointer {
         return try! SwiftObjectPointer.call(Java_SwiftPeerBridged_peer_methodID, on: bridged, args: [])
     }
 }
-private let Java_SwiftPeerBridged_class = try! JClass(name: "skip.bridge.SwiftPeerBridged")
-private let Java_SwiftPeerBridged_peer_methodID = Java_SwiftPeerBridged_class.getMethodID(name: "getSwift_Peer", sig: "()J")!
+private let Java_SwiftPeerBridged_class = try! JClass(name: "skip/bridge/SwiftPeerBridged")
+private let Java_SwiftPeerBridged_peer_methodID = Java_SwiftPeerBridged_class.getMethodID(name: "Swift_bridgedPeer", sig: "()J")!
 
 #endif
