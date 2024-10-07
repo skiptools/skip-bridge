@@ -53,6 +53,39 @@ extension JavaBoolean : ExpressibleByBooleanLiteral {
 /// The single shared singleton JNI instance for the process
 public private(set) var jni: JNI! // this gets set "OnLoad" so should always exist
 
+/// Establish a context in which to perform JNI operations.
+///
+/// - Warning: You cannot initiate JNI operations from native code outside of a context.
+public func jniContext<T>(_ block: () throws -> T) rethrows -> T {
+    let jvm: JNIInvokeInterface = jni._jvm.pointee!.pointee
+    var tenv: UnsafeMutableRawPointer?
+    let threadStatus = jvm.GetEnv(jni._jvm, &tenv, JavaInt(JNI_VERSION_1_6))
+    
+    // Ensure that there is a `JNIEnvPointer` for the current thread
+    // See: https://developer.android.com/training/articles/perf-jni#threads
+    switch threadStatus {
+    case JNI_OK:
+        return try block()
+    case JNI_EDETACHED:
+        // we weren't attached to the Java thread; attach, perform the block, and then detach
+        // see https://developer.android.com/training/articles/perf-jni#threads
+        var tenv: JNIEnvPointer!
+        if jvm.AttachCurrentThread(jni._jvm, &tenv, nil) != JNI_OK {
+            fatalError("SkipJNI: unable to attach JNI to current thread")
+        }
+        defer {
+            if jvm.DetachCurrentThread(jni._jvm) != JNI_OK {
+                fatalError("SkipJNI: unable to detach JNI from thread")
+            }
+        }
+        return try block()
+    case JNI_EVERSION:
+        fatalError("SkipJNI: unsupoprted JNI version")
+    default:
+        fatalError("SkipJNI: unexpected JNI thread status: \(threadStatus)")
+    }
+}
+
 /// Gateway to JVM and JNI functionality
 public class JNI {
     /// Our reference to the Java Virtual Machine, to be set on init
@@ -65,53 +98,16 @@ public class JNI {
 }
 
 extension JNI {
-    /// Ensure the `_env` pointer we have is always attached to the current thread
-    ///
-    /// See: https://developer.android.com/training/articles/perf-jni#threads
+    /// Perform an operation with the current thread's `JNIEnviPointer`.
     fileprivate func withEnv<T>(_ block: (JNINativeInterface, JNIEnvPointer) throws -> T) rethrows -> T {
         let jvm: JNIInvokeInterface = _jvm.pointee!.pointee
-
         var tenv: UnsafeMutableRawPointer?
         let threadStatus = jvm.GetEnv(_jvm, &tenv, JavaInt(JNI_VERSION_1_6))
-
-        switch threadStatus {
-        case JNI_OK:
-            let env = tenv!.assumingMemoryBound(to: JNIEnv?.self)
-            // if we're already attached, just invoke the block
-            return try block(env.pointee!.pointee, env)
-        case JNI_EDETACHED:
-            // we weren't attached to the Java thread; attach, perform the block, and then detach
-            // see https://developer.android.com/training/articles/perf-jni#threads
-            var tenv: JNIEnvPointer!
-            if jvm.AttachCurrentThread(_jvm, &tenv, nil) != JNI_OK {
-                fatalError("SkipJNI: unable to attach JNI to current thread")
-            }
-
-            // This should work in theory, but it invalidates any local references that were created from this thread, possibly before a global reference may have been created, which will then crash the next time the thread is references
-            //defer {
-            //    if jvm.DetachCurrentThread(_jvm) != JNI_OK {
-            //        fatalError("SkipJNI: unable to detach JNI from thread")
-            //    }
-            //}
-
-            // so instead we register a cleanup function for removing the environment when the thread exits, otherwise we will leak the thread
-            let keyCreated = withUnsafeMutablePointer(to: &jniEnvKey, {
-                pthread_key_create($0, { _ in
-                    // thread destructor callback
-                    _ = jni._jvm.pointee?.pointee.DetachCurrentThread(jni._jvm)
-                })
-            })
-            if keyCreated != 0 {
-                fatalError("SkipJNI: pthread_key_create failed")
-            }
-            pthread_setspecific(jniEnvKey, tenv)
-
-            return try block(tenv.pointee!.pointee, tenv)
-        case JNI_EVERSION:
-            fatalError("SkipJNI: unsupoprted JNI version")
-        default:
-            fatalError("SkipJNI: unexpected JNI thread status: \(threadStatus)")
+        guard threadStatus == JNI_OK else {
+            fatalError("SkipJNI: you must perform JNI operations within a jniContext { ... } block")
         }
+        let env = tenv!.assumingMemoryBound(to: JNIEnv?.self)
+        return try block(env.pointee!.pointee, env)
     }
 
     /// Same as `withEnv`, but also checks for any java exceptions. If an exception occurred,
@@ -139,9 +135,6 @@ extension JNI {
         }
     }
 }
-
-/// Thread cleanup
-private var jniEnvKey = pthread_key_t()
 
 extension JNI {
     /// The JNI version in effect
