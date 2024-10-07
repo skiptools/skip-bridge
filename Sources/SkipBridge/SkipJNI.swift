@@ -411,6 +411,7 @@ public class JObject: JObjectProtocol {
         jni.deleteGlobalRef(ptr)
     }
 
+    /// Return a reference to this object that will not become invalid if this `JObject` struct is deallocated.
     public func safePointer() -> JavaObjectPointer {
         return jni.newLocalRef(ptr)
     }

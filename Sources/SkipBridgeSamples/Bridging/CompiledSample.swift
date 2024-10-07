@@ -74,6 +74,11 @@ public func compiledFuncToTranspiledCompiledVar() -> String {
 // SKIP @bridge
 public var compiledVarOfTranspiledType = TranspiledClass()
 // SKIP @bridge
+public var compiledComputedVarOfTranspiledType: TranspiledClass {
+    // Test case where the native wrapper will be dealloc'd immediately
+    return TranspiledClass()
+}
+// SKIP @bridge
 public func compiledFuncToTranspiledVarOfTranspiledType(value: Int) -> Int {
     let c = compiledVarOfTranspiledType
     c.helper.i = value
