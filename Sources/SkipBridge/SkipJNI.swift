@@ -320,7 +320,11 @@ extension Optional: JObjectProtocol {
 
 extension Optional: JConvertible where Wrapped: JConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> Self {
-        return obj == nil ? nil : try Wrapped.fromJavaObject(obj)
+        if let obj {
+            return try Wrapped.fromJavaObject(obj)
+        } else {
+            return nil
+        }
     }
 
     public func toJavaObject() -> JavaObjectPointer? {
@@ -360,12 +364,13 @@ public protocol JPrimitiveWrapperProtocol: JObjectProtocol {
 extension JPrimitiveWrapperProtocol where Self: JObject {
     public init(_ value: ConvertibleType) {
         // we force try because primitive wrapper initializers should never fail
-        try! self.init(Self.javaClass.create(ctor: Self.initWithPrimitiveValueMethodID, [value.toJavaParameter()]))
+        let ptr = try! Self.javaClass.create(ctor: Self.initWithPrimitiveValueMethodID, args: [value.toJavaParameter()])
+        self.init(ptr)
     }
 
     public var value: ConvertibleType {
         get throws {
-            return try call(method: Self.primitiveValueMethodID, [])
+            return try call(method: Self.primitiveValueMethodID, args: [])
         }
     }
 }
@@ -377,18 +382,18 @@ public protocol JPrimitiveProtocol: JConvertible {
 
 extension JPrimitiveProtocol where WrapperType.ConvertibleType == Self {
     public static func fromJavaObject(_ ptr: JavaObjectPointer?) -> Self {
-        return try! WrapperType.init(ptr!).value
+        return try! Self.call(WrapperType.primitiveValueMethodID, on: ptr!, args: [])
     }
 
     public func toJavaObject() -> JavaObjectPointer? {
-        return (WrapperType.init(self) as? JObject)?.ptr
+        return try! WrapperType.javaClass.create(ctor: WrapperType.initWithPrimitiveValueMethodID, args: [self.toJavaParameter()])
     }
 }
 
 // MARK: Object Wrappers
 
 public class JObject: JObjectProtocol {
-    public let ptr: JavaObjectPointer
+    let ptr: JavaObjectPointer
 
     public init(_ ptr: JavaObjectPointer) {
         self.ptr = jni.newGlobalRef(ptr)
@@ -406,6 +411,10 @@ public class JObject: JObjectProtocol {
         jni.deleteGlobalRef(ptr)
     }
 
+    public func safePointer() -> JavaObjectPointer {
+        return jni.newLocalRef(ptr)
+    }
+
     public func get<T: JConvertible>(field: JavaFieldID) throws -> T {
         return try T.load(field, of: ptr)
     }
@@ -414,11 +423,11 @@ public class JObject: JObjectProtocol {
         value.store(field, of: ptr)
     }
 
-    public func call(method: JavaMethodID, _ args : [JavaParameter]) throws -> Void {
+    public func call(method: JavaMethodID, args : [JavaParameter]) throws -> Void {
         try jni.withEnvThrowing { $0.CallVoidMethodA($1, ptr, method, args) }
     }
 
-    public func call<T>(method: JavaMethodID, _ args: [JavaParameter]) throws -> T where T: JConvertible {
+    public func call<T>(method: JavaMethodID, args: [JavaParameter]) throws -> T where T: JConvertible {
         return try T.call(method, on: ptr, args: args)
     }
 }
@@ -458,7 +467,7 @@ public final class JClass : JObject {
         return jni.withEnv { $0.GetStaticMethodID($1, self.ptr, name, sig) }
     }
 
-    public func create(ctor: JavaMethodID, _ args: [JavaParameter]) throws -> JavaObjectPointer {
+    public func create(ctor: JavaMethodID, args: [JavaParameter]) throws -> JavaObjectPointer {
         guard let obj = try jni.withEnvThrowing({ $0.NewObjectA($1, self.ptr, ctor, args) }) else {
             throw JNIError(clear: true) // init should never return nil
         }
@@ -473,11 +482,11 @@ public final class JClass : JObject {
         value.storeStatic(field, of: self.ptr)
     }
 
-    public func callStatic(method: JavaMethodID, _ args : [JavaParameter]) throws -> Void {
+    public func callStatic(method: JavaMethodID, args : [JavaParameter]) throws -> Void {
         try jni.withEnvThrowing { $0.CallStaticVoidMethodA($1, self.ptr, method, args) }
     }
 
-    public func callStatic<T: JConvertible>(method: JavaMethodID, _ args: [JavaParameter]) throws -> T {
+    public func callStatic<T: JConvertible>(method: JavaMethodID, args: [JavaParameter]) throws -> T {
         return try T.callStatic(method, on: self.ptr, args: args)
     }
 }
@@ -486,17 +495,17 @@ public final class JThrowable: JObject {
     private static let javaClass = try! JClass(name: "java/lang/Throwable")
 
     public func getMessage() throws -> String? {
-        try call(method: Self.getMessageID, [])
+        try call(method: Self.getMessageID, args: [])
     }
     private static let getMessageID = javaClass.getMethodID(name: "getMessage", sig: "()Ljava/lang/String;")!
 
     public func getLocalizedMessage() throws -> String? {
-        try call(method: Self.getLocalizedMessageID, [])
+        try call(method: Self.getLocalizedMessageID, args: [])
     }
     private static let getLocalizedMessageID = javaClass.getMethodID(name: "getLocalizedMessage", sig: "()Ljava/lang/String;")!
 
     public func toString() throws -> String? {
-        try call(method: Self.toStringID, [])
+        try call(method: Self.toStringID, args: [])
     }
     private static let toStringID = javaClass.getMethodID(name: "toString", sig: "()Ljava/lang/String;")!
 
@@ -745,27 +754,9 @@ extension Int: JPrimitiveProtocol {
     #if arch(x86_64) || arch(arm64)
     public typealias WrapperType = JLong
     private typealias Convertible = Int64
-
-    public static func fromJavaObject(_ ptr: JavaObjectPointer?) -> Self {
-        return try! Int(JLong(ptr!).value)
-    }
-
-    public func toJavaObject() -> JavaObjectPointer? {
-        return JLong(Int64(self)).ptr
-    }
-    
     #else
-
     public typealias WrapperType = JInteger
     private typealias Convertible = Int32
-    
-    public static func fromJavaObject(_ ptr: JavaObjectPointer?) -> Self {
-        return try! Int(JInteger(ptr!).value)
-    }
-
-    public func toJavaObject() -> JavaObjectPointer? {
-        return JInteger(Int32(self)).ptr
-    }
     #endif
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int {
@@ -794,6 +785,14 @@ extension Int: JPrimitiveProtocol {
 
     public func toJavaParameter() -> JavaParameter {
         return Convertible(self).toJavaParameter()
+    }
+
+    public static func fromJavaObject(_ ptr: JavaObjectPointer?) -> Self {
+        return Int(Convertible.fromJavaObject(ptr))
+    }
+
+    public func toJavaObject() -> JavaObjectPointer? {
+        return Convertible(self).toJavaObject()
     }
 }
 

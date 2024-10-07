@@ -22,7 +22,7 @@ let Java_loadLibrary_methodID = Java_fileClass.getStaticMethodID(name: "loadLibr
 public func loadLibrary(_ libName: String) {
     #if !SKIP
     let libName_java = libName.toJavaParameter()
-    try! Java_fileClass.callStatic(method: Java_loadLibrary_methodID, [libName_java])
+    try! Java_fileClass.callStatic(method: Java_loadLibrary_methodID, args: [libName_java])
     #else
     // Xcode output for dynamic library
     // user.dir: ~/Developer/Xcode/DerivedData/ProjectName/SourcePackages/plugins/skip-jni.output/SkipBridgeSamplesTests/skipstone/SkipBridgeSamples

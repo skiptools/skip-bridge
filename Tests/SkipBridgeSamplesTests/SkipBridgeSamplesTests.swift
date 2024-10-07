@@ -57,6 +57,13 @@ final class SkipBridgeSamplesTests: XCTestCase {
         #endif
     }
 
+    func testCompiledOptionalVar() throws {
+        globalBridgeOptionalIntField = 99
+        XCTAssertEqual(99, globalBridgeOptionalIntField)
+        globalBridgeOptionalIntField = nil
+        XCTAssertNil(globalBridgeOptionalIntField)
+    }
+
     func testCompiledClass() throws {
         let c = CompiledClass()
         c.publicVar = "xxx"

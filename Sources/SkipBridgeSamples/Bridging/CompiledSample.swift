@@ -30,6 +30,9 @@ public let globalJavaGetFileSeparator: String = try! getJavaProperty("file.separ
 public let globalCompiledtoTranspiledCall = transpiledGlobalFuction(n1: 1.1, n2: 2)
 
 // SKIP @bridge
+public var globalBridgeOptionalIntField: Int? = 1
+
+// SKIP @bridge
 public class CompiledClass {
     public var publicVar: String = "publicVar"
     public var helper = CompiledHelper(i: 99)
@@ -111,7 +114,7 @@ import SkipBridge
 private func getJavaProperty(_ propertyName: String) throws -> String {
     let systemClass = try JClass(name: "java/lang/System")
     let getProperty = systemClass.getStaticMethodID(name: "getProperty", sig: "(Ljava/lang/String;)Ljava/lang/String;")!
-    return try systemClass.callStatic(method: getProperty, [propertyName.toJavaParameter()])
+    return try systemClass.callStatic(method: getProperty, args: [propertyName.toJavaParameter()])
 }
 #endif
 
