@@ -1,26 +1,26 @@
 
 #if SKIP
 
-// SKIP @bridge
+// SKIP @bridgeToSwift
 public func transpiledGlobalFuction(n1: Float, n2: Int8) -> Double {
     return Double(n1) + Double(n2)
 }
 
-// SKIP @bridge
+// SKIP @bridgeToSwift
 public var transpiledVar = 99
 
-// SKIP @bridge
+// SKIP @bridgeToSwift
 public var transpiledOptionalVar: Int? = 1
 
-// SKIP @bridge
+// SKIP @bridgeToSwift
 public var transpiledComputedVar: Int {
     return 100
 }
 
-// SKIP @bridge
+// SKIP @bridgeToSwift
 public var transpiledCompiledVar = CompiledClass()
 
-// SKIP @bridge
+// SKIP @bridgeToSwift
 public class TranspiledClass {
     public var publicVar: String = "publicVar"
     public var helper = TranspiledHelper(i: 99)
@@ -34,7 +34,7 @@ public class TranspiledClass {
     }
 }
 
-// SKIP @bridge
+// SKIP @bridgeToSwift
 public class TranspiledHelper {
     public var i: Int
 

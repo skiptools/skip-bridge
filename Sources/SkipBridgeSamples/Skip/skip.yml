@@ -1,4 +1,4 @@
 
 skip:
-  #mode: 'compile'
-  mode: 'transpile'
+  #mode: 'swift'
+  mode: 'kotlin'
