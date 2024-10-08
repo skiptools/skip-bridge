@@ -1,45 +1,165 @@
+// Copyright 2024 Skip
+//
+// This is free software: you can redistribute and/or modify it
+// under the terms of the GNU Lesser General Public License 3.0
+// as published by the Free Software Foundation https://fsf.org
 
 #if SKIP
 
+// MARK: Global constants
+
 // SKIP @bridgeToSwift
-public func transpiledGlobalFuction(n1: Float, n2: Int8) -> Double {
-    return Double(n1) + Double(n2)
+public let kotlinBoolConstant = true
+//- SKIP @bridgeToSwift
+//- TODO: public let kotlinCharacterConstant: Character = "a"
+// SKIP @bridgeToSwift
+public let kotlinDoubleConstant = 1.0
+// SKIP @bridgeToSwift
+public let kotlinFloatConstant = Float(2.0)
+// SKIP @bridgeToSwift
+public let kotlinInt8Constant = Int8(3)
+// SKIP @bridgeToSwift
+public let kotlinInt16Constant = Int16(4)
+// SKIP @bridgeToSwift
+public let kotlinInt32Constant = Int32(5)
+// SKIP @bridgeToSwift
+public let kotlinInt64Constant = Int64(6)
+// SKIP @bridgeToSwift
+public let kotlinIntConstant = 7
+// TODO: Unsigned values
+// SKIP @bridgeToSwift
+public let kotlinStringConstant = "s"
+
+// MARK: Global optional constants
+
+// SKIP @bridgeToSwift
+public let kotlinOptionalBoolConstant: Bool? = true
+//- SKIP @bridgeToSwift
+//- TODO: public let kotlinOptionalCharacterConstant: Character? = "a"
+// SKIP @bridgeToSwift
+public let kotlinOptionalDoubleConstant: Double? = 1.0
+// SKIP @bridgeToSwift
+public let kotlinOptionalFloatConstant: Float? = Float(2.0)
+// SKIP @bridgeToSwift
+public let kotlinOptionalInt8Constant: Int8? = nil
+// SKIP @bridgeToSwift
+public let kotlinOptionalInt16Constant: Int16? = Int16(3)
+// SKIP @bridgeToSwift
+public let kotlinOptionalInt32Constant: Int32? = Int32(4)
+// SKIP @bridgeToSwift
+public let kotlinOptionalInt64Constant: Int64? = Int64(5)
+// SKIP @bridgeToSwift
+public let kotlinOptionalIntConstant: Int? = 6
+// TODO: Unsigned values
+// SKIP @bridgeToSwift
+public let kotlinOptionalStringConstant: String? = "s"
+
+// MARK: Global vars
+
+// SKIP @bridgeToSwift
+public var kotlinBoolVar = true
+//- SKIP @bridgeToSwift
+//- TODO: public var kotlinCharacterVar: Character = "a"
+// SKIP @bridgeToSwift
+public var kotlinDoubleVar = 1.0
+// SKIP @bridgeToSwift
+public var kotlinFloatVar = Float(2.0)
+// SKIP @bridgeToSwift
+public var kotlinInt8Var = Int8(3)
+// SKIP @bridgeToSwift
+public var kotlinInt16Var = Int16(4)
+// SKIP @bridgeToSwift
+public var kotlinInt32Var = Int32(5)
+// SKIP @bridgeToSwift
+public var kotlinInt64Var = Int64(6)
+// SKIP @bridgeToSwift
+public var kotlinIntVar = 7
+// TODO: Unsigned values
+// SKIP @bridgeToSwift
+public var kotlinStringVar = "s"
+// SKIP @bridgeToSwift
+public var kotlinClassVar = KotlinHelperClass()
+// SKIP @bridgeToSwift
+public var kotlinSwiftClassVar = SwiftHelperClass()
+
+// MARK: Global optional vars
+
+// SKIP @bridgeToSwift
+public var kotlinOptionalBoolVar: Bool? = true
+//- SKIP @bridgeToSwift
+//- TODO: public var kotlinOptionalCharacterVar: Character? = "a"
+// SKIP @bridgeToSwift
+public var kotlinOptionalDoubleVar: Double? = 1.0
+// SKIP @bridgeToSwift
+public var kotlinOptionalFloatVar: Float? = Float(2.0)
+// SKIP @bridgeToSwift
+public var kotlinOptionalInt8Var: Int8? = nil
+// SKIP @bridgeToSwift
+public var kotlinOptionalInt16Var: Int16? = Int16(3)
+// SKIP @bridgeToSwift
+public var kotlinOptionalInt32Var: Int32? = Int32(4)
+// SKIP @bridgeToSwift
+public var kotlinOptionalInt64Var: Int64? = Int64(5)
+// SKIP @bridgeToSwift
+public var kotlinOptionalIntVar: Int? = 6
+// TODO: Unsigned values
+// SKIP @bridgeToSwift
+public var kotlinOptionalStringVar: String? = "s"
+
+// MARK: Global computed vars
+
+// SKIP @bridgeToSwift
+public var kotlinIntComputedVar: Int {
+    get {
+        return kotlinIntVar
+    }
+    set {
+        kotlinIntVar = newValue
+    }
 }
 
 // SKIP @bridgeToSwift
-public var transpiledVar = 99
-
-// SKIP @bridgeToSwift
-public var transpiledOptionalVar: Int? = 1
-
-// SKIP @bridgeToSwift
-public var transpiledComputedVar: Int {
-    return 100
+public var kotlinClassComputedVar: KotlinHelperClass {
+    get {
+        return kotlinClassVar
+    }
+    set {
+        kotlinClassVar = newValue
+    }
 }
 
 // SKIP @bridgeToSwift
-public var transpiledCompiledVar = CompiledClass()
+public var kotlinSwiftClassComputedVar: SwiftHelperClass {
+    get {
+        return kotlinSwiftClassVar
+    }
+    set {
+        kotlinSwiftClassVar = newValue
+    }
+}
+
+// MARK: Classes
 
 // SKIP @bridgeToSwift
-public class TranspiledClass {
-    public var publicVar: String = "publicVar"
-    public var helper = TranspiledHelper(i: 99)
-    public var compiled = CompiledClass()
+public class KotlinClass {
+    public let intConstant = 1
+    public let kotlinClassConstant = KotlinHelperClass()
+
+    public var intVar = 1
+    public var optionalIntVar: Int? = nil
+
+    public var kotlinClassVar = KotlinHelperClass()
+    public var swiftClassVar = SwiftHelperClass()
 
     public init() {
     }
-
-    public func transpiledFromCompiled() -> Int64 {
-        return 123
-    }
 }
 
 // SKIP @bridgeToSwift
-public class TranspiledHelper {
-    public var i: Int
+public class KotlinHelperClass {
+    public var stringVar = "s"
 
-    public init(i: Int) {
-        self.i = i
+    public init() {
     }
 }
 

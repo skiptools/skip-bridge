@@ -1,101 +1,182 @@
+// Copyright 2024 Skip
+//
+// This is free software: you can redistribute and/or modify it
+// under the terms of the GNU Lesser General Public License 3.0
+// as published by the Free Software Foundation https://fsf.org
+
+// MARK: Global constants
 
 // SKIP @bridgeToKotlin
-public let globalBridgeInt64Field: Int64 = Int64(123).multiplex(with: Int64(456))
+public let swiftBoolConstant = true
+//- SKIP @bridgeToKotlin
+//- TODO: public let swiftCharacterConstant: Character = "a"
+// SKIP @bridgeToKotlin
+public let swiftDoubleConstant = 1.0
+// SKIP @bridgeToKotlin
+public let swiftFloatConstant: Float = 2.0
+// SKIP @bridgeToKotlin
+public let swiftInt8Constant: Int8 = 3
+// SKIP @bridgeToKotlin
+public let swiftInt16Constant: Int16 = 4
+// SKIP @bridgeToKotlin
+public let swiftInt32Constant: Int32 = 5
+// SKIP @bridgeToKotlin
+public let swiftInt64Constant: Int64 = 6
+// SKIP @bridgeToKotlin
+public let swiftIntConstant = 7
+// TODO: Unsigned values
+// SKIP @bridgeToKotlin
+public let swiftStringConstant = "s"
+// SKIP @bridgeToKotlin
+public let swiftClassConstant = SwiftHelperClass()
+// SKIP @bridgeToKotlin
+public let swiftKotlinClassConstant = KotlinHelperClass()
+
+// MARK: Global optional constants
 
 // SKIP @bridgeToKotlin
-public let globalBridgeDoubleField: Double = Double(123).multiplex(with: Double(456))
+public let swiftOptionalBoolConstant: Bool? = true
+//- SKIP @bridgeToKotlin
+//- TODO: public let swiftOptionalCharacterConstant: Character? = "a"
+// SKIP @bridgeToKotlin
+public let swiftOptionalDoubleConstant: Double? = 1.0
+// SKIP @bridgeToKotlin
+public let swiftOptionalFloatConstant: Float? = 2.0
+// SKIP @bridgeToKotlin
+public let swiftOptionalInt8Constant: Int8? = nil
+// SKIP @bridgeToKotlin
+public let swiftOptionalInt16Constant: Int16? = 3
+// SKIP @bridgeToKotlin
+public let swiftOptionalInt32Constant: Int32? = 4
+// SKIP @bridgeToKotlin
+public let swiftOptionalInt64Constant: Int64? = 5
+// SKIP @bridgeToKotlin
+public let swiftOptionalIntConstant: Int? = 6
+// TODO: Unsigned values
+// SKIP @bridgeToKotlin
+public let swiftOptionalStringConstant: String? = "s"
+
+// MARK: Global vars
 
 // SKIP @bridgeToKotlin
-public let globalBridgeInt8Field: Int8 = Int8(16).multiplex(with: Int8(7))
+public var swiftBoolVar = true
+//- SKIP @bridgeToKotlin
+//- TODO: public var swiftCharacterVar: Character = "a"
+// SKIP @bridgeToKotlin
+public var swiftDoubleVar = 1.0
+// SKIP @bridgeToKotlin
+public var swiftFloatVar: Float = 2.0
+// SKIP @bridgeToKotlin
+public var swiftInt8Var: Int8 = 3
+// SKIP @bridgeToKotlin
+public var swiftInt16Var: Int16 = 4
+// SKIP @bridgeToKotlin
+public var swiftInt32Var: Int32 = 5
+// SKIP @bridgeToKotlin
+public var swiftInt64Var: Int64 = 6
+// SKIP @bridgeToKotlin
+public var swiftIntVar = 7
+// TODO: Unsigned values
+// SKIP @bridgeToKotlin
+public var swiftStringVar = "s"
+// SKIP @bridgeToKotlin
+public var swiftClassVar = SwiftHelperClass()
+// SKIP @bridgeToKotlin
+public var swiftKotlinClassVar = KotlinHelperClass()
+
+// MARK: Global optional vars
 
 // SKIP @bridgeToKotlin
-public let globalBridgeUInt8Field: UInt8 = UInt8(16).multiplex(with: UInt8(15))
+public var swiftOptionalBoolVar: Bool? = true
+//- SKIP @bridgeToKotlin
+//- TODO: public var swiftOptionalCharacterVar: Character? = "a"
+// SKIP @bridgeToKotlin
+public var swiftOptionalDoubleVar: Double? = 1.0
+// SKIP @bridgeToKotlin
+public var swiftOptionalFloatVar: Float? = 2.0
+// SKIP @bridgeToKotlin
+public var swiftOptionalInt8Var: Int8? = nil
+// SKIP @bridgeToKotlin
+public var swiftOptionalInt16Var: Int16? = 3
+// SKIP @bridgeToKotlin
+public var swiftOptionalInt32Var: Int32? = 4
+// SKIP @bridgeToKotlin
+public var swiftOptionalInt64Var: Int64? = 5
+// SKIP @bridgeToKotlin
+public var swiftOptionalIntVar: Int? = 6
+// TODO: Unsigned values
+// SKIP @bridgeToKotlin
+public var swiftOptionalStringVar: String? = "s"
+
+// MARK: Global computed vars
 
 // SKIP @bridgeToKotlin
-public let globalBridgeStringField = "abc" + "123"
+public var swiftIntComputedVar: Int {
+    get {
+        return swiftIntVar
+    }
+    set {
+        swiftIntVar = newValue
+    }
+}
 
 // SKIP @bridgeToKotlin
-public let globalBridgeUTF8String1Field = "😀" + ""
+public var swiftClassComputedVar: SwiftHelperClass {
+    get {
+        return swiftClassVar
+    }
+    set {
+        swiftClassVar = newValue
+    }
+}
 
 // SKIP @bridgeToKotlin
-public let globalBridgeUTF8String2Field = "🚀" + "123"
+public var swiftKotlinClassComputedVar: KotlinHelperClass {
+    get {
+        return swiftKotlinClassVar
+    }
+    set {
+        swiftKotlinClassVar = newValue
+    }
+}
+
+// MARK: Classes
 
 // SKIP @bridgeToKotlin
-public let globalBridgeUTF8String3Field = "😀" + "🚀"
+public class SwiftClass {
+    public let intConstant = 1
+    public let swiftClassConstant = SwiftHelperClass()
 
-// SKIP @bridgeToKotlin
-public let globalJavaGetFileSeparator: String = try! getJavaProperty("file.separator")
+    public var intVar = 1
+    public var optionalIntVar: Int? = nil
 
-// SKIP @bridgeToKotlin
-public let globalCompiledtoTranspiledCall = transpiledGlobalFuction(n1: 1.1, n2: 2)
-
-// SKIP @bridgeToKotlin
-public var globalBridgeOptionalIntField: Int? = 1
-
-// SKIP @bridgeToKotlin
-public class CompiledClass {
-    public var publicVar: String = "publicVar"
-    public var helper = CompiledHelper(i: 99)
+    public var swiftClassVar = SwiftHelperClass()
+    // TODO: needs to be optional 
+//    public var swiftKotlinClassVar = KotlinHelperClass()
 
     public init() {
     }
 }
 
 // SKIP @bridgeToKotlin
-public class CompiledHelper {
-    public var i: Int
+public class SwiftHelperClass {
+    public var stringVar = "s"
 
-    public init(i: Int) {
-        self.i = i
+    public init() {
     }
 }
 
-// Testing helpers: we can only access test transpiled-to-compiled bridging by going
-// through a compiled function
+// MARK: Unicode
+
 // SKIP @bridgeToKotlin
-public func compiledFuncToTranspiledClassPublicVar(value: String) -> String {
-    let c = TranspiledClass()
-    c.publicVar = value
-    return c.publicVar
-}
+public let swiftUTF8StringVar1 = "😀" + ""
 // SKIP @bridgeToKotlin
-public func compiledFuncToTranspiledVar(value: Int) -> Int {
-    transpiledVar = value
-    return transpiledVar
-}
+public let swiftUTF8StringVar2 = "🚀" + "123"
 // SKIP @bridgeToKotlin
-public func compiledFuncToTranspiledOptionalVar(value: Int?) -> Int? {
-    transpiledOptionalVar = value
-    return transpiledOptionalVar
-}
-// SKIP @bridgeToKotlin
-public func compiledFuncToTranspiledComputedVar() -> Int {
-    return transpiledComputedVar
-}
-// SKIP @bridgeToKotlin
-public func compiledFuncToTranspiledCompiledVar() -> String {
-    return transpiledCompiledVar.publicVar
-}
-// SKIP @bridgeToKotlin
-public var compiledVarOfTranspiledType = TranspiledClass()
-// SKIP @bridgeToKotlin
-public var compiledComputedVarOfTranspiledType: TranspiledClass {
-    // Test case where the native wrapper will be dealloc'd immediately
-    return TranspiledClass()
-}
-// SKIP @bridgeToKotlin
-public func compiledFuncToTranspiledVarOfTranspiledType(value: Int) -> Int {
-    let c = compiledVarOfTranspiledType
-    c.helper.i = value
-    return c.helper.i
-}
-// SKIP @bridgeToKotlin
-public func compiledFuncToTranspiledVarOfCompiledType(value: String) -> String {
-    let c = compiledVarOfTranspiledType
-    c.compiled = CompiledClass()
-    c.compiled.publicVar = value
-    return c.compiled.publicVar
-}
+public let swiftUTF8StringVar3 = "😀" + "🚀"
+
+// MARK: Sanity check
+// This code is not supported by our transpiler and ensures that we're compiling to native Swift
 
 protocol Multiplex {
     func multiplex(with: Self) -> Self
@@ -117,14 +198,3 @@ extension UInt32 : Multiplex { }
 extension UInt64 : Multiplex { }
 extension Float : Multiplex { }
 extension Double : Multiplex { }
-
-#if canImport(SkipBridge)
-import SkipBridge
-
-private func getJavaProperty(_ propertyName: String) throws -> String {
-    let systemClass = try JClass(name: "java/lang/System")
-    let getProperty = systemClass.getStaticMethodID(name: "getProperty", sig: "(Ljava/lang/String;)Ljava/lang/String;")!
-    return try systemClass.callStatic(method: getProperty, args: [propertyName.toJavaParameter()])
-}
-#endif
-
