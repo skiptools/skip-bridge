@@ -87,6 +87,13 @@ final class SkipBridgeSamplesTests: XCTestCase {
         XCTAssertEqual(i, 99)
     }
 
+    func testTranspiledOptionalVar() throws {
+        let i = compiledFuncToTranspiledOptionalVar(value: 99)
+        XCTAssertEqual(i, 99)
+        let i2 = compiledFuncToTranspiledOptionalVar(value: nil)
+        XCTAssertNil(i2)
+    }
+
     func testTranspiledComputedVar() throws {
         let i = compiledFuncToTranspiledComputedVar()
         XCTAssertEqual(i, 100)

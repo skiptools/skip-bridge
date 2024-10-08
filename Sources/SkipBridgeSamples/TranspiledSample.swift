@@ -10,6 +10,9 @@ public func transpiledGlobalFuction(n1: Float, n2: Int8) -> Double {
 public var transpiledVar = 99
 
 // SKIP @bridge
+public var transpiledOptionalVar: Int? = 1
+
+// SKIP @bridge
 public var transpiledComputedVar: Int {
     return 100
 }

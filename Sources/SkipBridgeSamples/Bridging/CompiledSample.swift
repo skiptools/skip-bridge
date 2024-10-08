@@ -64,6 +64,11 @@ public func compiledFuncToTranspiledVar(value: Int) -> Int {
     return transpiledVar
 }
 // SKIP @bridge
+public func compiledFuncToTranspiledOptionalVar(value: Int?) -> Int? {
+    transpiledOptionalVar = value
+    return transpiledOptionalVar
+}
+// SKIP @bridge
 public func compiledFuncToTranspiledComputedVar() -> Int {
     return transpiledComputedVar
 }
