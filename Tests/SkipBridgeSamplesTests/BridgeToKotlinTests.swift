@@ -118,7 +118,7 @@ final class BridgeToKotlinTests: XCTestCase {
 
     #if SKIP
     func testKotlinClassVar() {
-        XCTAssertEqual(testSupport_swiftKotlinClassVar_replaced_stringVar("ss"), "ss")
+        XCTAssertEqual(testSupport_swiftKotlinClassVar_stringVar(value: "ss"), "ss")
     }
     #endif
 
@@ -136,7 +136,7 @@ final class BridgeToKotlinTests: XCTestCase {
 
     #if SKIP
     func testComputedKotlinClassVar() {
-        XCTAssertEqual(testSupport_swiftKotlinClassComputedVar_replaced_stringVar("computed"), "computed")
+        XCTAssertEqual(testSupport_swiftKotlinClassComputedVar_stringVar(value: "computed"), "computed")
     }
     #endif
 
@@ -175,7 +175,7 @@ final class BridgeToKotlinTests: XCTestCase {
     // TODO:
 //    #if SKIP
 //    func testSwiftClassMemberKotlinClassVar() {
-//        XCTAssertEqual(testSupport_swiftKotlinClassMemberVar_replaced_stringVar("member"), "member")
+//        XCTAssertEqual(testSupport_swiftKotlinClassMemberVar_stringVar(value: "member"), "member")
 //    }
 //    #endif
 

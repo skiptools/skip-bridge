@@ -29,6 +29,10 @@ public let kotlinIntConstant = 7
 // TODO: Unsigned values
 // SKIP @bridgeToSwift
 public let kotlinStringConstant = "s"
+// SKIP @bridgeToSwift
+public var kotlinClassConstant = KotlinHelperClass()
+// SKIP @bridgeToSwift
+public var kotlinSwiftClassConstant = SwiftHelperClass()
 
 // MARK: Global optional constants
 
