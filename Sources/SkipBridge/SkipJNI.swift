@@ -348,20 +348,20 @@ public protocol JPrimitiveWrapperProtocol: JObjectProtocol {
     static var initWithPrimitiveValueMethodID: JavaMethodID { get }
     static var primitiveValueMethodID: JavaMethodID { get }
 
-    associatedtype ConvertibleType: JConvertible
-    var value: ConvertibleType { get throws }
-    init(_ value: ConvertibleType)
+    associatedtype JConvertibleType: JConvertible
+    var value: JConvertibleType { get throws }
+    init(_ value: JConvertibleType)
     init(_ obj: JavaObjectPointer)
 }
 
 extension JPrimitiveWrapperProtocol where Self: JObject {
-    public init(_ value: ConvertibleType) {
+    public init(_ value: JConvertibleType) {
         // we force try because primitive wrapper initializers should never fail
         let ptr = try! Self.javaClass.create(ctor: Self.initWithPrimitiveValueMethodID, args: [value.toJavaParameter()])
         self.init(ptr)
     }
 
-    public var value: ConvertibleType {
+    public var value: JConvertibleType {
         get throws {
             return try call(method: Self.primitiveValueMethodID, args: [])
         }
@@ -370,16 +370,16 @@ extension JPrimitiveWrapperProtocol where Self: JObject {
 
 /// A Java primitive
 public protocol JPrimitiveProtocol: JConvertible {
-    associatedtype WrapperType: JPrimitiveWrapperProtocol
+    associatedtype JWrapperType: JPrimitiveWrapperProtocol
 }
 
-extension JPrimitiveProtocol where WrapperType.ConvertibleType == Self {
+extension JPrimitiveProtocol where JWrapperType.JConvertibleType == Self {
     public static func fromJavaObject(_ ptr: JavaObjectPointer?) -> Self {
-        return try! Self.call(WrapperType.primitiveValueMethodID, on: ptr!, args: [])
+        return try! Self.call(JWrapperType.primitiveValueMethodID, on: ptr!, args: [])
     }
 
     public func toJavaObject() -> JavaObjectPointer? {
-        return try! WrapperType.javaClass.create(ctor: WrapperType.initWithPrimitiveValueMethodID, args: [self.toJavaParameter()])
+        return try! JWrapperType.javaClass.create(ctor: JWrapperType.initWithPrimitiveValueMethodID, args: [self.toJavaParameter()])
     }
 }
 
@@ -511,14 +511,14 @@ public final class JThrowable: JObject {
 // MARK: Primitives
 
 public final class JBoolean: JObject, JPrimitiveWrapperProtocol {
-    public typealias ConvertibleType = Bool
+    public typealias JConvertibleType = Bool
     public static let javaClass = try! JClass(name: "java/lang/Boolean")
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(Z)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "booleanValue", sig: "()Z")!
 }
 
 extension Bool: JPrimitiveProtocol {
-    public typealias WrapperType = JBoolean
+    public typealias JWrapperType = JBoolean
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Bool {
         try jni.withEnvThrowing { $0.CallBooleanMethodA($1, obj, method, args) == JNI_TRUE }
@@ -550,14 +550,14 @@ extension Bool: JPrimitiveProtocol {
 }
 
 final public class JByte: JObject, JPrimitiveWrapperProtocol {
-    public typealias ConvertibleType = Int8
+    public typealias JConvertibleType = Int8
     public static let javaClass = try! JClass(name: "java/lang/Byte")
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(B)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "byteValue", sig: "()B")!
 }
 
 extension Int8: JPrimitiveProtocol {
-    public typealias WrapperType = JByte
+    public typealias JWrapperType = JByte
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int8 {
         try jni.withEnvThrowing { $0.CallByteMethodA($1, obj, method, args) }
@@ -589,14 +589,14 @@ extension Int8: JPrimitiveProtocol {
 }
 
 public final class JChar: JObject, JPrimitiveWrapperProtocol {
-    public typealias ConvertibleType = UInt16
+    public typealias JConvertibleType = UInt16
     public static let javaClass = try! JClass(name: "java/lang/Character")
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(C)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "charValue", sig: "()C")!
 }
 
 extension UInt16: JPrimitiveProtocol {
-    public typealias WrapperType = JChar
+    public typealias JWrapperType = JChar
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> UInt16 {
         try jni.withEnvThrowing { $0.CallCharMethodA($1, obj, method, args) }
@@ -628,14 +628,14 @@ extension UInt16: JPrimitiveProtocol {
 }
 
 public final class JShort: JObject, JPrimitiveWrapperProtocol {
-    public typealias ConvertibleType = Int16
+    public typealias JConvertibleType = Int16
     public static let javaClass = try! JClass(name: "java/lang/Short")
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(S)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "shortValue", sig: "()S")!
 }
 
 extension Int16: JPrimitiveProtocol {
-    public typealias WrapperType = JShort
+    public typealias JWrapperType = JShort
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int16 {
         try jni.withEnvThrowing { $0.CallShortMethodA($1, obj, method, args) }
@@ -667,14 +667,14 @@ extension Int16: JPrimitiveProtocol {
 }
 
 public final class JInteger: JObject, JPrimitiveWrapperProtocol {
-    public typealias ConvertibleType = Int32
+    public typealias JConvertibleType = Int32
     public static let javaClass = try! JClass(name: "java/lang/Integer")
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(I)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "intValue", sig: "()I")!
 }
 
 extension Int32: JPrimitiveProtocol {
-    public typealias WrapperType = JInteger
+    public typealias JWrapperType = JInteger
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int32 {
         try jni.withEnvThrowing { $0.CallIntMethodA($1, obj, method, args) }
@@ -706,14 +706,14 @@ extension Int32: JPrimitiveProtocol {
 }
 
 public final class JLong: JObject, JPrimitiveWrapperProtocol {
-    public typealias ConvertibleType = Int64
+    public typealias JConvertibleType = Int64
     public static let javaClass = try! JClass(name: "java/lang/Long")
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(J)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "longValue", sig: "()J")!
 }
 
 extension Int64: JPrimitiveProtocol {
-    public typealias WrapperType = JLong
+    public typealias JWrapperType = JLong
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int64 {
         try jni.withEnvThrowing { $0.CallLongMethodA($1, obj, method, args) }
@@ -746,10 +746,10 @@ extension Int64: JPrimitiveProtocol {
 
 extension Int: JPrimitiveProtocol {
     #if arch(x86_64) || arch(arm64)
-    public typealias WrapperType = JLong
+    public typealias JWrapperType = JLong
     private typealias Convertible = Int64
     #else
-    public typealias WrapperType = JInteger
+    public typealias JWrapperType = JInteger
     private typealias Convertible = Int32
     #endif
 
@@ -791,14 +791,14 @@ extension Int: JPrimitiveProtocol {
 }
 
 public final class JFloat: JObject, JPrimitiveWrapperProtocol {
-    public typealias ConvertibleType = Float
+    public typealias JConvertibleType = Float
     public static let javaClass = try! JClass(name: "java/lang/Float")
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(F)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "floatValue", sig: "()F")!
 }
 
 extension Float: JPrimitiveProtocol {
-    public typealias WrapperType = JFloat
+    public typealias JWrapperType = JFloat
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Float {
         try jni.withEnvThrowing { $0.CallFloatMethodA($1, obj, method, args) }
@@ -830,14 +830,14 @@ extension Float: JPrimitiveProtocol {
 }
 
 public final class JDouble: JObject, JPrimitiveWrapperProtocol {
-    public typealias ConvertibleType = Double
+    public typealias JConvertibleType = Double
     public static let javaClass = try! JClass(name: "java/lang/Double")
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(D)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "doubleValue", sig: "()D")!
 }
 
 extension Double: JPrimitiveProtocol {
-    public typealias WrapperType = JDouble
+    public typealias JWrapperType = JDouble
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Double {
         try jni.withEnvThrowing { $0.CallDoubleMethodA($1, obj, method, args) }

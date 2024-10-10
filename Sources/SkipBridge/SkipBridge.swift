@@ -4,6 +4,8 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
+// MARK: loadLibrary
+
 #if !SKIP
 let Java_fileClass = try! JClass(name: "skip.bridge.SkipBridgeKt")
 let Java_loadLibrary_methodID = Java_fileClass.getStaticMethodID(name: "loadLibrary", sig: "(Ljava/lang/String;)V")!
@@ -54,6 +56,8 @@ public func loadLibrary(_ libName: String) {
     }
     #endif
 }
+
+// MARK: SwiftObjectPointer
 
 /// An opaque reference to a Swift object.
 public typealias SwiftObjectPointer = Int64

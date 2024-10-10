@@ -183,14 +183,6 @@ public func testSupport_kotlinSwiftClassVar_stringVar(value: String) -> String {
 }
 
 // SKIP @bridgeToKotlin
-public func testSupport_swiftKotlinClassVar_stringVar(value: String) -> String {
-    let helper = KotlinHelperClass()
-    helper.stringVar = value
-    swiftKotlinClassVar = helper
-    return swiftKotlinClassVar.stringVar
-}
-
-// SKIP @bridgeToKotlin
 public func testSupport_kotlinOptionalBoolVar(value: Bool?) -> Bool? {
     kotlinOptionalBoolVar = value
     return kotlinOptionalBoolVar
@@ -245,6 +237,30 @@ public func testSupport_kotlinOptionalStringVar(value: String?) -> String? {
 }
 
 // SKIP @bridgeToKotlin
+public func testSupport_kotlinOptionalClassVar_stringVar(value: String?) -> String? {
+    if let value {
+        let helper = KotlinHelperClass()
+        helper.stringVar = value
+        kotlinOptionalClassVar = helper
+    } else {
+        kotlinOptionalClassVar = nil
+    }
+    return kotlinOptionalClassVar?.stringVar
+}
+
+// SKIP @bridgeToKotlin
+public func testSupport_kotlinOptionalSwiftClassVar_stringVar(value: String?) -> String? {
+    if let value {
+        let helper = SwiftHelperClass()
+        helper.stringVar = value
+        kotlinOptionalSwiftClassVar = helper
+    } else {
+        kotlinOptionalSwiftClassVar = nil
+    }
+    return kotlinOptionalSwiftClassVar?.stringVar
+}
+
+// SKIP @bridgeToKotlin
 public func testSupport_kotlinIntComputedVar(value: Int) -> Int {
     kotlinIntComputedVar = value
     return kotlinIntComputedVar
@@ -269,6 +285,26 @@ public func testSupport_kotlinSwiftClassComputedVar_stringVar(value: String) -> 
 // MARK: Used by BridgeToKotlinTests
 
 // SKIP @bridgeToKotlin
+public func testSupport_swiftKotlinClassVar_stringVar(value: String) -> String {
+    let helper = KotlinHelperClass()
+    helper.stringVar = value
+    swiftKotlinClassVar = helper
+    return swiftKotlinClassVar.stringVar
+}
+
+// SKIP @bridgeToKotlin
+public func testSupport_swiftOptionalKotlinClassVar_stringVar(value: String?) -> String? {
+    if let value {
+        let helper = KotlinHelperClass()
+        helper.stringVar = value
+        swiftOptionalKotlinClassVar = helper
+    } else {
+        swiftOptionalKotlinClassVar = nil
+    }
+    return swiftOptionalKotlinClassVar?.stringVar
+}
+
+// SKIP @bridgeToKotlin
 public func testSupport_swiftKotlinClassComputedVar_stringVar(value: String) -> String {
     let helper = KotlinHelperClass()
     helper.stringVar = value
@@ -276,11 +312,11 @@ public func testSupport_swiftKotlinClassComputedVar_stringVar(value: String) -> 
     return swiftKotlinClassComputedVar.stringVar
 }
 
-//- SKIP @bridgeToKotlin
-//public func testSupport_swiftKotlinClassMemberVar_stringVar(string: String) -> String {
-//    let helper = KotlinHelperClass()
-//    helper.stringVar = string
-//    let value = SwiftClass()
-//    value.swiftKotlinClassVar = helper
-//    return value.swiftKotlinClassVar.stringVar
-//}
+// SKIP @bridgeToKotlin
+public func testSupport_swiftKotlinClassMemberVar_stringVar(value: String) -> String? {
+    let helper = KotlinHelperClass()
+    helper.stringVar = value
+    let subject = SwiftClass()
+    subject.optionalKotlinClassVar = helper
+    return subject.optionalKotlinClassVar?.stringVar
+}
