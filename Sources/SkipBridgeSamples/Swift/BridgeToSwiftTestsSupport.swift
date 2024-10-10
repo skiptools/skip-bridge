@@ -282,6 +282,14 @@ public func testSupport_kotlinSwiftClassComputedVar_stringVar(value: String) -> 
     return kotlinSwiftClassComputedVar.stringVar
 }
 
+// SKIP @bridgeToKotlin
+public func testSupport_kotlinClosure1Var(value: Int) -> String {
+    let s1 = kotlinClosure1Var(value)
+    kotlinClosure1Var = { i in "value = \(i)" }
+    let s2 = kotlinClosure1Var(value)
+    return s1 == s2 ? s1 : s1 + "/" + s2
+}
+
 // MARK: Used by BridgeToKotlinTests
 
 // SKIP @bridgeToKotlin

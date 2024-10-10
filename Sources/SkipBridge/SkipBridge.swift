@@ -63,17 +63,7 @@ public func loadLibrary(_ libName: String) {
 public typealias SwiftObjectPointer = Int64
 public let SwiftObjectNil = Int64(0)
 
-#if SKIP
-/// Protocol added to the generated class for a Swift type bridged to Kotlin.
-public protocol SwiftPeerBridged {
-    func Swift_bridgedPeer() -> SwiftObjectPointer
-}
-
-/// Marker type used to guarantee uniqueness of our `Swift_peer` constructor.
-public final class SwiftPeerMarker {
-}
-
-#else
+#if !SKIP
 
 extension SwiftObjectPointer {
     /// Get a pointer to the given object.
@@ -124,16 +114,80 @@ extension SwiftObjectPointer {
 private let Java_SwiftPeerBridged_class = try! JClass(name: "skip/bridge/SwiftPeerBridged")
 private let Java_SwiftPeerBridged_peer_methodID = Java_SwiftPeerBridged_class.getMethodID(name: "Swift_bridgedPeer", sig: "()J")!
 
+#else
+
+/// Protocol added to the generated class for a Swift type bridged to Kotlin.
+public protocol SwiftPeerBridged {
+    func Swift_bridgedPeer() -> SwiftObjectPointer
+}
+
+/// Marker type used to guarantee uniqueness of our `Swift_peer` constructor.
+public final class SwiftPeerMarker {
+}
+
 #endif
 
 // MARK: Closures
 
-/*
+#if !SKIP
 
-#if SKIP
+//~~~ Single class for all arities?
+//~~~ Handle void?
+//~~~ Do we need all this to be public?
 
-public final class JavaFunction1<P0, R>: kotlin.jvm.functions.Function1<P0, R> {
-    private let Swift_peer: SwiftObjectPointer
+/// A Swift object that is backed by a Java closure in the form of a `kotlin.jvm.functions.FunctionN` object.
+public final class JavaBackedClosure1<R>: JObject where R: JConvertible {
+    /// Invoke the underlying closure.
+    public func invoke(_ p0: JConvertible) throws -> R {
+        let p0_java = p0.toJavaObject().toJavaParameter()
+        //~~~ handle non-object return types?
+        return try call(method: Java_Function1_invoke_methodID, args: [p0_java])
+    }
+}
+private let Java_Function1_class = try! JClass(name: "kotlin/jvm/functions/Function1")
+private let Java_Function1_invoke_methodID = Java_Function1_class.getMethodID(name: "invoke", sig: "(Ljava/lang/Object;)Ljava/lang/Object;")!
+
+/// A Swift class that houses a closure.
+///
+/// This class can perform argument conversions and allows us to reference it with a `SwiftObjectPointer`.
+public final class SwiftClosure1 {
+    /// Create a Java closure in the form of a `kotlin.jvm.functions.FunctionN` backed by a Swift closure.
+    public static func javaObject<P0, R>(for closure: @escaping (P0) -> R) -> JavaObjectPointer {
+        let swiftPeer = SwiftClosure1(p0Type: P0.self) { p0 in
+            return closure(p0 as! P0)
+        }
+        let swiftPeerPtr = SwiftObjectPointer.pointer(to: swiftPeer, retain: true)
+        return try! Java_SwiftBackedFunction1_class.create(ctor: Java_SwiftBackedFunction1_constructor_methodID, args: [swiftPeerPtr.toJavaParameter()])
+    }
+
+    public let closure: (Any) -> Any
+    public let p0Type: Any.Type
+
+    public init(p0Type: Any.Type, closure: @escaping (Any) -> Any) {
+        self.p0Type = p0Type
+        self.closure = closure
+    }
+}
+private let Java_SwiftBackedFunction1_class = try! JClass(name: "skip/bridge/SwiftBackedFunction1")
+private let Java_SwiftBackedFunction1_constructor_methodID = Java_SwiftBackedFunction1_class.getMethodID(name: "<init>", sig: "(J)V")!
+
+@_cdecl("Java_skip_bridge_SwiftBackedFunction1_Swift_1release")
+func SwiftBackedFunction1_Swift_release(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer) {
+    Swift_peer.release(as: SwiftClosure1.self)
+}
+@_cdecl("Java_skip_bridge_SwiftBackedFunction1_Swift_1invoke")
+func SwiftBackedFunction1_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer) -> JavaObjectPointer {
+    let value_swift: SwiftClosure1 = Swift_peer.pointee()!
+    let p0_swift = try! (value_swift.p0Type as! JConvertible.Type).fromJavaObject(p0)
+    let c_return_swift = value_swift.closure(p0_swift) as! JConvertible
+    return c_return_swift.toJavaObject()!
+}
+
+#else
+
+/// A Swift-backed `kotlin.jvm.functions.FunctionN` type.
+public final class SwiftBackedFunction1<P0, R>: kotlin.jvm.functions.Function1<P0, R> {
+    private var Swift_peer: SwiftObjectPointer
 
     public init(Swift_peer: SwiftObjectPointer) {
         self.Swift_peer = Swift_peer
@@ -147,27 +201,10 @@ public final class JavaFunction1<P0, R>: kotlin.jvm.functions.Function1<P0, R> {
     private func Swift_release(Swift_peer: SwiftObjectPointer)
 
     public override func invoke(_ p0: P0) -> R {
-        return Swift_JavaFunction1_invoke(p0)
+        return Swift_invoke(Swift_peer, p0 as! Any) as! R
     }
+    // SKIP EXTERN
+    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any) -> Any
 }
-
-#else
-
-public final class JavaFunction1<R>: JObject where R: JConvertible {
-    //~~~ should not be optional return
-    public static func javaObject(for: (JConvertible) -> R) -> JavaObjectPointer? {
-        // Create and return a JavaFunction1
-        return nil
-    }
-
-    public func invoke(_ p0: JConvertible) throws -> R {
-        let p0_java = p0.toJavaParameter()
-        return try call(method: Java_Function0_invokeMethodID, args: [p0_java])
-    }
-}
-private let Java_Function0_class = try! JClass(name: "kotlin/jvm/functions/Function1")
-private let Java_Function0_invokeMethodID = Java_Function0_class.getMethodID(name: "invoke", sig: "(Ljava/lang/Object)Ljava/lang/Object;")!
 
 #endif
-
-*/

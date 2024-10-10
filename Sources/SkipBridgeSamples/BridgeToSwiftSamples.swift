@@ -174,3 +174,8 @@ public class KotlinHelperClass {
     public init() {
     }
 }
+
+// MARK: Closures
+
+// SKIP @bridgeToSwift
+public var kotlinClosure1Var: (Int) -> String = { i in "value = \(i)" }
