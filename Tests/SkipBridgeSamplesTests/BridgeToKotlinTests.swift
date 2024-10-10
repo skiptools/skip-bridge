@@ -11,7 +11,7 @@ import XCTest
 final class BridgeToKotlinTests: XCTestCase {
     override func setUp() {
         #if SKIP
-        loadPeerLibrary("SkipBridgeSamples")
+        loadPeerLibrary(packageName: "skip-brige", moduleName: "SkipBridgeSamples")
         #endif
     }
 
@@ -181,7 +181,7 @@ final class BridgeToKotlinTests: XCTestCase {
 
     func testUnicode() {
         XCTAssertEqual("😀", swiftUTF8StringVar1)
-        XCTAssertEqual("🚀123", swiftUTF8StringVar2)
+        XCTAssertEqual("🚀123456", swiftUTF8StringVar2)
         XCTAssertEqual("😀🚀", swiftUTF8StringVar3)
 
         #if !SKIP
@@ -196,6 +196,10 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertNotEqual("😀🚀", swiftUTF8StringVar3)
         XCTAssertEqual([240, 159], codePoints)
         #endif
+    }
+
+    func testGlobalFunction() {
+        XCTAssertEqual(8, multiplyInt32s(i1: 2, i2: 4))
     }
 }
 

@@ -4,14 +4,15 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
-#if SKIP
 import SkipBridgeSamples
 import XCTest
 
 // XXXSKIP INSERT: @org.junit.runner.RunWith(androidx.test.ext.junit.runners.AndroidJUnit4::class)
 final class BridgeToSwiftTests: XCTestCase {
     override func setUp() {
-        loadPeerLibrary("SkipBridgeSamples")
+        #if SKIP
+        loadPeerLibrary(packageName: "skip-brige", moduleName: "SkipBridgeSamples")
+        #endif
     }
 
     func testSimpleConstants() {
@@ -140,5 +141,3 @@ final class BridgeToSwiftTests: XCTestCase {
 //    #endif
      */
 }
-
-#endif

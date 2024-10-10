@@ -171,12 +171,18 @@ public class SwiftHelperClass {
 // SKIP @bridgeToKotlin
 public let swiftUTF8StringVar1 = "😀" + ""
 // SKIP @bridgeToKotlin
-public let swiftUTF8StringVar2 = "🚀" + "123"
+public let swiftUTF8StringVar2 = "🚀" + "123" + "456"
 // SKIP @bridgeToKotlin
 public let swiftUTF8StringVar3 = "😀" + "🚀"
 
 // MARK: Sanity check
 // This code is not supported by our transpiler and ensures that we're compiling to native Swift
+
+// SKIP @bridgeToKotlin
+public func multiplyInt32s(i1: Int32, i2: Int32) -> Int32 {
+    // FIXME: no-name parameters don't bridge: multiplyInt32s(_ i1: Int32, _ i2: Int32):
+    i1.multiplex(with: i2)
+}
 
 protocol Multiplex {
     func multiplex(with: Self) -> Self

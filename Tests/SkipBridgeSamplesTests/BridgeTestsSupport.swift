@@ -15,7 +15,7 @@
 /// 2. Xcode-launched Skip gradle tests, where gradle's JVM needs to load the Xcode created-library ("SkipBridgeSamples.framework/SkipBridgeSamples")
 /// 3. SwiftPM-launched Swift tests where the embedded JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
 /// 4. SwiftPM-launched Skip gradle tests, where gradle's JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
-func loadPeerLibrary(_ libName: String) {
+func loadPeerLibrary(packageName: String, moduleName libName: String) {
     //print("System.getenv(): \(System.getenv())")
 
     // Xcode output for dynamic library
@@ -24,14 +24,15 @@ func loadPeerLibrary(_ libName: String) {
 
     // XCTestBundlePath=/Users/marc/Library/Developer/Xcode/DerivedData/Skip-Everything-aqywrhrzhkbvfseiqgxuufbdwdft/Build/Products/Debug/SkipBridgeSamplesTests.xctest
     var libraryPath: String
+    let arch = System.getProperty("os.arch") == "aarch64" ? "arm64-apple-macosx" : "x86_64-apple-macosx"
     if let testBundlePath = System.getenv()["XCTestBundlePath"] { // running from within Xcode
-        libraryPath = testBundlePath + "/../PackageFrameworks/\(libName).framework/\(libName)"
+        libraryPath = testBundlePath + "/../../../../SourcePackages/plugins/skip-bridge.output/\(libName)/skipstone/\(libName)/src/main/swift/.build/\(arch)/debug/lib\(libName).dylib"
     } else {
+        // ### TODO: need to update for forked swift build output
         let cwd = System.getProperty("user.dir")
         // from gradle: /opt/src/github/skiptools/skip-jni/.build/plugins/outputs/skip-jni/SkipBridgeSamplesTests/skipstone
         // from swiftPM CLI: /opt/src/github/skiptools/skip-jni
         let dylib = "lib\(libName).dylib"
-        let arch = System.getProperty("os.arch") == "aarch64" ? "arm64-apple-macosx" : "x86_64-apple-macosx"
         libraryPath = cwd + "/.build/\(arch)/debug/\(dylib)" // Swift-launched JVM
         if !java.io.File(libraryPath).isFile() {
             libraryPath = cwd + "/../../../../../../\(arch)/debug/\(dylib)" // gradle-launched JVM

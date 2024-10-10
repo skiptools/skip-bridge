@@ -4,7 +4,7 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
-#if SKIP
+// This file is transpiled to Kotlin with downcalls generated for each @bridgeToSwift
 
 // MARK: Global constants
 
@@ -166,5 +166,3 @@ public class KotlinHelperClass {
     public init() {
     }
 }
-
-#endif
