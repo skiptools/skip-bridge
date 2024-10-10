@@ -26,7 +26,7 @@ func loadPeerLibrary(packageName: String, moduleName libName: String) {
     var libraryPath: String
     let arch = System.getProperty("os.arch") == "aarch64" ? "arm64-apple-macosx" : "x86_64-apple-macosx"
     if let testBundlePath = System.getenv()["XCTestBundlePath"] { // running from within Xcode
-        libraryPath = testBundlePath + "/../../../../SourcePackages/plugins/skip-bridge.output/\(libName)/skipstone/\(libName)/src/main/swift/.build/\(arch)/debug/lib\(libName).dylib"
+        libraryPath = testBundlePath + "/../../../../SourcePackages/plugins/\(packageName).output/\(libName)/skipstone/\(libName)/src/main/swift/.build/\(arch)/debug/lib\(libName).dylib"
     } else {
         // ### TODO: need to update for forked swift build output
         let cwd = System.getProperty("user.dir")
@@ -42,6 +42,10 @@ func loadPeerLibrary(packageName: String, moduleName libName: String) {
         }
     }
 
+    if loadedLibraries.contains(libraryPath) {
+        print("note: already loaded library: \(libraryPath)")
+        return
+    }
     // load the native library that contains the function implementations
     if !java.io.File(libraryPath).isFile() {
         fatalError("error: missing library: \(libraryPath)")
@@ -49,7 +53,11 @@ func loadPeerLibrary(packageName: String, moduleName libName: String) {
         print("note: loading library: \(libraryPath)")
         System.load(libraryPath)
         print("note: loaded library: \(libraryPath)")
+        loadedLibraries.insert(libraryPath)
     }
 }
+
+/// The libraries we have already loaded, so we don't try to load them again
+private var loadedLibraries: Set<String> = []
 
 #endif

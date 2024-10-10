@@ -11,7 +11,7 @@ import XCTest
 final class BridgeToKotlinTests: XCTestCase {
     override func setUp() {
         #if SKIP
-        loadPeerLibrary(packageName: "skip-brige", moduleName: "SkipBridgeSamples")
+        loadPeerLibrary(packageName: "skip-bridge", moduleName: "SkipBridgeSamples")
         #endif
     }
 
