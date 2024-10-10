@@ -125,3 +125,49 @@ private let Java_SwiftPeerBridged_class = try! JClass(name: "skip/bridge/SwiftPe
 private let Java_SwiftPeerBridged_peer_methodID = Java_SwiftPeerBridged_class.getMethodID(name: "Swift_bridgedPeer", sig: "()J")!
 
 #endif
+
+// MARK: Closures
+
+/*
+
+#if SKIP
+
+public final class JavaFunction1<P0, R>: kotlin.jvm.functions.Function1<P0, R> {
+    private let Swift_peer: SwiftObjectPointer
+
+    public init(Swift_peer: SwiftObjectPointer) {
+        self.Swift_peer = Swift_peer
+    }
+
+    deinit {
+        Swift_release(Swift_peer)
+        Swift_peer = SwiftObjectNil
+    }
+    // SKIP EXTERN
+    private func Swift_release(Swift_peer: SwiftObjectPointer)
+
+    public override func invoke(_ p0: P0) -> R {
+        return Swift_JavaFunction1_invoke(p0)
+    }
+}
+
+#else
+
+public final class JavaFunction1<R>: JObject where R: JConvertible {
+    //~~~ should not be optional return
+    public static func javaObject(for: (JConvertible) -> R) -> JavaObjectPointer? {
+        // Create and return a JavaFunction1
+        return nil
+    }
+
+    public func invoke(_ p0: JConvertible) throws -> R {
+        let p0_java = p0.toJavaParameter()
+        return try call(method: Java_Function0_invokeMethodID, args: [p0_java])
+    }
+}
+private let Java_Function0_class = try! JClass(name: "kotlin/jvm/functions/Function1")
+private let Java_Function0_invokeMethodID = Java_Function0_class.getMethodID(name: "invoke", sig: "(Ljava/lang/Object)Ljava/lang/Object;")!
+
+#endif
+
+*/
