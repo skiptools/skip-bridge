@@ -745,48 +745,42 @@ extension Int64: JPrimitiveProtocol {
 }
 
 extension Int: JPrimitiveProtocol {
-    #if arch(x86_64) || arch(arm64)
-    public typealias JWrapperType = JLong
-    private typealias Convertible = Int64
-    #else
     public typealias JWrapperType = JInteger
-    private typealias Convertible = Int32
-    #endif
 
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Int {
-        return Int(try Convertible.call(method, on: obj, args: args))
+        return Int(try Int32.call(method, on: obj, args: args))
     }
 
     public static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Int {
-        return Int(try Convertible.callStatic(method, on: cls, args: args))
+        return Int(try Int32.callStatic(method, on: cls, args: args))
     }
 
     public static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Int {
-        return Int(Convertible.load(field, of: obj))
+        return Int(Int32.load(field, of: obj))
     }
 
     public func store(_ field: JavaFieldID, of obj: JavaObjectPointer) {
-        Convertible(self).store(field, of: obj)
+        Int32(self).store(field, of: obj)
     }
 
     public static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Int {
-        return Int(Convertible.loadStatic(field, of: cls))
+        return Int(Int32.loadStatic(field, of: cls))
     }
 
     public func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) {
-        Convertible(self).storeStatic(field, of: cls)
+        Int32(self).storeStatic(field, of: cls)
     }
 
     public func toJavaParameter() -> JavaParameter {
-        return Convertible(self).toJavaParameter()
+        return Int32(self).toJavaParameter()
     }
 
     public static func fromJavaObject(_ ptr: JavaObjectPointer?) -> Self {
-        return Int(Convertible.fromJavaObject(ptr))
+        return Int(Int32.fromJavaObject(ptr))
     }
 
     public func toJavaObject() -> JavaObjectPointer? {
-        return Convertible(self).toJavaObject()
+        return Int32(self).toJavaObject()
     }
 }
 

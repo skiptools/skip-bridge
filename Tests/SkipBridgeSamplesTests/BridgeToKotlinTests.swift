@@ -36,7 +36,7 @@ final class BridgeToKotlinTests: XCTestCase {
     }
 
     func testOptionalConstants() {
-        XCTAssertEqual(swiftOptionalBoolVar, true)
+        XCTAssertEqual(swiftOptionalBoolConstant, true)
         XCTAssertEqual(swiftOptionalDoubleConstant, 1.0)
         XCTAssertEqual(swiftOptionalFloatConstant, Float(2.0))
         XCTAssertNil(swiftOptionalInt8Constant)
