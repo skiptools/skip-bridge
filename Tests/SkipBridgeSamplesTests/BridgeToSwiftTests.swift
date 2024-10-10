@@ -110,6 +110,10 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(testSupport_kotlinClassComputedVar_stringVar(value: "computed"), "computed")
     }
 
+    func testClosure1Var() {
+        XCTAssertEqual(testSupport_kotlinClosure1Var(value: 100), "value = 100")
+    }
+
     /*
     func testSwiftClassMemberConstant() {
         let value = SwiftClass()
