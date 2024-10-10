@@ -12,6 +12,11 @@ build:
           contents:
             # .build/jni-libs/ is the folder where our toolchain outputs the natively-compiled .so files
             - 'getByName("main").jniLibs.srcDirs(".build/jni-libs")'
+        - block: 'packaging'
+          contents:
+            # keepDebugSymbols is needed to prevent errors like: java.lang.UnsatisfiedLinkError: dlopen failed: empty/missing DT_HASH/DT_GNU_HASH in "/data/app/~~Zoepnr93K9vyUtTUUM0POg==/skip.bridge.samples.test-3nePwd6ioGZtLQ0K0EJpBQ==/base.apk!/lib/arm64-v8a/libdispatch.so" (new hash type from the future?)
+            - 'jniLibs.keepDebugSymbols.add("**/*.so")'
+
     - block: 'tasks.register("buildSwiftPackage")'
       export: false
       contents:
@@ -41,8 +46,8 @@ build:
                 #- 'commandLine("sh", "-c", "skip android build -d .build/jni-libs --swift-version 5.10.1 --package-path src/main/swift --verbose")'
 
                 #- 'commandLine("sh", "-c", "skip android build -d .build/jni-libs --swift-version 6.0.1 --package-path src/main/swift")'
-                - 'commandLine("sh", "-c", "swift build --package-path src/main/swift")'
-                #- 'commandLine("sh", "-c", "swift build --package-path src/main/swift && skip android build --package-path src/main/swift")'
+                #- 'commandLine("sh", "-c", "swift build --package-path src/main/swift")'
+                - 'commandLine("sh", "-c", "swift build --package-path src/main/swift && skip android build -d .build/jni-libs --package-path src/main/swift")'
 
                 #  --verbose
                 #- 'commandLine("sh", "-c", "ls .build/jni-libs/*")'

@@ -23,6 +23,16 @@ func loadPeerLibrary(packageName: String, moduleName libName: String) {
     // framework dylib: ~/Library/Developer/Xcode/DerivedData/ProjectName/Build/Products/Debug/PackageFrameworks/SkipBridgeSamples.framework/Versions/A/SkipBridgeSamples
 
     // XCTestBundlePath=/Users/marc/Library/Developer/Xcode/DerivedData/Skip-Everything-aqywrhrzhkbvfseiqgxuufbdwdft/Build/Products/Debug/SkipBridgeSamplesTests.xctest
+
+    // on an Android device this will be something like "google/sdk_gphone64_arm64/emu64a:14/UE1A.230829.050/12077443:userdebug/dev-keys"
+    let isRobolectric = android.os.Build.FINGERPRINT == "robolectric" || android.os.Build.FINGERPRINT == nil
+
+    if !isRobolectric {
+        // we are running on Android, which means the library is packaged with the APK, so we should be able to load it by name
+        System.loadLibrary(libName)
+        return
+    }
+
     var libraryPath: String
     let arch = System.getProperty("os.arch") == "aarch64" ? "arm64-apple-macosx" : "x86_64-apple-macosx"
     if let testBundlePath = System.getenv()["XCTestBundlePath"] { // running from within Xcode
