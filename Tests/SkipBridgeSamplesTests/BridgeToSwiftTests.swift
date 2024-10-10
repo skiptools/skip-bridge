@@ -67,7 +67,7 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(testSupport_kotlinSwiftClassVar_stringVar(value: "ss"), "ss")
     }
 
-    func testOptionalVars() {
+    func testOptionalSimpleVars() {
         XCTAssertEqual(testSupport_kotlinOptionalBoolVar(value: false), false)
         XCTAssertNil(testSupport_kotlinOptionalBoolVar(value: nil))
         XCTAssertEqual(testSupport_kotlinOptionalDoubleVar(value: 101.0), 101.0)
@@ -86,6 +86,16 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertNil(testSupport_kotlinOptionalIntVar(value: nil))
         XCTAssertEqual(testSupport_kotlinOptionalStringVar(value: "ss"), "ss")
         XCTAssertNil(testSupport_kotlinOptionalStringVar(value: nil))
+    }
+
+    func testOptionalKotlinClassVar() {
+        XCTAssertEqual(testSupport_kotlinOptionalClassVar_stringVar(value: "ss"), "ss")
+        XCTAssertNil(testSupport_kotlinOptionalClassVar_stringVar(value: nil))
+    }
+
+    func testOptionalSwiftClassVar() {
+        XCTAssertEqual(testSupport_kotlinOptionalSwiftClassVar_stringVar(value: "ss"), "ss")
+        XCTAssertNil(testSupport_kotlinOptionalSwiftClassVar_stringVar(value: nil))
     }
 
     func testComputedIntVar() {

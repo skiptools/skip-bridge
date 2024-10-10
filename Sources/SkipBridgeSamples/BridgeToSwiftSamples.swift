@@ -57,6 +57,10 @@ public let kotlinOptionalIntConstant: Int? = 6
 // TODO: Unsigned values
 // SKIP @bridgeToSwift
 public let kotlinOptionalStringConstant: String? = "s"
+// SKIP @bridgeToSwift
+public let kotlinOptionalClassConstant: KotlinHelperClass? = KotlinHelperClass()
+// SKIP @bridgeToSwift
+public let kotlinOptionalSwiftClassConstant: SwiftHelperClass? = SwiftHelperClass()
 
 // MARK: Global vars
 
@@ -109,6 +113,10 @@ public var kotlinOptionalIntVar: Int? = 6
 // TODO: Unsigned values
 // SKIP @bridgeToSwift
 public var kotlinOptionalStringVar: String? = "s"
+// SKIP @bridgeToSwift
+public var kotlinOptionalClassVar: KotlinHelperClass? = KotlinHelperClass()
+// SKIP @bridgeToSwift
+public var kotlinOptionalSwiftClassVar: SwiftHelperClass? = SwiftHelperClass()
 
 // MARK: Global computed vars
 
@@ -153,7 +161,7 @@ public class KotlinClass {
     public var optionalIntVar: Int? = nil
 
     public var kotlinClassVar = KotlinHelperClass()
-    public var swiftClassVar = SwiftHelperClass()
+    public var optionalSwiftClassVar = SwiftHelperClass()
 
     public init() {
     }
