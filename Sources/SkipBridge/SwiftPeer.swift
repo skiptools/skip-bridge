@@ -55,15 +55,29 @@ extension SwiftObjectPointer {
     public static func peer(of bridged: JavaObjectPointer) -> SwiftObjectPointer {
         return try! SwiftObjectPointer.call(Java_SwiftPeerBridged_peer_methodID, on: bridged, args: [])
     }
+
+    /// Check whether the given object is `SwiftPeerBridged` and if so, return its `Swift_peer`.
+    public static func filterPeer(of bridged: JavaObjectPointer) -> SwiftObjectPointer? {
+        let ptr: SwiftObjectPointer = try! Java_fileClass.callStatic(method: Java_peer_methodID, args: [bridged.toJavaParameter()])
+        return ptr == SwiftObjectNil ? nil : ptr
+    }
 }
+private let Java_fileClass = try! JClass(name: "skip/bridge/SwiftPeerKt")
+private let Java_peer_methodID = Java_fileClass.getStaticMethodID(name: "Swift_bridgedPeer", sig: "(Ljava/lang/Object;)J")!
 private let Java_SwiftPeerBridged_class = try! JClass(name: "skip/bridge/SwiftPeerBridged")
 private let Java_SwiftPeerBridged_peer_methodID = Java_SwiftPeerBridged_class.getMethodID(name: "Swift_bridgedPeer", sig: "()J")!
+
 
 #else
 
 /// Protocol added to the generated class for a Swift type bridged to Kotlin.
 public protocol SwiftPeerBridged {
     func Swift_bridgedPeer() -> SwiftObjectPointer
+}
+
+/// Return an object's peer if it is `SwiftPeerBridged`, else `SwiftObjectNil`.
+public func Swift_bridgedPeer(object: Any) -> SwiftObjectPointer {
+    return (object as? SwiftPeerBridged)?.Swift_bridgedPeer() ?? SwiftObjectNil
 }
 
 /// Marker type used to guarantee uniqueness of our `Swift_peer` constructor.

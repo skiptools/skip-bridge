@@ -173,6 +173,15 @@ public class SwiftHelperClass {
     }
 }
 
+// MARK: Closures
+
+// SKIP @bridgeToKotlin
+public var swiftClosure1Var: (Int) -> String = { i in "value = \(i)" }
+// SKIP @bridgeToKotlin
+public var swiftClosure1PrimitivesVar: (Int64) -> Int = { l in Int(l / 1000) }
+// SKIP @bridgeToKotlin
+public var swiftClosure1OptionalsVar: (String?) -> Int? = { s in s?.count }
+
 // MARK: Unicode
 
 // SKIP @bridgeToKotlin

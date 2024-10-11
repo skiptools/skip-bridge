@@ -6,29 +6,24 @@
 
 #if !SKIP
 
-/// A Swift object that is backed by a `void`-returning Java closure in the form of a `kotlin.jvm.functions.FunctionN` object.
-public final class JavaBackedVoidClosure: JObject {
-    public func invoke() throws {
-        let _: JavaObjectPointer? = try call(method: Java_Function0_invoke_methodID, args: [])
-    }
-
-    public func invoke(_ p0: JConvertible?) throws {
-        let p0_java = (p0?.toJavaObject()).toJavaParameter()
-        let _: JavaObjectPointer? = try call(method: Java_Function1_invoke_methodID, args: [p0_java])
-    }
-}
-
 /// A Swift object that is backed by a Java closure in the form of a `kotlin.jvm.functions.FunctionN` object.
-public final class JavaBackedClosure<R>: JObject where R: JConvertible {
+public final class JavaBackedClosure<R>: JObject {
     public func invoke() throws -> R {
         let object: JavaObjectPointer? = try call(method: Java_Function0_invoke_methodID, args: [])
-        return try! R.fromJavaObject(object)
+        return returnValue(for: object)
     }
 
     public func invoke(_ p0: JConvertible?) throws -> R {
         let p0_java = (p0?.toJavaObject()).toJavaParameter()
         let object: JavaObjectPointer? = try call(method: Java_Function1_invoke_methodID, args: [p0_java])
-        return try! R.fromJavaObject(object)
+        return returnValue(for: object)
+    }
+
+    private func returnValue(for object: JavaObjectPointer?) -> R {
+        guard R.self != Void.self else {
+            return () as! R
+        }
+        return try! (R.self as! JConvertible.Type).fromJavaObject(object) as! R
     }
 }
 
@@ -40,11 +35,19 @@ private let Java_Function1_invoke_methodID = Java_Function1_class.getMethodID(na
 /// A Swift reference type that wraps a 0-parameters closure.
 public final class SwiftClosure0 {
     public static func javaObject<R>(for closure: @escaping () -> R) -> JavaObjectPointer {
-        let swiftPeer = SwiftClosure0 {
-            return closure()
-        }
+        let swiftPeer = SwiftClosure0(closure: closure)
         let swiftPeerPtr = SwiftObjectPointer.pointer(to: swiftPeer, retain: true)
         return try! Java_SwiftBackedFunction0_class.create(ctor: Java_SwiftBackedFunction0_constructor_methodID, args: [swiftPeerPtr.toJavaParameter()])
+    }
+
+    public static func closure<R>(forJavaObject function: JavaObjectPointer) -> () -> R {
+        if let ptr = SwiftObjectPointer.filterPeer(of: function) {
+            let closure: SwiftClosure0 = ptr.pointee()!
+            return closure.closure as! () -> R
+        } else {
+            let closure = JavaBackedClosure<R>(function)
+            return { try! closure.invoke() }
+        }
     }
 
     public let closure: () -> Any?
@@ -72,14 +75,22 @@ func SwiftBackedFunction0_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target:
 /// A Swift reference type that wraps a 1-parameter closure.
 public final class SwiftClosure1 {
     public static func javaObject<P0: JConvertible, R>(for closure: @escaping (P0) -> R) -> JavaObjectPointer {
-        let swiftPeer = SwiftClosure1 { (p0: P0) in
-            return closure(p0)
-        }
+        let swiftPeer = SwiftClosure1(closure: closure)
         let swiftPeerPtr = SwiftObjectPointer.pointer(to: swiftPeer, retain: true)
         return try! Java_SwiftBackedFunction1_class.create(ctor: Java_SwiftBackedFunction1_constructor_methodID, args: [swiftPeerPtr.toJavaParameter()])
     }
 
-    public let closure: (Any?) -> Any?
+    public static func closure<P0: JConvertible, R>(forJavaObject function: JavaObjectPointer) -> (P0) -> R {
+        if let ptr = SwiftObjectPointer.filterPeer(of: function) {
+            let closure: SwiftClosure1 = ptr.pointee()!
+            return { p0 in closure.closure(p0) as! R }
+        } else {
+            let closure = JavaBackedClosure<R>(function)
+            return { p0 in try! closure.invoke(p0) }
+        }
+    }
+
+    public let closure: (JConvertible) -> Any?
     public let p0Type: Any.Type
     public let returnType: Any.Type
 
@@ -107,7 +118,7 @@ func SwiftBackedFunction1_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target:
 #else
 
 /// A Swift-backed `kotlin.jvm.functions.Function0` implementor.
-public final class SwiftBackedFunction0<R>: kotlin.jvm.functions.Function0<R> {
+public final class SwiftBackedFunction0<R>: kotlin.jvm.functions.Function0<R>, SwiftPeerBridged {
     private var Swift_peer: SwiftObjectPointer
 
     public init(Swift_peer: SwiftObjectPointer) {
@@ -126,10 +137,14 @@ public final class SwiftBackedFunction0<R>: kotlin.jvm.functions.Function0<R> {
     }
     // SKIP EXTERN
     private func Swift_invoke(Swift_peer: SwiftObjectPointer) -> Any?
+
+    override func Swift_bridgedPeer() -> SwiftObjectPointer {
+        return Swift_peer
+    }
 }
 
 /// A Swift-backed `kotlin.jvm.functions.Function1` implementor.
-public final class SwiftBackedFunction1<P0, R>: kotlin.jvm.functions.Function1<P0, R> {
+public final class SwiftBackedFunction1<P0, R>: kotlin.jvm.functions.Function1<P0, R>, SwiftPeerBridged {
     private var Swift_peer: SwiftObjectPointer
 
     public init(Swift_peer: SwiftObjectPointer) {
@@ -148,6 +163,10 @@ public final class SwiftBackedFunction1<P0, R>: kotlin.jvm.functions.Function1<P
     }
     // SKIP EXTERN
     private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?) -> Any?
+
+    override func Swift_bridgedPeer() -> SwiftObjectPointer {
+        return Swift_peer
+    }
 }
 
 #endif
