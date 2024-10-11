@@ -179,3 +179,7 @@ public class KotlinHelperClass {
 
 // SKIP @bridgeToSwift
 public var kotlinClosure1Var: (Int) -> String = { i in "value = \(i)" }
+// SKIP @bridgeToSwift
+public var kotlinClosure1PrimitivesVar: (Int64) -> Int = { l in Int(l / 1000) }
+// SKIP @bridgeToSwift
+public var kotlinClosure1OptionalsVar: (String?) -> Int? = { s in s?.count }

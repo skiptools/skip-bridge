@@ -290,6 +290,22 @@ public func testSupport_kotlinClosure1Var(value: Int) -> String {
     return s1 == s2 ? s1 : s1 + "/" + s2
 }
 
+// SKIP @bridgeToKotlin
+public func testSupport_kotlinClosure1PrimitivesVar(value: Int64) -> Int {
+    let i1 = kotlinClosure1PrimitivesVar(value)
+    kotlinClosure1PrimitivesVar = { l in Int(l / 1000) }
+    let i2 = kotlinClosure1PrimitivesVar(value)
+    return i1 == i2 ? i1 : i1 * 10000 + i2
+}
+
+// SKIP @bridgeToKotlin
+public func testSupport_kotlinClosure1OptionalsVar(value: String?) -> Int? {
+    let i1 = kotlinClosure1OptionalsVar(value)
+    kotlinClosure1OptionalsVar = { s in s?.count }
+    let i2 = kotlinClosure1OptionalsVar(value)
+    return i1 == i2 ? i1 : (i1 ?? 0) * 10000 + (i2 ?? 0)
+}
+
 // MARK: Used by BridgeToKotlinTests
 
 // SKIP @bridgeToKotlin
