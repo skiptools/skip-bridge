@@ -140,8 +140,8 @@ public final class JavaBackedClosure1<R>: JObject where R: JConvertible {
     /// Invoke the underlying closure.
     public func invoke(_ p0: JConvertible) throws -> R {
         let p0_java = p0.toJavaObject().toJavaParameter()
-        //~~~ handle non-object return types?
-        return try call(method: Java_Function1_invoke_methodID, args: [p0_java])
+        let object: JavaObjectPointer = try call(method: Java_Function1_invoke_methodID, args: [p0_java])
+        return try! R.fromJavaObject(object)
     }
 }
 private let Java_Function1_class = try! JClass(name: "kotlin/jvm/functions/Function1")

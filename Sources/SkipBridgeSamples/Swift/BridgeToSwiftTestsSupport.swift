@@ -290,6 +290,14 @@ public func testSupport_kotlinClosure1Var(value: Int) -> String {
     return s1 == s2 ? s1 : s1 + "/" + s2
 }
 
+// SKIP @bridgeToKotlin
+public func testSupport_kotlinClosure1PrimitiveReturnVar(value: String) -> Int {
+    let count1 = kotlinClosure1PrimitiveReturnVar(value)
+    kotlinClosure1PrimitiveReturnVar = { s in s.count }
+    let count2 = kotlinClosure1PrimitiveReturnVar(value)
+    return count1 == count2 ? count1 : count1 * 10000 + count2
+}
+
 // MARK: Used by BridgeToKotlinTests
 
 // SKIP @bridgeToKotlin
