@@ -184,6 +184,35 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(testSupport_swiftKotlinClassMemberVar_stringVar(value: "member"), "member")
     }
 
+    public func testClosure1Var() {
+        let orig = swiftClosure1Var
+        XCTAssertEqual(swiftClosure1Var(99), "value = 99")
+        swiftClosure1Var = { i in "kotlin = \(i)" }
+        XCTAssertEqual(swiftClosure1Var(99), "kotlin = 99")
+        swiftClosure1Var = orig
+        XCTAssertEqual(swiftClosure1Var(99), "value = 99")
+    }
+
+    public func testClosure1PrimitivesVar() {
+        XCTAssertEqual(swiftClosure1PrimitivesVar(Int64(3000)), 3)
+        swiftClosure1PrimitivesVar = { l in Int(l / 500) }
+        XCTAssertEqual(swiftClosure1PrimitivesVar(Int64(3000)), 6)
+    }
+
+    public func testClosure1OptionalsVar() {
+        XCTAssertEqual(swiftClosure1OptionalsVar("abc"), 3)
+        XCTAssertNil(swiftClosure1OptionalsVar(nil))
+        swiftClosure1OptionalsVar = { s in
+            if let s {
+                return s.count * 2
+            } else {
+                return nil
+            }
+        }
+        XCTAssertEqual(swiftClosure1OptionalsVar("abc"), 6)
+        XCTAssertNil(swiftClosure1OptionalsVar(nil))
+    }
+
     func testUnicode() {
         XCTAssertEqual("😀", swiftUTF8StringVar1)
         XCTAssertEqual("🚀123456", swiftUTF8StringVar2)
