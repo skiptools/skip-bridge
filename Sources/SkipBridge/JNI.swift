@@ -261,13 +261,13 @@ public protocol JConvertible {
     static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Self
     static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Self
 
-    static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) throws -> Self
+    static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Self
     func store(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Void
 
-    static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) throws -> Self
+    static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Self
     func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Void
 
-    static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> Self
+    static func fromJavaObject(_ obj: JavaObjectPointer?) -> Self
     func toJavaObject() -> JavaObjectPointer?
 
     func toJavaParameter() -> JavaParameter
@@ -279,23 +279,23 @@ public protocol JObjectProtocol {
 
 extension JConvertible where Self: JObjectProtocol {
     public static func call(_ method: JavaMethodID, on obj: JavaObjectPointer, args: [JavaParameter]) throws -> Self {
-        try fromJavaObject(try jni.withEnvThrowing { $0.CallObjectMethodA($1, obj, method, args) })
+        fromJavaObject(try jni.withEnvThrowing { $0.CallObjectMethodA($1, obj, method, args) })
     }
 
     public static func callStatic(_ method: JavaMethodID, on cls: JavaClassPointer, args: [JavaParameter]) throws -> Self {
-        try fromJavaObject(try jni.withEnvThrowing { $0.CallStaticObjectMethodA($1, cls, method, args) })
+        fromJavaObject(try jni.withEnvThrowing { $0.CallStaticObjectMethodA($1, cls, method, args) })
     }
 
-    public static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) throws -> Self {
-        try fromJavaObject(jni.withEnv { $0.GetObjectField($1, obj, field) })
+    public static func load(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Self {
+        fromJavaObject(jni.withEnv { $0.GetObjectField($1, obj, field) })
     }
 
     public func store(_ field: JavaFieldID, of obj: JavaObjectPointer) -> Void {
         jni.withEnv { $0.SetObjectField($1, obj, field, toJavaObject()) }
     }
 
-    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) throws -> Self {
-        try fromJavaObject(jni.withEnv { $0.GetStaticObjectField($1, cls, field) })
+    public static func loadStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Self {
+        fromJavaObject(jni.withEnv { $0.GetStaticObjectField($1, cls, field) })
     }
 
     public func storeStatic(_ field: JavaFieldID, of cls: JavaClassPointer) -> Void {
@@ -312,9 +312,9 @@ extension Optional: JObjectProtocol {
 }
 
 extension Optional: JConvertible where Wrapped: JConvertible {
-    public static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> Self {
+    public static func fromJavaObject(_ obj: JavaObjectPointer?) -> Self {
         if let obj {
-            return try Wrapped.fromJavaObject(obj)
+            return Wrapped.fromJavaObject(obj)
         } else {
             return nil
         }
@@ -333,7 +333,7 @@ extension JavaObjectPointer: JObjectProtocol {
 }
 
 extension JavaObjectPointer: JConvertible {
-    public static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> JavaObjectPointer {
+    public static func fromJavaObject(_ obj: JavaObjectPointer?) -> JavaObjectPointer {
         return obj!
     }
 
@@ -409,8 +409,8 @@ public class JObject: JObjectProtocol {
         return jni.newLocalRef(ptr)
     }
 
-    public func get<T: JConvertible>(field: JavaFieldID) throws -> T {
-        return try T.load(field, of: ptr)
+    public func get<T: JConvertible>(field: JavaFieldID) -> T {
+        return T.load(field, of: ptr)
     }
 
     public func set<T: JConvertible>(field: JavaFieldID, value: T) {
@@ -468,8 +468,8 @@ public final class JClass : JObject {
         return obj
     }
 
-    public func getStatic<T: JConvertible>(field: JavaFieldID) throws -> T {
-        return try T.loadStatic(field, of: ptr)
+    public func getStatic<T: JConvertible>(field: JavaFieldID) -> T {
+        return T.loadStatic(field, of: ptr)
     }
 
     public func setStatic<T: JConvertible>(field: JavaFieldID, value: T) {
@@ -865,14 +865,14 @@ extension Double: JPrimitiveProtocol {
 extension String: JObjectProtocol, JConvertible {
     private static let javaClass = try! JClass(name: "java/lang/String")
 
-    public static func fromJavaObject(_ obj: JavaObjectPointer?) throws -> String {
-        try jni.withEnv { jnii, env in
+    public static func fromJavaObject(_ obj: JavaObjectPointer?) -> String {
+        jni.withEnv { jnii, env in
             guard let chars = jnii.GetStringUTFChars(env, obj, nil) else {
-                throw JNIError(description: "Could not get characters from String", clear: false)
+                fatalError("Could not get characters from String")
             }
             defer { jnii.ReleaseStringUTFChars(env, obj, chars) }
             guard let str = String(validatingUTF8: chars) else {
-                throw JNIError(description: "Could not get valid UTF8 characters from String", clear: false)
+                fatalError("Could not get valid UTF8 characters from String")
             }
             return str
         }

@@ -23,7 +23,7 @@ public final class JavaBackedClosure<R>: JObject {
         guard R.self != Void.self else {
             return () as! R
         }
-        return try! (R.self as! JConvertible.Type).fromJavaObject(object) as! R
+        return (R.self as! JConvertible.Type).fromJavaObject(object) as! R
     }
 }
 
@@ -74,13 +74,19 @@ func SwiftBackedFunction0_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target:
 
 /// A Swift reference type that wraps a 1-parameter closure.
 public final class SwiftClosure1 {
-    public static func javaObject<P0: JConvertible, R>(for closure: @escaping (P0) -> R) -> JavaObjectPointer {
+    public static func javaObject<P0: JConvertible, R>(for closure: ((P0) -> R)?) -> JavaObjectPointer? {
+        guard let closure else {
+            return nil
+        }
         let swiftPeer = SwiftClosure1(closure: closure)
         let swiftPeerPtr = SwiftObjectPointer.pointer(to: swiftPeer, retain: true)
         return try! Java_SwiftBackedFunction1_class.create(ctor: Java_SwiftBackedFunction1_constructor_methodID, args: [swiftPeerPtr.toJavaParameter()])
     }
 
-    public static func closure<P0: JConvertible, R>(forJavaObject function: JavaObjectPointer) -> (P0) -> R {
+    public static func closure<P0: JConvertible, R>(forJavaObject function: JavaObjectPointer?) -> ((P0) -> R)? {
+        guard let function else {
+            return nil
+        }
         if let ptr = SwiftObjectPointer.filterPeer(of: function) {
             let closure: SwiftClosure1 = ptr.pointee()!
             return { p0 in closure.closure(p0) as! R }
@@ -110,7 +116,7 @@ func SwiftBackedFunction1_Swift_release(_ Java_env: JNIEnvPointer, _ Java_target
 @_cdecl("Java_skip_bridge_SwiftBackedFunction1_Swift_1invoke")
 func SwiftBackedFunction1_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer?) -> JavaObjectPointer? {
     let value_swift: SwiftClosure1 = Swift_peer.pointee()!
-    let p0_swift = try! (value_swift.p0Type as! JConvertible.Type).fromJavaObject(p0)
+    let p0_swift = (value_swift.p0Type as! JConvertible.Type).fromJavaObject(p0)
     let c_return_swift = value_swift.closure(p0_swift)
     return value_swift.returnType == Void.self ? nil : (c_return_swift as! JConvertible).toJavaObject()
 }
