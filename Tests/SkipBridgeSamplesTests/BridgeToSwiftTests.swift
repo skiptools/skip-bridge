@@ -123,6 +123,18 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(testSupport_kotlinClosure1OptionalsVar(value: nil), nil)
     }
 
+    func testArrays() async throws {
+        let roundtripped = testSupport_kotlinIntArrayVar(value: [4, 5, 6])
+        XCTAssertEqual(roundtripped, [4, 5, 6])
+        XCTAssertEqual(roundtripped[1], 5)
+    }
+
+    func testDictionaries() async throws {
+        let roundtripped = testSupport_kotlinIntStringDictionaryVar(value: [4: "d", 5: "e", 6: "f"])
+        XCTAssertEqual(roundtripped, [4: "d", 5: "e", 6: "f"])
+        XCTAssertEqual(roundtripped[5], "e")
+    }
+
     /*
     func testSwiftClassMemberConstant() {
         let value = SwiftClass()

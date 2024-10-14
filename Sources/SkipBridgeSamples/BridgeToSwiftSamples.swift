@@ -183,3 +183,10 @@ public var kotlinClosure1Var: (Int) -> String = { i in "value = \(i)" }
 public var kotlinClosure1PrimitivesVar: (Int64) -> Int = { l in Int(l / 1000) }
 // SKIP @bridgeToSwift
 public var kotlinClosure1OptionalsVar: (String?) -> Int? = { s in s?.count }
+
+// MARK: Containers
+
+// SKIP @bridgeToSwift
+public var kotlinIntArrayVar = [1, 2, 3]
+// SKIP @bridgeToSwift
+public var kotlinIntStringDictionaryVar = [1: "a", 2: "b", 3: "c"]

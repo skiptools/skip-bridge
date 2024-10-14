@@ -213,6 +213,26 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertNil(swiftClosure1OptionalsVar(nil))
     }
 
+    func testArrays() async throws {
+        XCTAssertEqual(swiftIntArrayVar, [1, 2, 3])
+        XCTAssertEqual(swiftIntArrayVar[1], 2)
+        swiftIntArrayVar = [4, 5, 6, 7]
+        XCTAssertEqual(swiftIntArrayVar, [4, 5, 6, 7])
+        XCTAssertEqual(swiftIntArrayVar[1], 5)
+        swiftIntArrayVar = []
+        XCTAssertEqual(swiftIntArrayVar, Array<Int>())
+    }
+
+    func testDictionaries() async throws {
+        XCTAssertEqual(swiftIntStringDictionaryVar, [1: "a", 2: "b", 3: "c"])
+        XCTAssertEqual(swiftIntStringDictionaryVar[2], "b")
+        swiftIntStringDictionaryVar = [4: "d", 5: "e", 6: "f"]
+        XCTAssertEqual(swiftIntStringDictionaryVar, [4: "d", 5: "e", 6: "f"])
+        XCTAssertEqual(swiftIntStringDictionaryVar[5], "e")
+        swiftIntStringDictionaryVar = [:]
+        XCTAssertEqual(swiftIntStringDictionaryVar, Dictionary<Int, String>())
+    }
+
     func testUnicode() {
         XCTAssertEqual("😀", swiftUTF8StringVar1)
         XCTAssertEqual("🚀123456", swiftUTF8StringVar2)
