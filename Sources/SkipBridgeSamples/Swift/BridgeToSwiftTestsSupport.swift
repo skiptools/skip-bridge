@@ -306,6 +306,18 @@ public func testSupport_kotlinClosure1OptionalsVar(value: String?) -> Int? {
     return i1 == i2 ? i1 : (i1 ?? 0) * 10000 + (i2 ?? 0)
 }
 
+// SKIP @bridgeToKotlin
+public func testSupport_kotlinIntArrayVar(value: [Int]) -> [Int] {
+    kotlinIntArrayVar = value
+    return kotlinIntArrayVar
+}
+
+// SKIP @bridgeToKotlin
+public func testSupport_kotlinIntStringDictionaryVar(value: [Int: String]) -> [Int: String] {
+    kotlinIntStringDictionaryVar = value
+    return kotlinIntStringDictionaryVar
+}
+
 // MARK: Used by BridgeToKotlinTests
 
 // SKIP @bridgeToKotlin

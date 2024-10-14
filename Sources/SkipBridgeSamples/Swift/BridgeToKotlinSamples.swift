@@ -182,6 +182,13 @@ public var swiftClosure1PrimitivesVar: (Int64) -> Int = { l in Int(l / 1000) }
 // SKIP @bridgeToKotlin
 public var swiftClosure1OptionalsVar: (String?) -> Int? = { s in s?.count }
 
+// MARK: Containers
+
+// SKIP @bridgeToKotlin
+public var swiftIntArrayVar = [1, 2, 3]
+// SKIP @bridgeToKotlin
+public var swiftIntStringDictionaryVar = [1: "a", 2: "b", 3: "c"]
+
 // MARK: Unicode
 
 // SKIP @bridgeToKotlin

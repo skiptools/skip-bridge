@@ -866,11 +866,11 @@ extension String: JObjectProtocol, JConvertible {
     private static let javaClass = try! JClass(name: "java/lang/String")
 
     public static func fromJavaObject(_ obj: JavaObjectPointer?) -> String {
-        jni.withEnv { jnii, env in
-            guard let chars = jnii.GetStringUTFChars(env, obj, nil) else {
+        jni.withEnv { jni, env in
+            guard let chars = jni.GetStringUTFChars(env, obj, nil) else {
                 fatalError("Could not get characters from String")
             }
-            defer { jnii.ReleaseStringUTFChars(env, obj, chars) }
+            defer { jni.ReleaseStringUTFChars(env, obj, chars) }
             guard let str = String(validatingUTF8: chars) else {
                 fatalError("Could not get valid UTF8 characters from String")
             }
