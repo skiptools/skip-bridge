@@ -24,8 +24,7 @@ build:
           contents:
             # need to clear any environment variables that are being set by the iOS toolchain
             # we need to remove any that confuse the toolchain
-            #- 'System.getenv().forEach { key, value -> println("ENVIRONMENT: ${key}") }'
-            - 'System.getenv().forEach { key, value -> println("${key}=\"${value}\"") }'
+            - 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
 
             - block: 'exec'
               contents:

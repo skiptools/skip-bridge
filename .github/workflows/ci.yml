@@ -18,14 +18,7 @@ jobs:
   test-skip-bridge:
     runs-on: macos-13
     steps:
-      - uses: gradle/actions/setup-gradle@v3
-      - uses: actions/setup-java@v4
-        with:
-          java-version: '22'
-          distribution: 'temurin'
-      - run: java -version
-      - run: brew install skiptools/skip/skip
-      - run: skip doctor
+      - uses: gradle/actions/setup-gradle@v4
+      - run: brew install skiptools/skip/swift-android-toolchain@6.0
       - uses: actions/checkout@v4
       - run: swift test
-

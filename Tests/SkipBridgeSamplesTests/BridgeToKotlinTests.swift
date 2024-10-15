@@ -5,9 +5,9 @@
 // as published by the Free Software Foundation https://fsf.org
 
 import SkipBridgeSamples
+import SkipBridge
 import XCTest
 
-// XXXSKIP INSERT: @org.junit.runner.RunWith(androidx.test.ext.junit.runners.AndroidJUnit4::class)
 final class BridgeToKotlinTests: XCTestCase {
     override func setUp() {
         #if SKIP
