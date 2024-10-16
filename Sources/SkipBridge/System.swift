@@ -4,11 +4,6 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
-#if !SKIP
-private let Java_fileClass = try! JClass(name: "skip.bridge.SystemKt")
-private let Java_loadLibrary_methodID = Java_fileClass.getStaticMethodID(name: "loadLibrary", sig: "(Ljava/lang/String;)V")!
-#endif
-
 /// In order to use JNI to access the Swift side of the bridge, we need to first manually load the library.
 /// This only works on macOS; Android will need to load the .so from the embedded jni library path.
 ///
@@ -19,43 +14,19 @@ private let Java_loadLibrary_methodID = Java_fileClass.getStaticMethodID(name: "
 /// 2. Xcode-launched Skip gradle tests, where gradle's JVM needs to load the Xcode created-library ("SkipBridgeSamples.framework/SkipBridgeSamples")
 /// 3. SwiftPM-launched Swift tests where the embedded JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
 /// 4. SwiftPM-launched Skip gradle tests, where gradle's JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
-public func loadLibrary(_ libName: String) {
+public func loadLibrary(packageName: String, moduleName libName: String) throws {
     #if !SKIP
     let libName_java = libName.toJavaParameter()
-    try! Java_fileClass.callStatic(method: Java_loadLibrary_methodID, args: [libName_java])
+    try Java_systemClass.get().callStatic(method: Java_loadLibrary_methodID.get(), args: [libName_java])
     #else
-    // Xcode output for dynamic library
-    // user.dir: ~/Developer/Xcode/DerivedData/ProjectName/SourcePackages/plugins/skip-jni.output/SkipBridgeSamplesTests/skipstone/SkipBridgeSamples
-    // framework dylib: ~/Library/Developer/Xcode/DerivedData/ProjectName/Build/Products/Debug/PackageFrameworks/SkipBridgeSamples.framework/Versions/A/SkipBridgeSamples
-
-    // XCTestBundlePath=/Users/marc/Library/Developer/Xcode/DerivedData/Skip-Everything-aqywrhrzhkbvfseiqgxuufbdwdft/Build/Products/Debug/SkipBridgeSamplesTests.xctest
-    var libraryPath: String
-    if let testBundlePath = System.getenv()["XCTestBundlePath"] { // running from within Xcode
-        libraryPath = testBundlePath + "/../PackageFrameworks/\(libName).framework/Versions/A/\(libName)"
-    } else {
-        let cwd = System.getProperty("user.dir")
-        // from gradle: /opt/src/github/skiptools/skip-jni/.build/plugins/outputs/skip-jni/SkipBridgeSamplesTests/skipstone
-        // from swiftPM CLI: /opt/src/github/skiptools/skip-jni
-        let dylib = "lib\(libName).dylib"
-        let arch = System.getProperty("os.arch") == "aarch64" ? "arm64-apple-macosx" : "x86_64-apple-macosx"
-        libraryPath = cwd + "/.build/\(arch)/debug/\(dylib)" // Swift-launched JVM
-        if !java.io.File(libraryPath).isFile() {
-            libraryPath = cwd + "/../../../../../../\(arch)/debug/\(dylib)" // gradle-launched JVM
-        }
-    }
-
-    // load the native library that contains the function implementations
-    if !java.io.File(libraryPath).isFile() {
-        print("warning: missing library: \(libraryPath)")
-    } else {
-        print("note: loading library: \(libraryPath)")
-        System.load(libraryPath)
-        print("note: loaded library: \(libraryPath)")
-    }
+    loadPeerLibrary(packageName: packageName, moduleName: libName)
     #endif
 }
 
-#if SKIP
+#if !SKIP
+private let Java_systemClass = Result { try JClass(name: "skip.bridge.SystemKt") }
+private let Java_loadLibrary_methodID = Result { try Java_systemClass.get().getStaticMethodID(name: "loadLibrary", sig: "(Ljava/lang/String;)V")! }
+#else
 /// The libraries we have already loaded, so we don't try to load them again
 private var loadedLibraries: Set<String> = []
 
@@ -69,8 +40,9 @@ private var loadedLibraries: Set<String> = []
 /// 2. Xcode-launched Skip gradle tests, where gradle's JVM needs to load the Xcode created-library ("SkipBridgeSamples.framework/SkipBridgeSamples")
 /// 3. SwiftPM-launched Swift tests where the embedded JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
 /// 4. SwiftPM-launched Skip gradle tests, where gradle's JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
-public func loadPeerLibrary(packageName: String, moduleName libName: String) {
-    //print("System.getenv(): \(System.getenv())")
+public func loadPeerLibrary(packageName: String, moduleName libName: String) throws {
+    let env = System.getenv()
+    //print("System.getenv(): \(env.toSortedMap())")
 
     // Xcode output for dynamic library
     // user.dir: ~/Developer/Xcode/DerivedData/ProjectName/SourcePackages/plugins/skip-jni.output/SkipBridgeSamplesTests/skipstone/SkipBridgeSamples
@@ -82,36 +54,44 @@ public func loadPeerLibrary(packageName: String, moduleName libName: String) {
     let isRobolectric = android.os.Build.FINGERPRINT == "robolectric" || android.os.Build.FINGERPRINT == nil
 
     if !isRobolectric {
-        // we are running on Android, which means the library is packaged with the APK, so we should be able to load it by name
+        // we are running on Android, which means the library is packaged with the APK, so we should be able to simply load it by name
         System.loadLibrary(libName)
         return
     }
 
-    var libraryPath: String
-    let arch = System.getProperty("os.arch") == "aarch64" ? "arm64-apple-macosx" : "x86_64-apple-macosx"
-    if let testBundlePath = System.getenv()["XCTestBundlePath"] { // running from within Xcode
-        libraryPath = testBundlePath + "/../../../../SourcePackages/plugins/\(packageName).output/\(libName)/skipstone/\(libName)/src/main/swift/.build/\(arch)/debug/lib\(libName).dylib"
+    // running in Robolectric means we have to search around the file system for where the .dylib is output
+    let osName = System.getProperty("os.name")
+    let osArch = System.getProperty("os.arch")
+    let libext: String
+    let arch: String
+    if osName.toLowerCase().contains("linux") {
+        libext = "so"
+        arch = osArch == "aarch64" ? "aarch64-unknown-linux-gnu" : "x86_64-unknown-linux-gnu"
     } else {
-        // TODO: need to update for forked swift build output
-        let cwd = System.getProperty("user.dir")
-        // from gradle: /opt/src/github/skiptools/skip-jni/.build/plugins/outputs/skip-jni/SkipBridgeSamplesTests/skipstone
-        // from swiftPM CLI: /opt/src/github/skiptools/skip-jni
-        let dylib = "lib\(libName).dylib"
-        libraryPath = cwd + "/.build/\(arch)/debug/\(dylib)" // Swift-launched JVM
-        if !java.io.File(libraryPath).isFile() {
-            libraryPath = cwd + "/../../../../../../\(arch)/debug/\(dylib)" // gradle-launched JVM
-        }
-        if !java.io.File(libraryPath).isFile() {
-            libraryPath = cwd + "/../../../../../../../\(arch)/debug/\(dylib)" // gradle-launched JVM (Swift 6)
-        }
+        libext = "dylib"
+        arch = osArch == "aarch64" ? "arm64-apple-macosx" : "x86_64-apple-macosx"
+    }
+    let sharedObject = "lib\(libName).\(libext)"
+    let libPath = "src/main/swift/.build/\(arch)/debug/\(sharedObject)"
+
+    let cwd = System.getProperty("user.dir")
+
+    var libraryPath: String
+    if let testBundlePath = env["XCTestBundlePath"] { // running from within an Xcode test case, the XCTestBundlePath points to somewhere like: ~/Library/Developer/Xcode/DerivedData/*-*/Build/Products/Debug/SkipBridgeSamplesTests.xctest
+        // cwd from Xcode: /Users/marc/Library/Developer/Xcode/DerivedData/Skip-Everything-aqywrhrzhkbvfseiqgxuufbdwdft/SourcePackages/plugins/skip-bridge.output/SkipBridgeSamplesTests/skipstone
+        libraryPath = cwd + "/" + libPath
+    } else {
+        // need to update for forked swift build output
+
+        // cwd from swiftPM CLI: /opt/src/github/skiptools/skip-bridge/.build/plugins/outputs/skip-bridge/SkipBridgeSamplesTests/destination/skipstone/SkipBridgeSamples
+        libraryPath = cwd + "/" + libPath
     }
 
     if loadedLibraries.contains(libraryPath) {
         print("note: already loaded library: \(libraryPath)")
         return
-    }
-    // load the native library that contains the function implementations
-    if !java.io.File(libraryPath).isFile() {
+    } else if !java.io.File(libraryPath).isFile() {
+        // load the native library that contains the function implementations
         error("error: missing library: \(libraryPath)")
     } else {
         print("note: loading library: \(libraryPath)")

@@ -5,8 +5,22 @@ skip:
 
 build:
   contents:
+    - block: 'tasks.withType<org.gradle.api.tasks.compile.AbstractCompile>'
+      contents:
+        - 'dependsOn("buildSwiftPackage")'
+
+    - block: 'tasks.register("buildSwiftPackage")'
+      contents:
+        - block: 'doLast'
+          contents:
+            - 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
+            - block: 'exec'
+              contents:
+                - 'environment("SKIP_PLUGIN_DISABLED", "1")'
+                # Invoke the native swift-android toolchain, which will create .so libraries for each specified architecture
+                - 'commandLine("sh", "-c", "swift build --package-path src/main/swift && skip android build -d .build/jni-libs --package-path src/main/swift")'
+
     - block: 'android'
-      export: false
       contents:
         - block: 'sourceSets'
           contents:
@@ -17,45 +31,3 @@ build:
             # keepDebugSymbols is needed to prevent errors like: java.lang.UnsatisfiedLinkError: dlopen failed: empty/missing DT_HASH/DT_GNU_HASH in "/data/app/~~Zoepnr93K9vyUtTUUM0POg==/skip.bridge.samples.test-3nePwd6ioGZtLQ0K0EJpBQ==/base.apk!/lib/arm64-v8a/libdispatch.so" (new hash type from the future?)
             - 'jniLibs.keepDebugSymbols.add("**/*.so")'
 
-    - block: 'tasks.register("buildSwiftPackage")'
-      export: false
-      contents:
-        - block: 'doLast'
-          contents:
-            # need to clear any environment variables that are being set by the iOS toolchain
-            # we need to remove any that confuse the toolchain
-            - 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
-
-            - block: 'exec'
-              contents:
-                # the SKIP_ZERO env is checked in Package.swift to disable adding the dependencies and plugin (which won't work in the Android native build, since they don't support plugins)
-                #- 'environment("SKIP_ZERO", "1")'
-
-                # tell the plugin to not execute
-                #- 'environment("SKIP_PLUGIN_DISABLED", "1")'
-
-                # temporary to use the local Skip tool from the SwiftPM build (until we can get SKIPLOCAL working for swift builds from Gradle)
-                #- 'environment("SKIP_COMMAND_OVERRIDE", System.getenv()["BUILT_PRODUCTS_DIR"] + "/../Debug/skip")'
-
-                - 'environment("SKIP_PLUGIN_DISABLED", "1")'
-
-                # Invoke the native swift-android toolchain, which will create .so libraries for each specified architecture
-                #- 'commandLine("sh", "-c", "which skip")'
-                #- 'commandLine("sh", "-c", "skip version")'
-                #- 'commandLine("sh", "-c", "skip android build -d .build/jni-libs --swift-version 5.10.1 --package-path src/main/swift --verbose")'
-
-                #- 'commandLine("sh", "-c", "skip android build -d .build/jni-libs --swift-version 6.0.1 --package-path src/main/swift")'
-                #- 'commandLine("sh", "-c", "swift build --package-path src/main/swift")'
-                - 'commandLine("sh", "-c", "swift build --package-path src/main/swift && skip android build -d .build/jni-libs --package-path src/main/swift")'
-
-                #  --verbose
-                #- 'commandLine("sh", "-c", "ls .build/jni-libs/*")'
-                #- 'commandLine("sh", "-c", "pwd")'
-
-                # path should include ~/Library/Developer/Xcode/DerivedData/Project-Hash/Build/Products/Debug/skip
-                #- 'commandLine("sh", "-c", "which skip")'
-
-    - block: 'tasks.withType<org.gradle.api.tasks.compile.AbstractCompile>'
-      export: false
-      contents:
-        - 'dependsOn("buildSwiftPackage")'
