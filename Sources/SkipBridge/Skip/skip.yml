@@ -14,6 +14,8 @@ build:
           contents:
             # Output the environment (for debugging)
             - 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
+            - 'exec { commandLine("sh", "-c", "echo SKIP PATH: $(which skip)") }'
+            - 'exec { commandLine("sh", "-c", "skip version") }'
             - block: 'exec'
               contents:
                 - 'commandLine("sh", "-c", "skip android build -d .build/jni-libs --package-path ${swiftPath} --product ${project.name}")'
@@ -31,6 +33,8 @@ build:
           contents:
             # Output the environment (for debugging)
             - 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
+            - 'exec { commandLine("sh", "-c", "echo SKIP PATH: $(which skip)") }'
+            - 'exec { commandLine("sh", "-c", "skip version") }'
             - block: 'exec'
               contents:
                 # build for local macOS in order to run tests
