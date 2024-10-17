@@ -4,10 +4,11 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
-#if !SKIP
+import Observation
+import SkipBridge
 
-/// Protocol added to Swift types generated for Kotlin `@bridgeToSwift` types.
-public protocol BridgedFromKotlin: JObjectProtocol, JConvertible {
+@BridgeToKotlinObservable
+class ObservedClass {
+    var i = 1
+    var array: [String]?
 }
-
-#endif
