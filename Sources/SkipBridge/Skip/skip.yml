@@ -2,6 +2,19 @@ build:
   contents:
     # the location of the skipstone derived Swift package
     - 'val swiftPath = "src/main/swift"'
+    - 'var swiftBuildConfig = "unset"'
+
+    - block: 'android'
+      contents:
+        - block: 'buildTypes'
+          contents:
+            - block: 'release'
+              contents:
+                - 'swiftBuildConfig = "release"'
+            - block: 'debug'
+              contents:
+                - 'swiftBuildConfig = "debug"'
+
     - block: 'tasks.withType<org.gradle.api.tasks.compile.AbstractCompile>'
       contents:
         - block: 'if (file(swiftPath).exists())'
@@ -16,9 +29,10 @@ build:
             - 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
             - 'exec { commandLine("sh", "-c", "echo SKIP PATH: $(which skip)") }'
             - 'exec { commandLine("sh", "-c", "skip version") }'
+            - 'exec { commandLine("sh", "-c", "echo SKIP BUILD CONFIG: ${swiftBuildConfig}") }'
             - block: 'exec'
               contents:
-                - 'commandLine("sh", "-c", "skip android build -d .build/jni-libs --package-path ${swiftPath} --product ${project.name}")'
+                - 'commandLine("sh", "-c", "skip android build -d .build/jni-libs --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name} --arch aarch64 --arch x86_64")'
 
     # For test cases, we compile locally with `swift build` against the derived Swift project
     - block: 'tasks.withType<Test>'
@@ -35,10 +49,11 @@ build:
             - 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
             - 'exec { commandLine("sh", "-c", "echo SKIP PATH: $(which skip)") }'
             - 'exec { commandLine("sh", "-c", "skip version") }'
+            - 'exec { commandLine("sh", "-c", "echo SKIP BUILD CONFIG: ${swiftBuildConfig}") }'
             - block: 'exec'
               contents:
                 # build for local macOS in order to run tests
-                - 'commandLine("sh", "-c", "swift build --package-path ${swiftPath} --product ${project.name}")'
+                - 'commandLine("sh", "-c", "swift build --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name}")'
                 # Do not run the skipstone plugin when building again, because we have already performed transpilation.
                 - 'environment("SKIP_PLUGIN_DISABLED", "1")'
 
