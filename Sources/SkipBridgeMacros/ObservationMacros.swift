@@ -58,10 +58,13 @@ public struct BridgeToKotlinObservableMacro {
       @\(raw: ignoredMacroName) private let \(raw: registrarVariableName) = \(raw: qualifiedRegistrarTypeName)()
       """
     }
-    static func bridgingRegistrarVariable(_ observableType: TokenSyntax, count: Int) -> DeclSyntax {
+    static func bridgingRegistrarVariable(_ observableType: TokenSyntax, propertyNames: [String]) -> DeclSyntax {
+        let propertyNamesString = propertyNames
+            .map { "\"\($0)\"" }
+            .joined(separator: ", ")
         return
       """
-      @\(raw: ignoredMacroName) private let \(raw: bridgingRegistrarVariableName) = \(raw: qualifiedBridgingRegistrarTypeName)(\(raw: count))
+      @\(raw: ignoredMacroName) private let \(raw: bridgingRegistrarVariableName) = \(raw: qualifiedBridgingRegistrarTypeName)(for: [\(raw: propertyNamesString)])
       """
     }
     
@@ -213,14 +216,10 @@ extension VariableDeclSyntax {
 }
 
 extension DeclGroupSyntax {
-    var bridgingObservationVariableCount: Int {
-        var count = 0
-        for property in definedVariables {
-            if property.isValidForObservation && !property.hasMacroApplication(BridgeToKotlinObservableMacro.ignoredMacroName) {
-                count += 1
-            }
+    var bridgingObservationVariableNames: [String] {
+        return definedVariables.compactMap { property in
+            return property.isValidForObservation &&  !property.hasMacroApplication(BridgeToKotlinObservableMacro.ignoredMacroName) ? property.identifier?.trimmed.text : nil
         }
-        return count
     }
 }
 
@@ -255,7 +254,7 @@ extension BridgeToKotlinObservableMacro: MemberMacro {
         var declarations = [DeclSyntax]()
         
         declaration.addIfNeeded(BridgeToKotlinObservableMacro.registrarVariable(observableType), to: &declarations)
-        declaration.addIfNeeded(BridgeToKotlinObservableMacro.bridgingRegistrarVariable(observableType, count: declaration.bridgingObservationVariableCount), to: &declarations)
+        declaration.addIfNeeded(BridgeToKotlinObservableMacro.bridgingRegistrarVariable(observableType, propertyNames: declaration.bridgingObservationVariableNames), to: &declarations)
         declaration.addIfNeeded(BridgeToKotlinObservableMacro.accessFunction(observableType), to: &declarations)
         declaration.addIfNeeded(BridgeToKotlinObservableMacro.withMutationFunction(observableType), to: &declarations)
 
@@ -350,7 +349,7 @@ public struct BridgeToKotlinObservationTrackedMacro: AccessorMacro {
       """
       get {
       access(keyPath: \\.\(identifier))
-      \(raw: BridgeToKotlinObservableMacro.bridgingRegistrarVariableName).willAccess("\(identifier)")
+      \(raw: BridgeToKotlinObservableMacro.bridgingRegistrarVariableName).access("\(identifier)")
       return _\(identifier)
       }
       """
@@ -358,7 +357,7 @@ public struct BridgeToKotlinObservationTrackedMacro: AccessorMacro {
         let setAccessor: AccessorDeclSyntax =
       """
       set {
-      \(raw: BridgeToKotlinObservableMacro.bridgingRegistrarVariableName).willUpdate("\(identifier)", _\(identifier), newValue)
+      \(raw: BridgeToKotlinObservableMacro.bridgingRegistrarVariableName).update("\(identifier)", _\(identifier), newValue)
       withMutation(keyPath: \\.\(identifier)) {
       _\(identifier) = newValue
       }

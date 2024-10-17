@@ -33,29 +33,70 @@ public macro BridgeToKotlinObservable() = #externalMacro(module: "SkipBridgeMacr
 public macro BridgeToKotlinObservationTracked() = #externalMacro(module: "SkipBridgeMacros", type: "BridgeToKotlinObservationTrackedMacro")
 
 /// Helper to bridge Swift observed state changes to Jetpack Compose state tracking.
-public struct BridgingObservationRegistrar {
-    public init(_ propertyCount: Int) {
+public struct BridgingObservationRegistrar: Codable, Hashable, @unchecked Sendable {
+    private let propertyIndexes: [String: Int]
+    private let Java_peer: JavaObjectPointer?
+
+    public init(for properties: [String]) {
+        self.propertyIndexes = Self.assignIndexes(to: properties)
+        self.Java_peer = Self.Java_initPeer(propertyCount: properties.count)
+    }
+
+    public func access(_ property: String) {
+        guard let index = propertyIndexes[property] else {
+            return
+        }
         // TODO
     }
 
-    public func willAccess(_ property: String) {
-        // TODO
-    }
-
-    public func willUpdate<T>(_ property: String, _ from: T, _ to: T) where T: Equatable {
-        if to != from {
-            willChange(property)
+    public func update<T>(_ property: String, _ from: T, _ to: T) where T: Equatable {
+        if to != from, let index = propertyIndexes[property] {
+            update(index)
         }
     }
 
-    public func willUpdate(_ property: String, _ from: Any, _ to: Any) {
-        if (to as AnyObject) !== (from as AnyObject) {
-            willChange(property)
+    public func update(_ property: String, _ from: Any, _ to: Any) {
+        if (to as AnyObject) !== (from as AnyObject), let index = propertyIndexes[property] {
+            update(index)
         }
     }
 
-    private func willChange(_ property: String) {
+    private func update(_ index: Int) {
         // TODO
+    }
+
+    public static func ==(lhs: BridgingObservationRegistrar, rhs: BridgingObservationRegistrar) -> Bool {
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.unkeyedContainer()
+        // OK if order is different on decode
+        try container.encode(contentsOf: propertyIndexes.keys)
+    }
+
+    public init(from decoder: any Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        var properties: [String] = []
+        while !container.isAtEnd {
+            try properties.append(container.decode(String.self))
+        }
+        self.propertyIndexes = Self.assignIndexes(to: properties)
+        self.Java_peer = Self.Java_initPeer(propertyCount: properties.count)
+    }
+
+    private static func assignIndexes(to properties: [String]) -> [String: Int] {
+        return properties.enumerated().reduce(into: [:]) { result, property in
+            result[property.element] = property.offset
+        }
+    }
+
+    private static func Java_initPeer(propertyCount: Int) -> JavaObjectPointer? {
+        // TODO
+        return nil
     }
 }
 
