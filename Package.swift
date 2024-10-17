@@ -1,6 +1,12 @@
 // swift-tools-version: 5.9
+import Foundation
 import CompilerPluginSupport
 import PackageDescription
+
+var swiftSettings: [SwiftSetting] = []
+if ProcessInfo.processInfo.environment["SKIP_JNI_MODE"] == "1" {
+    swiftSettings.append(.define("SKIP_JNI_MODE"))
+}
 
 let package = Package(
     name: "skip-bridge",
@@ -20,6 +26,7 @@ let package = Package(
         .target(name: "CJNI"),
         .target(name: "SkipBridge",
             dependencies: ["CJNI", "SkipBridgeMacros", .product(name: "SkipLib", package: "skip-lib")],
+            swiftSettings: swiftSettings,
             plugins: [.plugin(name: "skipstone", package: "skip")]),
         .target(name: "SkipBridgeSamples",
             dependencies: ["SkipBridge"],
