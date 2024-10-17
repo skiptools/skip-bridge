@@ -58,6 +58,7 @@ public final class SwiftClosure0 {
         self.returnType = R.self
     }
 }
+
 private let Java_SwiftBackedFunction0_class = try! JClass(name: "skip/bridge/SwiftBackedFunction0")
 private let Java_SwiftBackedFunction0_constructor_methodID = Java_SwiftBackedFunction0_class.getMethodID(name: "<init>", sig: "(J)V")!
 

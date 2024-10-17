@@ -256,26 +256,3 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(8, multiplyInt32s(i1: 2, i2: 4))
     }
 }
-
-/*
-
-
-// MARK: Classes
-
-// SKIP @bridgeToKotlin
-public class SwiftClass {
-    public let intConstant = 1
-    public let swiftClassConstant = SwiftHelperClass()
-
-    public var intVar = 1
-    public var optionalIntVar: Int? = nil
-
-    public var swiftClassVar = SwiftHelperClass()
-    public var swiftKotlinClassVar = KotlinHelperClass()
-}
-
-// SKIP @bridgeToKotlin
-public class SwiftHelperClass {
-    public var stringVar = "s"
-}
-*/
