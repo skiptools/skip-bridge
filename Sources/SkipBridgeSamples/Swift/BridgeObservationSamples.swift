@@ -9,6 +9,7 @@ import Observation
 #endif
 import SkipBridge
 
+@available(macOS 14, *)
 @BridgeObservable
 class ObservedClass {
     var i = 1

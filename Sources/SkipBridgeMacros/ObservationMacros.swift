@@ -254,11 +254,9 @@ extension BridgeObservableMacro: MemberMacro {
         var declarations = [DeclSyntax]()
         
         declaration.addIfNeeded(BridgeObservableMacro.bridgeRegistrarVariable(observableType, propertyNames: declaration.bridgeObservationVariableNames), to: &declarations)
-        #if canImport(Observation)
         declaration.addIfNeeded(BridgeObservableMacro.registrarVariable(observableType), to: &declarations)
         declaration.addIfNeeded(BridgeObservableMacro.accessFunction(observableType), to: &declarations)
         declaration.addIfNeeded(BridgeObservableMacro.withMutationFunction(observableType), to: &declarations)
-        #endif
 
         return declarations
     }
@@ -306,8 +304,7 @@ extension BridgeObservableMacro: ExtensionMacro {
         if protocols.isEmpty {
             return []
         }
-        
-        #if canImport(Observation)
+
         let decl: DeclSyntax = """
         extension \(raw: type.trimmedDescription): \(raw: qualifiedConformanceName) {}
         """
@@ -318,9 +315,6 @@ extension BridgeObservableMacro: ExtensionMacro {
         } else {
             return [ext]
         }
-        #else
-        return []
-        #endif
     }
 }
 
@@ -351,7 +345,6 @@ public struct BridgeObservationTrackedMacro: AccessorMacro {
       }
       """
 
-        #if canImport(Observation)
         let getAccessor: AccessorDeclSyntax =
       """
       get {
@@ -370,24 +363,6 @@ public struct BridgeObservationTrackedMacro: AccessorMacro {
       }
       }
       """
-        #else
-
-        let getAccessor: AccessorDeclSyntax =
-      """
-      get {
-      \(raw: BridgeObservableMacro.bridgeRegistrarVariableName).access("\(identifier)")
-      return _\(identifier)
-      }
-      """
-
-        let setAccessor: AccessorDeclSyntax =
-      """
-      set {
-      \(raw: BridgeObservableMacro.bridgeRegistrarVariableName).update("\(identifier)", _\(identifier), newValue)
-      _\(identifier) = newValue
-      }
-      """
-        #endif
 
         //    let modifyAccessor: AccessorDeclSyntax =
         //      """

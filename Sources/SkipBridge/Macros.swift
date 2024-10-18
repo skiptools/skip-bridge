@@ -20,10 +20,10 @@ public macro BridgeToSwift() = #externalMacro(module: "SkipBridgeMacros", type: 
 public macro BridgeIgnored() = #externalMacro(module: "SkipBridgeMacros", type: "BridgeIgnoredMacro")
 
 /// Add the ability for this type to participate in both SwiftUI and Jetpack Compose state tracking.
-@attached(member, names: named(_$observationRegistrar), named(_$BridgeObservationRegistrar), named(access), named(withMutation))
+@attached(member, names: named(_$observationRegistrar), named(_$bridgeObservationRegistrar), named(access), named(withMutation))
 @attached(memberAttribute)
 @attached(extension, conformances: Observable)
-public macro BridgeToKotlinObservable() = #externalMacro(module: "SkipBridgeMacros", type: "BridgeToKotlinObservableMacro")
+public macro BridgeObservable() = #externalMacro(module: "SkipBridgeMacros", type: "BridgeObservableMacro")
 
 /// Add the ability for this property to participate in both SwiftUI and Jetpack Compose state tracking.
 @attached(accessor, names: named(init), named(get), named(set))
