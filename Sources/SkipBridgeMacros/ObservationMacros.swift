@@ -24,10 +24,10 @@ import SwiftSyntaxMacros
 import SwiftDiagnostics
 import SwiftSyntaxBuilder
 
-public struct BridgeToKotlinObservableMacro {
+public struct BridgeObservableMacro {
     static let moduleName = "Observation"
-    static let bridgingModuleName = "SkipBridge"
-    
+    static let bridgeModuleName = "SkipBridge"
+
     static let conformanceName = "Observable"
     static var qualifiedConformanceName: String {
         return "\(moduleName).\(conformanceName)"
@@ -41,30 +41,30 @@ public struct BridgeToKotlinObservableMacro {
     static var qualifiedRegistrarTypeName: String {
         return "\(moduleName).\(registrarTypeName)"
     }
-    static let bridgingRegistrarTypeName = "BridgingObservationRegistrar"
-    static var qualifiedBridgingRegistrarTypeName: String {
-        return "\(bridgingModuleName).\(bridgingRegistrarTypeName)"
+    static let bridgeRegistrarTypeName = "BridgeObservationRegistrar"
+    static var qualifiedBridgeRegistrarTypeName: String {
+        return "\(bridgeModuleName).\(bridgeRegistrarTypeName)"
     }
     
-    static let trackedMacroName = "BridgeToKotlinObservationTracked"
-    static let ignoredMacroName = "ObservationIgnored"
-    
+    static let trackedMacroName = "BridgeObservationTracked"
+    static let ignoredMacroName = "BridgeObservationIgnored"
+
     static let registrarVariableName = "_$observationRegistrar"
-    static let bridgingRegistrarVariableName = "_$bridgingObservationRegistrar"
-    
+    static let bridgeRegistrarVariableName = "_$bridgeObservationRegistrar"
+
     static func registrarVariable(_ observableType: TokenSyntax) -> DeclSyntax {
         return
       """
       @\(raw: ignoredMacroName) private let \(raw: registrarVariableName) = \(raw: qualifiedRegistrarTypeName)()
       """
     }
-    static func bridgingRegistrarVariable(_ observableType: TokenSyntax, propertyNames: [String]) -> DeclSyntax {
+    static func bridgeRegistrarVariable(_ observableType: TokenSyntax, propertyNames: [String]) -> DeclSyntax {
         let propertyNamesString = propertyNames
             .map { "\"\($0)\"" }
             .joined(separator: ", ")
         return
       """
-      @\(raw: ignoredMacroName) private let \(raw: bridgingRegistrarVariableName) = \(raw: qualifiedBridgingRegistrarTypeName)(for: [\(raw: propertyNamesString)])
+      @\(raw: ignoredMacroName) private let \(raw: bridgeRegistrarVariableName) = \(raw: qualifiedBridgeRegistrarTypeName)(for: [\(raw: propertyNamesString)])
       """
     }
     
@@ -216,14 +216,14 @@ extension VariableDeclSyntax {
 }
 
 extension DeclGroupSyntax {
-    var bridgingObservationVariableNames: [String] {
+    var bridgeObservationVariableNames: [String] {
         return definedVariables.compactMap { property in
-            return property.isValidForObservation &&  !property.hasMacroApplication(BridgeToKotlinObservableMacro.ignoredMacroName) ? property.identifier?.trimmed.text : nil
+            return property.isValidForObservation &&  !property.hasMacroApplication(BridgeObservableMacro.ignoredMacroName) ? property.identifier?.trimmed.text : nil
         }
     }
 }
 
-extension BridgeToKotlinObservableMacro: MemberMacro {
+extension BridgeObservableMacro: MemberMacro {
     public static func expansion<
         Declaration: DeclGroupSyntax,
         Context: MacroExpansionContext
@@ -240,29 +240,31 @@ extension BridgeToKotlinObservableMacro: MemberMacro {
         
         if declaration.isEnum {
             // enumerations cannot store properties
-            throw DiagnosticsError(syntax: node, message: "'@Observable' cannot be applied to enumeration type '\(observableType.text)'", id: .invalidApplication)
+            throw DiagnosticsError(syntax: node, message: "'@BridgeObservable' cannot be applied to enumeration type '\(observableType.text)'", id: .invalidApplication)
         }
         if declaration.isStruct {
             // structs are not yet supported; copying/mutation semantics tbd
-            throw DiagnosticsError(syntax: node, message: "'@Observable' cannot be applied to struct type '\(observableType.text)'", id: .invalidApplication)
+            throw DiagnosticsError(syntax: node, message: "'@BridgeObservable' cannot be applied to struct type '\(observableType.text)'", id: .invalidApplication)
         }
         if declaration.isActor {
             // actors cannot yet be supported for their isolation
-            throw DiagnosticsError(syntax: node, message: "'@Observable' cannot be applied to actor type '\(observableType.text)'", id: .invalidApplication)
+            throw DiagnosticsError(syntax: node, message: "'@BridgeObservable' cannot be applied to actor type '\(observableType.text)'", id: .invalidApplication)
         }
         
         var declarations = [DeclSyntax]()
         
-        declaration.addIfNeeded(BridgeToKotlinObservableMacro.registrarVariable(observableType), to: &declarations)
-        declaration.addIfNeeded(BridgeToKotlinObservableMacro.bridgingRegistrarVariable(observableType, propertyNames: declaration.bridgingObservationVariableNames), to: &declarations)
-        declaration.addIfNeeded(BridgeToKotlinObservableMacro.accessFunction(observableType), to: &declarations)
-        declaration.addIfNeeded(BridgeToKotlinObservableMacro.withMutationFunction(observableType), to: &declarations)
+        declaration.addIfNeeded(BridgeObservableMacro.bridgeRegistrarVariable(observableType, propertyNames: declaration.bridgeObservationVariableNames), to: &declarations)
+        #if canImport(Observation)
+        declaration.addIfNeeded(BridgeObservableMacro.registrarVariable(observableType), to: &declarations)
+        declaration.addIfNeeded(BridgeObservableMacro.accessFunction(observableType), to: &declarations)
+        declaration.addIfNeeded(BridgeObservableMacro.withMutationFunction(observableType), to: &declarations)
+        #endif
 
         return declarations
     }
 }
 
-extension BridgeToKotlinObservableMacro: MemberAttributeMacro {
+extension BridgeObservableMacro: MemberAttributeMacro {
     public static func expansion<
         Declaration: DeclGroupSyntax,
         MemberDeclaration: DeclSyntaxProtocol,
@@ -279,19 +281,19 @@ extension BridgeToKotlinObservableMacro: MemberAttributeMacro {
         }
         
         // dont apply to ignored properties or properties that are already flagged as tracked
-        if property.hasMacroApplication(BridgeToKotlinObservableMacro.ignoredMacroName) ||
-            property.hasMacroApplication(BridgeToKotlinObservableMacro.trackedMacroName) {
+        if property.hasMacroApplication(BridgeObservableMacro.ignoredMacroName) ||
+            property.hasMacroApplication(BridgeObservableMacro.trackedMacroName) {
             return []
         }
         
         
         return [
-            AttributeSyntax(attributeName: IdentifierTypeSyntax(name: .identifier(BridgeToKotlinObservableMacro.trackedMacroName)))
+            AttributeSyntax(attributeName: IdentifierTypeSyntax(name: .identifier(BridgeObservableMacro.trackedMacroName)))
         ]
     }
 }
 
-extension BridgeToKotlinObservableMacro: ExtensionMacro {
+extension BridgeObservableMacro: ExtensionMacro {
     public static func expansion(
         of node: AttributeSyntax,
         attachedTo declaration: some DeclGroupSyntax,
@@ -305,6 +307,7 @@ extension BridgeToKotlinObservableMacro: ExtensionMacro {
             return []
         }
         
+        #if canImport(Observation)
         let decl: DeclSyntax = """
         extension \(raw: type.trimmedDescription): \(raw: qualifiedConformanceName) {}
         """
@@ -315,10 +318,13 @@ extension BridgeToKotlinObservableMacro: ExtensionMacro {
         } else {
             return [ext]
         }
+        #else
+        return []
+        #endif
     }
 }
 
-public struct BridgeToKotlinObservationTrackedMacro: AccessorMacro {
+public struct BridgeObservationTrackedMacro: AccessorMacro {
     public static func expansion<
         Context: MacroExpansionContext,
         Declaration: DeclSyntaxProtocol
@@ -333,7 +339,7 @@ public struct BridgeToKotlinObservationTrackedMacro: AccessorMacro {
             return []
         }
         
-        if property.hasMacroApplication(BridgeToKotlinObservableMacro.ignoredMacroName) {
+        if property.hasMacroApplication(BridgeObservableMacro.ignoredMacroName) {
             return []
         }
         
@@ -345,11 +351,12 @@ public struct BridgeToKotlinObservationTrackedMacro: AccessorMacro {
       }
       """
 
+        #if canImport(Observation)
         let getAccessor: AccessorDeclSyntax =
       """
       get {
       access(keyPath: \\.\(identifier))
-      \(raw: BridgeToKotlinObservableMacro.bridgingRegistrarVariableName).access("\(identifier)")
+      \(raw: BridgeObservableMacro.bridgeRegistrarVariableName).access("\(identifier)")
       return _\(identifier)
       }
       """
@@ -357,19 +364,37 @@ public struct BridgeToKotlinObservationTrackedMacro: AccessorMacro {
         let setAccessor: AccessorDeclSyntax =
       """
       set {
-      \(raw: BridgeToKotlinObservableMacro.bridgingRegistrarVariableName).update("\(identifier)", _\(identifier), newValue)
+      \(raw: BridgeObservableMacro.bridgeRegistrarVariableName).update("\(identifier)", _\(identifier), newValue)
       withMutation(keyPath: \\.\(identifier)) {
       _\(identifier) = newValue
       }
       }
       """
-        
+        #else
+
+        let getAccessor: AccessorDeclSyntax =
+      """
+      get {
+      \(raw: BridgeObservableMacro.bridgeRegistrarVariableName).access("\(identifier)")
+      return _\(identifier)
+      }
+      """
+
+        let setAccessor: AccessorDeclSyntax =
+      """
+      set {
+      \(raw: BridgeObservableMacro.bridgeRegistrarVariableName).update("\(identifier)", _\(identifier), newValue)
+      _\(identifier) = newValue
+      }
+      """
+        #endif
+
         //    let modifyAccessor: AccessorDeclSyntax =
         //      """
         //      _modify {
         //      access(keyPath: \\.\(identifier))
-        //      \(raw: BridgeToKotlinObservableMacro.registrarVariableName).willSet(self, keyPath: \\.\(identifier))
-        //      defer { \(raw: BridgeToKotlinObservableMacro.registrarVariableName).didSet(self, keyPath: \\.\(identifier)) }
+        //      \(raw: BridgeObservableMacro.registrarVariableName).willSet(self, keyPath: \\.\(identifier))
+        //      defer { \(raw: BridgeObservableMacro.registrarVariableName).didSet(self, keyPath: \\.\(identifier)) }
         //      yield &_\(identifier)
         //      }
         //      """
@@ -378,7 +403,7 @@ public struct BridgeToKotlinObservationTrackedMacro: AccessorMacro {
     }
 }
 
-extension BridgeToKotlinObservationTrackedMacro: PeerMacro {
+extension BridgeObservationTrackedMacro: PeerMacro {
     public static func expansion<
         Context: MacroExpansionContext,
         Declaration: DeclSyntaxProtocol
@@ -392,12 +417,18 @@ extension BridgeToKotlinObservationTrackedMacro: PeerMacro {
             return []
         }
         
-        if property.hasMacroApplication(BridgeToKotlinObservableMacro.ignoredMacroName) ||
-            property.hasMacroApplication(BridgeToKotlinObservableMacro.trackedMacroName) {
+        if property.hasMacroApplication(BridgeObservableMacro.ignoredMacroName) ||
+            property.hasMacroApplication(BridgeObservableMacro.trackedMacroName) {
             return []
         }
         
-        let storage = DeclSyntax(property.privatePrefixed("_", addingAttribute: BridgeToKotlinObservableMacro.ignoredAttribute))
+        let storage = DeclSyntax(property.privatePrefixed("_", addingAttribute: BridgeObservableMacro.ignoredAttribute))
         return [storage]
+    }
+}
+
+package struct BridgeObservationIgnoredMacro: AccessorMacro {
+    package static func expansion(of node: AttributeSyntax, providingAccessorsOf declaration: some DeclSyntaxProtocol, in context: some MacroExpansionContext) throws -> [AccessorDeclSyntax] {
+        return []
     }
 }

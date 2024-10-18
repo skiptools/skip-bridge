@@ -10,7 +10,7 @@ if ProcessInfo.processInfo.environment["SKIP_JNI_MODE"] == "1" {
 
 let package = Package(
     name: "skip-bridge",
-    platforms: [.iOS(.v16), .macOS(.v14)],
+    platforms: [.iOS(.v16), .macOS(.v13)],
     products: [
         .library(name: "SkipBridge", type: .dynamic, targets: ["SkipBridge"]),
         .library(name: "SkipBridgeSamples", type: .dynamic, targets: ["SkipBridgeSamples"]),

@@ -14,6 +14,6 @@ struct SkipBridgeMacrosPlugin: CompilerPlugin {
         BridgeToSwiftMacro.self,
         BridgeIgnoredMacro.self,
         BridgeToKotlinObservableMacro.self,
-        BridgeToKotlinObservationTrackedMacro.self,
+        BridgeObservationTrackedMacro.self,
     ]
 }

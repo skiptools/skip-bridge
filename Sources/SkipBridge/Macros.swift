@@ -20,20 +20,22 @@ public macro BridgeToSwift() = #externalMacro(module: "SkipBridgeMacros", type: 
 public macro BridgeIgnored() = #externalMacro(module: "SkipBridgeMacros", type: "BridgeIgnoredMacro")
 
 /// Add the ability for this type to participate in both SwiftUI and Jetpack Compose state tracking.
-@available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
-@attached(member, names: named(_$observationRegistrar), named(_$bridgingObservationRegistrar), named(access), named(withMutation))
+@attached(member, names: named(_$observationRegistrar), named(_$BridgeObservationRegistrar), named(access), named(withMutation))
 @attached(memberAttribute)
 @attached(extension, conformances: Observable)
 public macro BridgeToKotlinObservable() = #externalMacro(module: "SkipBridgeMacros", type: "BridgeToKotlinObservableMacro")
 
 /// Add the ability for this property to participate in both SwiftUI and Jetpack Compose state tracking.
-@available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
 @attached(accessor, names: named(init), named(get), named(set))
 @attached(peer, names: prefixed(`_`))
-public macro BridgeToKotlinObservationTracked() = #externalMacro(module: "SkipBridgeMacros", type: "BridgeToKotlinObservationTrackedMacro")
+public macro BridgeObservationTracked() = #externalMacro(module: "SkipBridgeMacros", type: "BridgeObservationTrackedMacro")
+
+/// Ignore this property for state tracking.
+@attached(accessor, names: named(willSet))
+public macro BridgeObservationIgnored() = #externalMacro(module: "SkipBridgeMacros", type: "BridgeObservationIgnoredMacro")
 
 /// Helper to bridge Swift observed state changes to Jetpack Compose state tracking.
-public struct BridgingObservationRegistrar: Codable, Hashable, @unchecked Sendable {
+public struct BridgeObservationRegistrar: Codable, Hashable, @unchecked Sendable {
     private let propertyIndexes: [String: Int]
     private let Java_peer: JavaObjectPointer?
 
@@ -65,7 +67,7 @@ public struct BridgingObservationRegistrar: Codable, Hashable, @unchecked Sendab
         // TODO
     }
 
-    public static func ==(lhs: BridgingObservationRegistrar, rhs: BridgingObservationRegistrar) -> Bool {
+    public static func ==(lhs: BridgeObservationRegistrar, rhs: BridgeObservationRegistrar) -> Bool {
         return true
     }
 
