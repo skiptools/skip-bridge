@@ -35,7 +35,7 @@ build:
             - block: 'exec'
               contents:
                 # build for local macOS in order to run tests
-                - 'commandLine("sh", "-c", "swift build --package-path ${swiftPath} --product ${project.name}")'
+                - 'commandLine("sh", "-c", "~/Library/Developer/Toolchains/swift-6.0.1-RELEASE.xctoolchain/usr/bin/swift build --package-path ${swiftPath} --product ${project.name}")'
                 # Do not run the skipstone plugin when building again, because we have already performed transpilation.
                 - 'environment("SKIP_PLUGIN_DISABLED", "1")'
                 - 'environment("SKIP_JNI_MODE", "1")'
