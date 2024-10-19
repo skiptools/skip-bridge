@@ -9,14 +9,18 @@
 /// A Swift object that is backed by a Java closure in the form of a `kotlin.jvm.functions.FunctionN` object.
 public final class JavaBackedClosure<R>: JObject {
     public func invoke() throws -> R {
-        let object: JavaObjectPointer? = try call(method: Java_Function0_invoke_methodID, args: [])
-        return returnValue(for: object)
+        return try jniContext {
+            let object: JavaObjectPointer? = try call(method: Java_Function0_invoke_methodID, args: [])
+            return returnValue(for: object)
+        }
     }
 
     public func invoke(_ p0: JConvertible?) throws -> R {
-        let p0_java = (p0?.toJavaObject()).toJavaParameter()
-        let object: JavaObjectPointer? = try call(method: Java_Function1_invoke_methodID, args: [p0_java])
-        return returnValue(for: object)
+        return try jniContext {
+            let p0_java = (p0?.toJavaObject()).toJavaParameter()
+            let object: JavaObjectPointer? = try call(method: Java_Function1_invoke_methodID, args: [p0_java])
+            return returnValue(for: object)
+        }
     }
 
     private func returnValue(for object: JavaObjectPointer?) -> R {
@@ -34,16 +38,22 @@ private let Java_Function1_invoke_methodID = Java_Function1_class.getMethodID(na
 
 /// A Swift reference type that wraps a 0-parameters closure.
 public final class SwiftClosure0 {
-    public static func javaObject<R>(for closure: @escaping () -> R) -> JavaObjectPointer {
+    public static func javaObject<R>(for closure: (() -> R)?) -> JavaObjectPointer? {
+        guard let closure else {
+            return nil
+        }
         let swiftPeer = SwiftClosure0(closure: closure)
         let swiftPeerPtr = SwiftObjectPointer.pointer(to: swiftPeer, retain: true)
         return try! Java_SwiftBackedFunction0_class.create(ctor: Java_SwiftBackedFunction0_constructor_methodID, args: [swiftPeerPtr.toJavaParameter()])
     }
 
-    public static func closure<R>(forJavaObject function: JavaObjectPointer) -> () -> R {
+    public static func closure<R>(forJavaObject function: JavaObjectPointer?) -> (() -> R)? {
+        guard let function else {
+            return nil
+        }
         if let ptr = SwiftObjectPointer.filterPeer(of: function) {
             let closure: SwiftClosure0 = ptr.pointee()!
-            return closure.closure as! () -> R
+            return { closure.closure() as! R }
         } else {
             let closure = JavaBackedClosure<R>(function)
             return { try! closure.invoke() }

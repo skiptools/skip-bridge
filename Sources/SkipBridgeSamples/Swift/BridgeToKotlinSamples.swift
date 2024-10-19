@@ -139,6 +139,19 @@ public class SwiftHelperClass {
 @BridgeToKotlin public var swiftIntArrayVar = [1, 2, 3]
 @BridgeToKotlin public var swiftIntStringDictionaryVar = [1: "a", 2: "b", 3: "c"]
 
+// MARK: Async
+
+@BridgeToKotlin
+public func swiftAsync0Function() async {
+    try? await Task.sleep(nanoseconds: 10_000_000)
+}
+
+@BridgeToKotlin
+public func swiftAsync1Function(i: Int) async -> Int {
+    try? await Task.sleep(nanoseconds: 10_000_000)
+    return i + 1
+}
+
 // MARK: Unicode
 
 @BridgeToKotlin public let swiftUTF8StringVar1 = "😀" + ""

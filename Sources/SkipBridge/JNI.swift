@@ -408,7 +408,7 @@ public class JObject: JObjectProtocol {
     }
 
     deinit {
-        jni.deleteGlobalRef(ptr)
+        jniContext { jni.deleteGlobalRef(ptr) }
     }
 
     /// Return a reference to this object that will not become invalid if this `JObject` struct is deallocated.
