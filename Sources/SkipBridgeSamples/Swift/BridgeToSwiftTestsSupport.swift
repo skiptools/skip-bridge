@@ -10,6 +10,11 @@ import SkipBridge
 // tests of bridging Kotlin to Swift.
 
 @BridgeToKotlin
+public func testSupport_isJNIMode() -> Bool {
+    return JNI.isJNIMode
+}
+
+@BridgeToKotlin
 public func testSupport_kotlinBoolConstant() -> Bool {
     return kotlinBoolConstant
 }
