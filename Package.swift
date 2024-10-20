@@ -13,7 +13,7 @@ let package = Package(
     platforms: [.iOS(.v16), .macOS(.v13)],
     products: [
         .library(name: "SkipBridge", targets: ["SkipBridge"]),
-        //.library(name: "SkipBridgeMacros", targets: ["SkipBridgeMacros"]),
+        .library(name: "SkipBridgeMacros", targets: ["SkipBridgeMacros"]),
         .library(name: "SkipBridgeSamples", type: .dynamic, targets: ["SkipBridgeSamples"]),
     ],
     dependencies: [
@@ -23,10 +23,12 @@ let package = Package(
     ],
     targets: [
         .target(name: "CJNI"),
-        .macro(name: "SkipBridgeMacros",
+        .target(name: "SkipBridgeMacros",
+            dependencies: ["SkipBridgeMacrosImpl"]),
+        .macro(name: "SkipBridgeMacrosImpl",
             dependencies: [.product(name: "SwiftSyntax", package: "swift-syntax"), .product(name: "SwiftSyntaxMacros", package: "swift-syntax"), .product(name: "SwiftCompilerPlugin", package: "swift-syntax")]),
         .target(name: "SkipBridge",
-            dependencies: ["CJNI", .product(name: "SkipLib", package: "skip-lib"), .target(name: "SkipBridgeMacros")],
+            dependencies: ["CJNI", .product(name: "SkipLib", package: "skip-lib")],
             swiftSettings: swiftSettings,
             plugins: [.plugin(name: "skipstone", package: "skip")]),
         .target(name: "SkipBridgeSamples",

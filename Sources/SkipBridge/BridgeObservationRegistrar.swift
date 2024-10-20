@@ -5,34 +5,7 @@
 // as published by the Free Software Foundation https://fsf.org
 
 #if !SKIP
-import Observation
-
-/// Identify a compiled Swift declaration that should be bridged to Kotlin.
-@attached(peer)
-public macro BridgeToKotlin() = #externalMacro(module: "SkipBridgeMacros", type: "BridgeToKotlinMacro")
-
-/// Identify a declaration that will be transpiled to Kotlin but should be bridged to compiled Swift.
-@attached(peer)
-public macro BridgeToSwift() = #externalMacro(module: "SkipBridgeMacros", type: "BridgeToSwiftMacro")
-
-/// Mark a member that should not be bridged.
-@attached(accessor, names: named(willSet))
-public macro BridgeIgnored() = #externalMacro(module: "SkipBridgeMacros", type: "BridgeIgnoredMacro")
-
-/// Add the ability for this type to participate in both SwiftUI and Jetpack Compose state tracking.
-@attached(member, names: named(_$observationRegistrar), named(_$bridgeObservationRegistrar), named(access), named(withMutation))
-@attached(memberAttribute)
-@attached(extension, conformances: Observable)
-public macro BridgeObservable() = #externalMacro(module: "SkipBridgeMacros", type: "BridgeObservableMacro")
-
-/// Add the ability for this property to participate in both SwiftUI and Jetpack Compose state tracking.
-@attached(accessor, names: named(init), named(get), named(set))
-@attached(peer, names: prefixed(`_`))
-public macro BridgeObservationTracked() = #externalMacro(module: "SkipBridgeMacros", type: "BridgeObservationTrackedMacro")
-
-/// Ignore this property for state tracking.
-@attached(accessor, names: named(willSet))
-public macro BridgeObservationIgnored() = #externalMacro(module: "SkipBridgeMacros", type: "BridgeObservationIgnoredMacro")
+import CJNI
 
 /// Helper to bridge Swift observed state changes to Jetpack Compose state tracking.
 public struct BridgeObservationRegistrar: Codable, Hashable, @unchecked Sendable {
@@ -101,5 +74,5 @@ public struct BridgeObservationRegistrar: Codable, Hashable, @unchecked Sendable
         return nil
     }
 }
-
 #endif
+

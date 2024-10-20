@@ -8,6 +8,7 @@
 import Observation
 #endif
 import SkipBridge
+import SkipBridgeMacros
 
 @available(macOS 14, *)
 @BridgeObservable

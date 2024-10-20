@@ -5,6 +5,9 @@
 // as published by the Free Software Foundation https://fsf.org
 
 import SkipBridge
+#if !SKIP
+import SkipBridgeMacros
+#endif
 
 // MARK: Global constants
 

@@ -5,6 +5,7 @@
 // as published by the Free Software Foundation https://fsf.org
 
 import SkipBridge
+import SkipBridgeMacros
 
 // Current limitations on Roboelectric testing require us to go through a compiled wrapper in order to perform our
 // tests of bridging Kotlin to Swift.
