@@ -42,7 +42,7 @@ public typealias JavaFieldID = jfieldID
 public typealias JavaMethodID = jmethodID
 public typealias JavaParameter = jvalue
 
-extension JavaBoolean : ExpressibleByBooleanLiteral {
+extension JavaBoolean : @retroactive ExpressibleByBooleanLiteral {
     public init(booleanLiteral value: Bool) {
         self = value ? JavaBoolean(JNI_TRUE) : JavaBoolean(JNI_FALSE)
     }
@@ -259,6 +259,14 @@ public struct JNIError: Error, CustomStringConvertible {
 /// An error from a Java Throwable.
 public struct ThrowableError: Error, CustomStringConvertible {
     public let description: String
+
+    public init(description: String) {
+        self.description = description
+    }
+
+    public init(throwable: JavaObjectPointer) {
+        self = JThrowable.toError(throwable)
+    }
 }
 
 // MARK: Convertions
@@ -495,6 +503,11 @@ public final class JClass : JObject {
 public final class JThrowable: JObject {
     private static let javaClass = try! JClass(name: "java/lang/Throwable")
 
+    public static func toError(_ ptr: JavaObjectPointer) -> ThrowableError {
+        let str = try? String.call(toStringID, on: ptr, args: [])
+        return ThrowableError(description: str ?? "A Java exception occurred, and an error was raised when trying to get the exception message")
+    }
+
     public func getMessage() throws -> String? {
         try call(method: Self.getMessageID, args: [])
     }
@@ -511,7 +524,7 @@ public final class JThrowable: JObject {
     private static let toStringID = javaClass.getMethodID(name: "toString", sig: "()Ljava/lang/String;")!
 
     public func toError() -> ThrowableError {
-        return ThrowableError(description: (try? toString()) ?? "A java exception occurred, and an error was raised when trying to get the exception message")
+        return Self.toError(ptr)
     }
 }
 

@@ -184,6 +184,12 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(testSupport_swiftKotlinClassMemberVar_stringVar(value: "member"), "member")
     }
 
+    public func testClosure0Var() {
+        swiftClosure0Var()
+        swiftClosure0Var = { print("reassigned") }
+        swiftClosure0Var()
+    }
+
     public func testClosure1Var() {
         let orig = swiftClosure1Var
         XCTAssertEqual(swiftClosure1Var(99), "value = 99")
@@ -258,6 +264,10 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual([240, 159], codePoints)
         #endif
     }
+
+//    func testExerciseObservable() {
+//        swiftExerciseObservable()
+//    }
 
     func testGlobalFunction() {
         XCTAssertEqual(8, multiplyInt32s(i1: 2, i2: 4))

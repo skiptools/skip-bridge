@@ -64,7 +64,7 @@ public struct BridgeObservationRegistrar: Codable, Hashable, @unchecked Sendable
     }
 
     #if SKIP_JNI_MODE
-    private static let Java_stateClass = try? JClass(name: "skip/model/BridgeObservableState")
+    private static let Java_stateClass = try? JClass(name: "skip/model/MutableStateBacking")
     private static let Java_state_init_methodID = Java_stateClass?.getMethodID(name: "<init>", sig: "(I)V")
     private static let Java_state_access_methodID = Java_stateClass?.getMethodID(name: "access", sig: "(I)V")
     private static let Java_state_update_methodID = Java_stateClass?.getMethodID(name: "update", sig: "(I)V")

@@ -132,6 +132,7 @@ public class KotlinHelperClass {
 
 // MARK: Closures
 
+@BridgeToSwift public var kotlinClosure0Var: () -> Void = { print("original") }
 @BridgeToSwift public var kotlinClosure1Var: (Int) -> String = { i in "value = \(i)" }
 @BridgeToSwift public var kotlinClosure1PrimitivesVar: (Int64) -> Int = { l in Int(l / 1000) }
 @BridgeToSwift public var kotlinClosure1OptionalsVar: (String?) -> Int? = { s in s?.count }
@@ -140,3 +141,26 @@ public class KotlinHelperClass {
 
 @BridgeToSwift public var kotlinIntArrayVar = [1, 2, 3]
 @BridgeToSwift public var kotlinIntStringDictionaryVar = [1: "a", 2: "b", 3: "c"]
+
+// MARK: Functions
+
+//@BridgeToSwift
+//public func kotlinThrowingFunction() throws {
+//    throw KotlinError()
+//}
+
+// MARK: Async
+
+@BridgeToSwift
+public func kotlinAsync0Function() async {
+    try? await Task.sleep(nanoseconds: 10_000_000)
+}
+
+@BridgeToSwift
+public func kotlinAsync1Function(i: Int) async -> Int {
+    try? await Task.sleep(nanoseconds: 10_000_000)
+    return i + 1
+}
+
+struct KotlinError: Error {
+}

@@ -291,6 +291,13 @@ public func testSupport_kotlinSwiftClassComputedVar_stringVar(value: String) -> 
 }
 
 @BridgeToKotlin
+public func testSupport_kotlinClosure0Var() {
+    kotlinClosure0Var()
+    kotlinClosure0Var = { print("reassigned") }
+    kotlinClosure0Var()
+}
+
+@BridgeToKotlin
 public func testSupport_kotlinClosure1Var(value: Int) -> String {
     let s1 = kotlinClosure1Var(value)
     kotlinClosure1Var = { i in "value = \(i)" }
@@ -324,6 +331,21 @@ public func testSupport_kotlinIntArrayVar(value: [Int]) -> [Int] {
 public func testSupport_kotlinIntStringDictionaryVar(value: [Int: String]) -> [Int: String] {
     kotlinIntStringDictionaryVar = value
     return kotlinIntStringDictionaryVar
+}
+
+//@BridgeToKotlin
+//public func testSupport_callKotlinThrowingFunction() throws {
+//    try kotlinThrowingFunction()
+//}
+
+@BridgeToKotlin
+public func testSupport_callKotlinAsync0Function() async {
+    await kotlinAsync0Function()
+}
+
+@BridgeToKotlin
+public func testSupport_callKotlinAsync1Function(with value: Int) async -> Int {
+    return await kotlinAsync1Function(i: value)
 }
 
 // MARK: Used by BridgeToKotlinTests

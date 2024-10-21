@@ -119,6 +119,10 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(testSupport_kotlinClassComputedVar_stringVar(value: "computed"), "computed")
     }
 
+    func testClosure0Var() {
+        testSupport_kotlinClosure0Var()
+    }
+
     func testClosure1Var() {
         XCTAssertEqual(testSupport_kotlinClosure1Var(value: 100), "value = 100")
     }
@@ -132,16 +136,27 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(testSupport_kotlinClosure1OptionalsVar(value: nil), nil)
     }
 
-    func testArrays() async throws {
+    func testArrays() {
         let roundtripped = testSupport_kotlinIntArrayVar(value: [4, 5, 6])
         XCTAssertEqual(roundtripped, [4, 5, 6])
         XCTAssertEqual(roundtripped[1], 5)
     }
 
-    func testDictionaries() async throws {
+    func testDictionaries() {
         let roundtripped = testSupport_kotlinIntStringDictionaryVar(value: [4: "d", 5: "e", 6: "f"])
         XCTAssertEqual(roundtripped, [4: "d", 5: "e", 6: "f"])
         XCTAssertEqual(roundtripped[5], "e")
+    }
+
+//    func testThrowingFunction() throws {
+//        try testSupport_callKotlinThrowingFunction()
+//    }
+
+    func testAsyncFunctions() async {
+        await testSupport_callKotlinAsync0Function()
+
+        let result = await testSupport_callKotlinAsync1Function(with: 99)
+        XCTAssertEqual(result, 100)
     }
 
     /*

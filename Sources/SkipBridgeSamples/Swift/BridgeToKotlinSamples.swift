@@ -130,6 +130,7 @@ public class SwiftHelperClass {
 
 // MARK: Closures
 
+@BridgeToKotlin public var swiftClosure0Var: () -> Void = { print("original") }
 @BridgeToKotlin public var swiftClosure1Var: (Int) -> String = { i in "value = \(i)" }
 @BridgeToKotlin public var swiftClosure1PrimitivesVar: (Int64) -> Int = { l in Int(l / 1000) }
 @BridgeToKotlin public var swiftClosure1OptionalsVar: (String?) -> Int? = { s in s?.count }
@@ -157,6 +158,16 @@ public func swiftAsync1Function(i: Int) async -> Int {
 @BridgeToKotlin public let swiftUTF8StringVar1 = "😀" + ""
 @BridgeToKotlin public let swiftUTF8StringVar2 = "🚀" + "123" + "456"
 @BridgeToKotlin public let swiftUTF8StringVar3 = "😀" + "🚀"
+
+// MARK: Observation
+
+@BridgeToKotlin
+public func swiftExerciseObservable() {
+    if #available(macOS 14, *) {
+        let obj = ObservedClass()
+        obj.i += 1
+    }
+}
 
 // MARK: Sanity check
 // This code is not supported by our transpiler and ensures that we're compiling to native Swift
