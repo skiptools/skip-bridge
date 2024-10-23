@@ -16,7 +16,6 @@ let package = Package(
         .library(name: "SkipBridgeSamples", type: .dynamic, targets: ["SkipBridgeSamples"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.1"),
         .package(url: "https://source.skip.tools/skip.git", branch: "main"),
         .package(url: "https://source.skip.tools/skip-lib.git", from: "1.0.0"),
     ],
@@ -35,12 +34,14 @@ let package = Package(
     ]
 )
 
-#if swift(>=5.10)
+#if swift(>=6.0)
+package.dependencies.append(contentsOf: [
+    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.1")
+])
 // SkipBridgeMacros is only included when Swift version is 5.10 or greater
 package.products.append(contentsOf: [
     .library(name: "SkipBridgeMacros", targets: ["SkipBridgeMacros"])
 ])
-
 package.targets.append(contentsOf: [
     .target(name: "SkipBridgeMacros",
         dependencies: ["SkipBridgeMacrosImpl"]),
