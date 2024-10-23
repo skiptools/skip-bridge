@@ -71,7 +71,6 @@ public func jniContext<T>(_ block: () throws -> T) rethrows -> T {
         return try block()
     case JNI_EDETACHED:
         // we weren't attached to the Java thread; attach, perform the block, and then detach
-        // see https://developer.android.com/training/articles/perf-jni#threads
         var tenv: JNIEnvPointer!
         if jvm.AttachCurrentThread(jni._jvm, &tenv, nil) != JNI_OK {
             fatalError("SkipJNI: unable to attach JNI to current thread")
@@ -83,7 +82,7 @@ public func jniContext<T>(_ block: () throws -> T) rethrows -> T {
         }
         return try block()
     case JNI_EVERSION:
-        fatalError("SkipJNI: unsupoprted JNI version")
+        fatalError("SkipJNI: unsupported JNI version")
     default:
         fatalError("SkipJNI: unexpected JNI thread status: \(threadStatus)")
     }
