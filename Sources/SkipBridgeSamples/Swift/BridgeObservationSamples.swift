@@ -7,11 +7,9 @@
 #if canImport(Observation)
 import Observation
 #endif
-import SkipBridge
-import SkipBridgeMacros
 
 @available(macOS 14, *)
-@BridgeObservable
+@Observable
 class ObservedClass {
     var i = 1
     var array: [String]?

@@ -10,171 +10,171 @@ import SkipBridgeMacros
 // Current limitations on Roboelectric testing require us to go through a compiled wrapper in order to perform our
 // tests of bridging Kotlin to Swift.
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_isJNIMode() -> Bool {
     return JNI.isJNIMode
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinBoolConstant() -> Bool {
     return kotlinBoolConstant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinDoubleConstant() -> Double {
     return kotlinDoubleConstant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinFloatConstant() -> Float {
     return kotlinFloatConstant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinInt8Constant() -> Int8 {
     return kotlinInt8Constant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinInt16Constant() -> Int16 {
     return kotlinInt16Constant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinInt32Constant() -> Int32 {
     return kotlinInt32Constant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinInt64Constant() -> Int64 {
     return kotlinInt64Constant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinIntConstant() -> Int {
     return kotlinIntConstant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinStringConstant() -> String {
     return kotlinStringConstant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_swiftKotlinClassConstant_stringVar() -> String {
     return swiftKotlinClassConstant.stringVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinClassConstant_stringVar() -> String {
     return kotlinClassConstant.stringVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinSwiftClassConstant_stringVar() -> String {
     return kotlinSwiftClassConstant.stringVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalBoolConstant() -> Bool? {
     return kotlinOptionalBoolConstant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalDoubleConstant() -> Double? {
     return kotlinOptionalDoubleConstant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalFloatConstant() -> Float? {
     return kotlinOptionalFloatConstant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalInt8Constant() -> Int8? {
     return kotlinOptionalInt8Constant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalInt16Constant() -> Int16? {
     return kotlinOptionalInt16Constant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalInt32Constant() -> Int32? {
     return kotlinOptionalInt32Constant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalInt64Constant() -> Int64? {
     return kotlinOptionalInt64Constant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalIntConstant() -> Int? {
     return kotlinOptionalIntConstant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalStringConstant() -> String? {
     return kotlinOptionalStringConstant
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinBoolVar(value: Bool) -> Bool {
     kotlinBoolVar = value
     return kotlinBoolVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinDoubleVar(value: Double) -> Double {
     kotlinDoubleVar = value
     return kotlinDoubleVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinFloatVar(value: Float) -> Float {
     kotlinFloatVar = value
     return kotlinFloatVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinInt8Var(value: Int8) -> Int8 {
     kotlinInt8Var = value
     return kotlinInt8Var
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinInt16Var(value: Int16) -> Int16 {
     kotlinInt16Var = value
     return kotlinInt16Var
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinInt32Var(value: Int32) -> Int32 {
     kotlinInt32Var = value
     return kotlinInt32Var
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinInt64Var(value: Int64) -> Int64 {
     kotlinInt64Var = value
     return kotlinInt64Var
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinIntVar(value: Int) -> Int {
     kotlinIntVar = value
     return kotlinIntVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinStringVar(value: String) -> String {
     kotlinStringVar = value
     return kotlinStringVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinClassVar_stringVar(value: String) -> String {
     let helper = KotlinHelperClass()
     helper.stringVar = value
@@ -182,7 +182,7 @@ public func testSupport_kotlinClassVar_stringVar(value: String) -> String {
     return kotlinClassVar.stringVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinSwiftClassVar_stringVar(value: String) -> String {
     let helper = SwiftHelperClass()
     helper.stringVar = value
@@ -190,61 +190,61 @@ public func testSupport_kotlinSwiftClassVar_stringVar(value: String) -> String {
     return kotlinSwiftClassVar.stringVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalBoolVar(value: Bool?) -> Bool? {
     kotlinOptionalBoolVar = value
     return kotlinOptionalBoolVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalDoubleVar(value: Double?) -> Double? {
     kotlinOptionalDoubleVar = value
     return kotlinOptionalDoubleVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalFloatVar(value: Float?) -> Float? {
     kotlinOptionalFloatVar = value
     return kotlinOptionalFloatVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalInt8Var(value: Int8?) -> Int8? {
     kotlinOptionalInt8Var = value
     return kotlinOptionalInt8Var
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalInt16Var(value: Int16?) -> Int16? {
     kotlinOptionalInt16Var = value
     return kotlinOptionalInt16Var
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalInt32Var(value: Int32?) -> Int32? {
     kotlinOptionalInt32Var = value
     return kotlinOptionalInt32Var
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalInt64Var(value: Int64?) -> Int64? {
     kotlinOptionalInt64Var = value
     return kotlinOptionalInt64Var
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalIntVar(value: Int?) -> Int? {
     kotlinOptionalIntVar = value
     return kotlinOptionalIntVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalStringVar(value: String?) -> String? {
     kotlinOptionalStringVar = value
     return kotlinOptionalStringVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalClassVar_stringVar(value: String?) -> String? {
     if let value {
         let helper = KotlinHelperClass()
@@ -256,7 +256,7 @@ public func testSupport_kotlinOptionalClassVar_stringVar(value: String?) -> Stri
     return kotlinOptionalClassVar?.stringVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinOptionalSwiftClassVar_stringVar(value: String?) -> String? {
     if let value {
         let helper = SwiftHelperClass()
@@ -268,13 +268,13 @@ public func testSupport_kotlinOptionalSwiftClassVar_stringVar(value: String?) ->
     return kotlinOptionalSwiftClassVar?.stringVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinIntComputedVar(value: Int) -> Int {
     kotlinIntComputedVar = value
     return kotlinIntComputedVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinClassComputedVar_stringVar(value: String) -> String {
     let helper = KotlinHelperClass()
     helper.stringVar = value
@@ -282,7 +282,7 @@ public func testSupport_kotlinClassComputedVar_stringVar(value: String) -> Strin
     return kotlinClassComputedVar.stringVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinSwiftClassComputedVar_stringVar(value: String) -> String {
     let helper = SwiftHelperClass()
     helper.stringVar = value
@@ -290,14 +290,14 @@ public func testSupport_kotlinSwiftClassComputedVar_stringVar(value: String) -> 
     return kotlinSwiftClassComputedVar.stringVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinClosure0Var() {
     kotlinClosure0Var()
     kotlinClosure0Var = { print("reassigned") }
     kotlinClosure0Var()
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinClosure1Var(value: Int) -> String {
     let s1 = kotlinClosure1Var(value)
     kotlinClosure1Var = { i in "value = \(i)" }
@@ -305,7 +305,7 @@ public func testSupport_kotlinClosure1Var(value: Int) -> String {
     return s1 == s2 ? s1 : s1 + "/" + s2
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinClosure1PrimitivesVar(value: Int64) -> Int {
     let i1 = kotlinClosure1PrimitivesVar(value)
     kotlinClosure1PrimitivesVar = { l in Int(l / 1000) }
@@ -313,7 +313,7 @@ public func testSupport_kotlinClosure1PrimitivesVar(value: Int64) -> Int {
     return i1 == i2 ? i1 : i1 * 10000 + i2
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinClosure1OptionalsVar(value: String?) -> Int? {
     let i1 = kotlinClosure1OptionalsVar(value)
     kotlinClosure1OptionalsVar = { s in s?.count }
@@ -321,36 +321,36 @@ public func testSupport_kotlinClosure1OptionalsVar(value: String?) -> Int? {
     return i1 == i2 ? i1 : (i1 ?? 0) * 10000 + (i2 ?? 0)
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinIntArrayVar(value: [Int]) -> [Int] {
     kotlinIntArrayVar = value
     return kotlinIntArrayVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinIntStringDictionaryVar(value: [Int: String]) -> [Int: String] {
     kotlinIntStringDictionaryVar = value
     return kotlinIntStringDictionaryVar
 }
 
-//@BridgeToKotlin
+//// SKIP @BridgeToKotlin
 //public func testSupport_callKotlinThrowingFunction() throws {
 //    try kotlinThrowingFunction()
 //}
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_callKotlinAsync0Function() async {
     await kotlinAsync0Function()
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_callKotlinAsync1Function(with value: Int) async -> Int {
     return await kotlinAsync1Function(i: value)
 }
 
 // MARK: Used by BridgeToKotlinTests
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_swiftKotlinClassVar_stringVar(value: String) -> String {
     let helper = KotlinHelperClass()
     helper.stringVar = value
@@ -358,7 +358,7 @@ public func testSupport_swiftKotlinClassVar_stringVar(value: String) -> String {
     return swiftKotlinClassVar.stringVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_swiftOptionalKotlinClassVar_stringVar(value: String?) -> String? {
     if let value {
         let helper = KotlinHelperClass()
@@ -370,7 +370,7 @@ public func testSupport_swiftOptionalKotlinClassVar_stringVar(value: String?) ->
     return swiftOptionalKotlinClassVar?.stringVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_swiftKotlinClassComputedVar_stringVar(value: String) -> String {
     let helper = KotlinHelperClass()
     helper.stringVar = value
@@ -378,7 +378,7 @@ public func testSupport_swiftKotlinClassComputedVar_stringVar(value: String) -> 
     return swiftKotlinClassComputedVar.stringVar
 }
 
-@BridgeToKotlin
+// SKIP @BridgeToKotlin
 public func testSupport_swiftKotlinClassMemberVar_stringVar(value: String) -> String? {
     let helper = KotlinHelperClass()
     helper.stringVar = value
