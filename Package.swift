@@ -35,17 +35,17 @@ let package = Package(
 )
 
 #if swift(>=6.0)
-package.dependencies.append(contentsOf: [
-    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.1")
-])
-// SkipBridgeMacros is only included when Swift version is 5.10 or greater
-package.products.append(contentsOf: [
-    .library(name: "SkipBridgeMacros", targets: ["SkipBridgeMacros"])
-])
-package.targets.append(contentsOf: [
-    .target(name: "SkipBridgeMacros",
-        dependencies: ["SkipBridgeMacrosImpl"]),
-    .macro(name: "SkipBridgeMacrosImpl",
-        dependencies: [.product(name: "SwiftSyntax", package: "swift-syntax"), .product(name: "SwiftSyntaxMacros", package: "swift-syntax"), .product(name: "SwiftCompilerPlugin", package: "swift-syntax")]),
-])
+//package.dependencies.append(contentsOf: [
+//    .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.1")
+//])
+//// SkipBridgeMacros is only included when Swift version is 5.10 or greater
+//package.products.append(contentsOf: [
+//    .library(name: "SkipBridgeMacros", targets: ["SkipBridgeMacros"])
+//])
+//package.targets.append(contentsOf: [
+//    .target(name: "SkipBridgeMacros",
+//        dependencies: ["SkipBridgeMacrosImpl"]),
+//    .macro(name: "SkipBridgeMacrosImpl",
+//        dependencies: [.product(name: "SwiftSyntax", package: "swift-syntax"), .product(name: "SwiftSyntaxMacros", package: "swift-syntax"), .product(name: "SwiftCompilerPlugin", package: "swift-syntax")]),
+//])
 #endif
