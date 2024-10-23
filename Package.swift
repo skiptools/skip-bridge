@@ -32,7 +32,7 @@ let package = Package(
             swiftSettings: swiftSettings,
             plugins: [.plugin(name: "skipstone", package: "skip")]),
         .target(name: "SkipBridgeSamples",
-            dependencies: ["SkipBridge", "SkipBridgeMacros"],
+            dependencies: ["SkipBridge"],
             plugins: [.plugin(name: "skipstone", package: "skip")]),
         .testTarget(name: "SkipBridgeSamplesTests",
             dependencies: ["SkipBridgeSamples", .product(name: "SkipTest", package: "skip")],
