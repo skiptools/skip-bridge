@@ -52,6 +52,7 @@ extension Dictionary: JObjectProtocol, JConvertible where Key: JConvertible, Val
         return dict_java
     }
 }
+
 private let Java_Dictionary = try! JClass(name: "skip/lib/Dictionary")
 private let Java_Dictionary_constructor_methodID = Java_Dictionary.getMethodID(name: "<init>", sig: "(Ljava/util/Map;ZZ)V")!
 private let Java_Dictionary_kotlin_methodID = Java_Dictionary.getMethodID(name: "kotlin", sig: "(Z)Ljava/util/Map;")!

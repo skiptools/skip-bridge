@@ -56,6 +56,7 @@ build:
                 - 'commandLine("sh", "-c", "swift build --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name}")'
                 # Do not run the skipstone plugin when building again, because we have already performed transpilation.
                 - 'environment("SKIP_PLUGIN_DISABLED", "1")'
+                - 'environment("SKIP_JNI_MODE", "1")'
 
     - block: 'android'
       contents:

@@ -41,6 +41,7 @@ extension Array: JObjectProtocol, JConvertible where Element: JConvertible {
         return arr_java
     }
 }
+
 private let Java_Array = try! JClass(name: "skip/lib/Array")
 private let Java_Array_constructor_methodID = Java_Array.getMethodID(name: "<init>", sig: "(Ljava/lang/Iterable;ZZ)V")!
 private let Java_Array_kotlin_methodID = Java_Array.getMethodID(name: "kotlin", sig: "(Z)Ljava/util/List;")!

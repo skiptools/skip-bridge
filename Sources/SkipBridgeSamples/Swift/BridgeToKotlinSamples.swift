@@ -4,121 +4,120 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
+import SkipBridge
+import SkipBridgeMacros
+
 // MARK: Global constants
 
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftBoolConstant = true
-//- SKIP @bridgeToKotlin
-//- TODO: public let swiftCharacterConstant: Character = "a"
-// SKIP @bridgeToKotlin
+// TODO: Char
+// SKIP @BridgeToKotlin
 public let swiftDoubleConstant = 1.0
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftFloatConstant: Float = 2.0
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftInt8Constant: Int8 = 3
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftInt16Constant: Int16 = 4
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftInt32Constant: Int32 = 5
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftInt64Constant: Int64 = 6
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftIntConstant = 7
 // TODO: Unsigned values
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftStringConstant = "s"
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftClassConstant = SwiftHelperClass()
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftKotlinClassConstant = KotlinHelperClass()
 
 // MARK: Global optional constants
 
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftOptionalBoolConstant: Bool? = true
-//- SKIP @bridgeToKotlin
-//- TODO: public let swiftOptionalCharacterConstant: Character? = "a"
-// SKIP @bridgeToKotlin
+// TODO: Optional char
+// SKIP @BridgeToKotlin
 public let swiftOptionalDoubleConstant: Double? = 1.0
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftOptionalFloatConstant: Float? = 2.0
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftOptionalInt8Constant: Int8? = nil
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftOptionalInt16Constant: Int16? = 3
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftOptionalInt32Constant: Int32? = 4
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftOptionalInt64Constant: Int64? = 5
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftOptionalIntConstant: Int? = 6
 // TODO: Unsigned values
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftOptionalStringConstant: String? = "s"
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftOptionalClassConstant: SwiftHelperClass? = SwiftHelperClass()
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftOptionalKotlinClassConstant: KotlinHelperClass? = KotlinHelperClass()
 
 // MARK: Global vars
 
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftBoolVar = true
-//- SKIP @bridgeToKotlin
-//- TODO: public var swiftCharacterVar: Character = "a"
-// SKIP @bridgeToKotlin
+// TODO: Char
+// SKIP @BridgeToKotlin
 public var swiftDoubleVar = 1.0
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftFloatVar: Float = 2.0
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftInt8Var: Int8 = 3
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftInt16Var: Int16 = 4
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftInt32Var: Int32 = 5
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftInt64Var: Int64 = 6
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftIntVar = 7
 // TODO: Unsigned values
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftStringVar = "s"
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftClassVar = SwiftHelperClass()
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftKotlinClassVar = KotlinHelperClass()
 
 // MARK: Global optional vars
 
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftOptionalBoolVar: Bool? = true
-//- SKIP @bridgeToKotlin
-//- TODO: public var swiftOptionalCharacterVar: Character? = "a"
-// SKIP @bridgeToKotlin
+// TODO: Optional char
+// SKIP @BridgeToKotlin
 public var swiftOptionalDoubleVar: Double? = 1.0
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftOptionalFloatVar: Float? = 2.0
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftOptionalInt8Var: Int8? = nil
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftOptionalInt16Var: Int16? = 3
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftOptionalInt32Var: Int32? = 4
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftOptionalInt64Var: Int64? = 5
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftOptionalIntVar: Int? = 6
 // TODO: Unsigned values
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftOptionalStringVar: String? = "s"
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftOptionalClassVar: SwiftHelperClass? = SwiftHelperClass()
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftOptionalKotlinClassVar: KotlinHelperClass? = KotlinHelperClass()
 
 // MARK: Global computed vars
 
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftIntComputedVar: Int {
     get {
         return swiftIntVar
@@ -128,7 +127,7 @@ public var swiftIntComputedVar: Int {
     }
 }
 
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftClassComputedVar: SwiftHelperClass {
     get {
         return swiftClassVar
@@ -138,7 +137,7 @@ public var swiftClassComputedVar: SwiftHelperClass {
     }
 }
 
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftKotlinClassComputedVar: KotlinHelperClass {
     get {
         return swiftKotlinClassVar
@@ -150,7 +149,7 @@ public var swiftKotlinClassComputedVar: KotlinHelperClass {
 
 // MARK: Classes
 
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public class SwiftClass {
     public let intConstant = 1
     public let swiftClassConstant = SwiftHelperClass()
@@ -165,7 +164,7 @@ public class SwiftClass {
     }
 }
 
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public class SwiftHelperClass {
     public var stringVar = "s"
 
@@ -175,33 +174,58 @@ public class SwiftHelperClass {
 
 // MARK: Closures
 
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
+public var swiftClosure0Var: () -> Void = { print("original") }
+// SKIP @BridgeToKotlin
 public var swiftClosure1Var: (Int) -> String = { i in "value = \(i)" }
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftClosure1PrimitivesVar: (Int64) -> Int = { l in Int(l / 1000) }
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftClosure1OptionalsVar: (String?) -> Int? = { s in s?.count }
 
 // MARK: Containers
 
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftIntArrayVar = [1, 2, 3]
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public var swiftIntStringDictionaryVar = [1: "a", 2: "b", 3: "c"]
+
+// MARK: Async
+
+// SKIP @BridgeToKotlin
+public func swiftAsync0Function() async {
+    try? await Task.sleep(nanoseconds: 10_000_000)
+}
+
+// SKIP @BridgeToKotlin
+public func swiftAsync1Function(i: Int) async -> Int {
+    try? await Task.sleep(nanoseconds: 10_000_000)
+    return i + 1
+}
 
 // MARK: Unicode
 
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftUTF8StringVar1 = "😀" + ""
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftUTF8StringVar2 = "🚀" + "123" + "456"
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public let swiftUTF8StringVar3 = "😀" + "🚀"
+
+// MARK: Observation
+
+// SKIP @BridgeToKotlin
+public func swiftExerciseObservable() {
+    if #available(macOS 14, *) {
+        let obj = ObservedClass()
+        obj.i += 1
+    }
+}
 
 // MARK: Sanity check
 // This code is not supported by our transpiler and ensures that we're compiling to native Swift
 
-// SKIP @bridgeToKotlin
+// SKIP @BridgeToKotlin
 public func multiplyInt32s(i1: Int32, i2: Int32) -> Int32 {
     // FIXME: no-name parameters don't bridge: multiplyInt32s(_ i1: Int32, _ i2: Int32):
     i1.multiplex(with: i2)

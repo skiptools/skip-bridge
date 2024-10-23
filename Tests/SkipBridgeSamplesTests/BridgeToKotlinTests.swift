@@ -184,6 +184,12 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(testSupport_swiftKotlinClassMemberVar_stringVar(value: "member"), "member")
     }
 
+    public func testClosure0Var() {
+        swiftClosure0Var()
+        swiftClosure0Var = { print("reassigned") }
+        swiftClosure0Var()
+    }
+
     public func testClosure1Var() {
         let orig = swiftClosure1Var
         XCTAssertEqual(swiftClosure1Var(99), "value = 99")
@@ -213,7 +219,7 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertNil(swiftClosure1OptionalsVar(nil))
     }
 
-    func testArrays() async throws {
+    func testArrays() {
         XCTAssertEqual(swiftIntArrayVar, [1, 2, 3])
         XCTAssertEqual(swiftIntArrayVar[1], 2)
         swiftIntArrayVar = [4, 5, 6, 7]
@@ -223,7 +229,7 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftIntArrayVar, Array<Int>())
     }
 
-    func testDictionaries() async throws {
+    func testDictionaries() {
         XCTAssertEqual(swiftIntStringDictionaryVar, [1: "a", 2: "b", 3: "c"])
         XCTAssertEqual(swiftIntStringDictionaryVar[2], "b")
         swiftIntStringDictionaryVar = [4: "d", 5: "e", 6: "f"]
@@ -231,6 +237,13 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftIntStringDictionaryVar[5], "e")
         swiftIntStringDictionaryVar = [:]
         XCTAssertEqual(swiftIntStringDictionaryVar, Dictionary<Int, String>())
+    }
+
+    func testAsyncFunction() async {
+        await swiftAsync0Function()
+        
+        let result = await swiftAsync1Function(i: 99)
+        XCTAssertEqual(result, 100)
     }
 
     func testUnicode() {
@@ -252,30 +265,11 @@ final class BridgeToKotlinTests: XCTestCase {
         #endif
     }
 
+//    func testExerciseObservable() {
+//        swiftExerciseObservable()
+//    }
+
     func testGlobalFunction() {
         XCTAssertEqual(8, multiplyInt32s(i1: 2, i2: 4))
     }
 }
-
-/*
-
-
-// MARK: Classes
-
-// SKIP @bridgeToKotlin
-public class SwiftClass {
-    public let intConstant = 1
-    public let swiftClassConstant = SwiftHelperClass()
-
-    public var intVar = 1
-    public var optionalIntVar: Int? = nil
-
-    public var swiftClassVar = SwiftHelperClass()
-    public var swiftKotlinClassVar = KotlinHelperClass()
-}
-
-// SKIP @bridgeToKotlin
-public class SwiftHelperClass {
-    public var stringVar = "s"
-}
-*/
