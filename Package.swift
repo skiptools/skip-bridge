@@ -13,7 +13,6 @@ let package = Package(
     platforms: [.iOS(.v16), .macOS(.v13)],
     products: [
         .library(name: "SkipBridge", targets: ["SkipBridge"]),
-        .library(name: "SkipBridgeMacros", targets: ["SkipBridgeMacros"]),
         .library(name: "SkipBridgeSamples", type: .dynamic, targets: ["SkipBridgeSamples"]),
     ],
     dependencies: [
@@ -23,10 +22,6 @@ let package = Package(
     ],
     targets: [
         .target(name: "CJNI"),
-        .target(name: "SkipBridgeMacros",
-            dependencies: ["SkipBridgeMacrosImpl"]),
-        .macro(name: "SkipBridgeMacrosImpl",
-            dependencies: [.product(name: "SwiftSyntax", package: "swift-syntax"), .product(name: "SwiftSyntaxMacros", package: "swift-syntax"), .product(name: "SwiftCompilerPlugin", package: "swift-syntax")]),
         .target(name: "SkipBridge",
             dependencies: ["CJNI", .product(name: "SkipLib", package: "skip-lib")],
             swiftSettings: swiftSettings,
@@ -40,3 +35,16 @@ let package = Package(
     ]
 )
 
+#if swift(>=5.10)
+// SkipBridgeMacros is only included when Swift version is 5.10 or greater
+package.products.append(contentsOf: [
+    .library(name: "SkipBridgeMacros", targets: ["SkipBridgeMacros"])
+])
+
+package.targets.append(contentsOf: [
+    .target(name: "SkipBridgeMacros",
+        dependencies: ["SkipBridgeMacrosImpl"]),
+    .macro(name: "SkipBridgeMacrosImpl",
+        dependencies: [.product(name: "SwiftSyntax", package: "swift-syntax"), .product(name: "SwiftSyntaxMacros", package: "swift-syntax"), .product(name: "SwiftCompilerPlugin", package: "swift-syntax")]),
+])
+#endif
