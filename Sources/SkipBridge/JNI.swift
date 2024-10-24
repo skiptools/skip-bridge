@@ -53,8 +53,13 @@ extension JavaBoolean : @retroactive ExpressibleByBooleanLiteral {
 
 // MARK: JNI
 
-/// The single shared singleton JNI instance for the process
+/// The single shared singleton JNI instance for the process.
 public private(set) var jni: JNI! // this gets set "OnLoad" so should always exist
+
+/// Whether the shared JNI instance has been initialized.
+public var isJNIInitialized: Bool {
+    return jni != nil
+}
 
 /// Establish a context in which to perform JNI operations.
 ///
@@ -88,7 +93,7 @@ public func jniContext<T>(_ block: () throws -> T) rethrows -> T {
     }
 }
 
-/// Gateway to JVM and JNI functionality
+/// Gateway to JVM and JNI functionality.
 public class JNI {
     /// `true` when the SkipBridge module was compiled with the `SKIP_JNI_MODE` flag.
     #if SKIP_JNI_MODE
@@ -226,7 +231,7 @@ extension JNI {
 
 // MARK: Errors
 
-/// A system-level error relating to interacting with the Java Virtual Machine
+/// A system-level error relating to interacting with the Java Virtual Machine.
 public struct JVMError: Error, CustomStringConvertible {
     public var description: String
 

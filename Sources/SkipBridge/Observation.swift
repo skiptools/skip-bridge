@@ -102,25 +102,40 @@ private final class BridgeObservationSupport: @unchecked Sendable {
     }
 
     private func Java_initPeer() -> JObject? {
-        guard let cls = Self.Java_stateClass, let initMethod = Self.Java_state_init_methodID else {
+        guard isJNIInitialized else {
             return nil
         }
-        let ptr: JavaObjectPointer = try! cls.create(ctor: initMethod, args: [])
-        return JObject(ptr)
+        return jniContext {
+            guard let cls = Self.Java_stateClass, let initMethod = Self.Java_state_init_methodID else {
+                return nil
+            }
+            let ptr: JavaObjectPointer = try! cls.create(ctor: initMethod, args: [])
+            return JObject(ptr)
+        }
     }
 
     private func Java_access(_ index: Int) {
-        guard let peer = Java_peer, let accessMethod = Self.Java_state_access_methodID else {
+        guard isJNIInitialized, let peer = Java_peer else {
             return
         }
-        try! peer.call(method: accessMethod, args: [Int32(index).toJavaParameter()])
+        jniContext {
+            guard let accessMethod = Self.Java_state_access_methodID else {
+                return
+            }
+            try! peer.call(method: accessMethod, args: [Int32(index).toJavaParameter()])
+        }
     }
 
     private func Java_update(_ index: Int) {
-        guard let peer = Java_peer, let updateMethod = Self.Java_state_update_methodID else {
+        guard isJNIInitialized, let peer = Java_peer else {
             return
         }
-        try! peer.call(method: updateMethod, args: [Int32(index).toJavaParameter()])
+        jniContext {
+            guard let updateMethod = Self.Java_state_update_methodID else {
+                return
+            }
+            try! peer.call(method: updateMethod, args: [Int32(index).toJavaParameter()])
+        }
     }
 
     private let lock = NSLock()
