@@ -45,11 +45,19 @@ public typealias JavaFieldID = jfieldID
 public typealias JavaMethodID = jmethodID
 public typealias JavaParameter = jvalue
 
+#if compiler(>=6)
 extension JavaBoolean : @retroactive ExpressibleByBooleanLiteral {
     public init(booleanLiteral value: Bool) {
         self = value ? JavaBoolean(JNI_TRUE) : JavaBoolean(JNI_FALSE)
     }
 }
+#else
+extension JavaBoolean : ExpressibleByBooleanLiteral {
+    public init(booleanLiteral value: Bool) {
+        self = value ? JavaBoolean(JNI_TRUE) : JavaBoolean(JNI_FALSE)
+    }
+}
+#endif
 
 // MARK: JNI
 
