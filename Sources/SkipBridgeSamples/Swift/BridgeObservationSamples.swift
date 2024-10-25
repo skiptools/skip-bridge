@@ -6,11 +6,12 @@
 
 #if canImport(Observation)
 import Observation
-#endif
 
-@available(macOS 14, *)
+@available(macOS 14, iOS 17, *)
 @Observable
 class ObservedClass {
     var i = 1
     var array: [String]?
 }
+
+#endif

@@ -215,7 +215,7 @@ public let swiftUTF8StringVar3 = "😀" + "🚀"
 
 // SKIP @BridgeToKotlin
 public func swiftExerciseObservable() {
-    if #available(macOS 14, *) {
+    if #available(macOS 14, iOS 17, *) {
         let obj = ObservedClass()
         obj.i += 1
     }
