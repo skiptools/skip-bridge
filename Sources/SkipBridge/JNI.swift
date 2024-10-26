@@ -97,8 +97,9 @@ public func jniContext<T>(_ block: () throws -> T) rethrows -> T {
                 fatalError("SkipJNI: unable to detach JNI from thread")
             }
         }
-        // TODO: should we set the ClassLoader for the current thread to be the application ClassLoader? Otherwise classes defined in the app may not be found when loaded from a natively-created thread when loaded via reflection…
-        //JClassLoader.setThreadClassLoader()
+
+        // We set the ClassLoader for the current thread to be the application ClassLoader, otherwise classes defined in the app may not be found when loaded from a natively-created thread when loaded via reflection
+        JClassLoader.setThreadClassLoader()
         return try block()
     case JNI_EVERSION:
         fatalError("SkipJNI: unsupported JNI version")
@@ -482,7 +483,7 @@ public final class JClass : JObject {
             }
             self.init(cls, name: name)
         } else {
-            // use the same ClassLoader as when JNI was initialized, which will include the classes bundles with the app
+            // use the same ClassLoader as when JNI was initialized, which will include the classes bundled with the app
             let cls = try JClassLoader.globalClassLoader.loadClass(name.replacing("/", with: "."))
             self.init(cls, name: name)
         }
