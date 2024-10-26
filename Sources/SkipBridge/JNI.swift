@@ -62,7 +62,11 @@ extension JavaBoolean : ExpressibleByBooleanLiteral {
 // MARK: JNI
 
 /// The single shared singleton JNI instance for the process.
-public private(set) var jni: JNI! // this gets set "OnLoad" so should always exist
+public private(set) var jni: JNI! { // this gets set "OnLoad" so should always exist
+    didSet {
+        _ = JClassLoader.globalClassLoader // cache the global class loader on initialization
+    }
+}
 
 /// Whether the shared JNI instance has been initialized.
 public var isJNIInitialized: Bool {
@@ -93,6 +97,8 @@ public func jniContext<T>(_ block: () throws -> T) rethrows -> T {
                 fatalError("SkipJNI: unable to detach JNI from thread")
             }
         }
+        // TODO: should we set the ClassLoader for the current thread to be the application ClassLoader? Otherwise classes defined in the app may not be found when loaded from a natively-created thread when loaded via reflection…
+        //JClassLoader.setThreadClassLoader()
         return try block()
     case JNI_EVERSION:
         fatalError("SkipJNI: unsupported JNI version")
@@ -212,7 +218,7 @@ extension JNI {
         }
     }
 
-    public func findClass(_ name: String) -> JavaClassPointer? {
+    fileprivate func findClass(_ name: String) -> JavaClassPointer? {
         withEnv { $0.FindClass($1, name) }
     }
 
@@ -463,12 +469,23 @@ public final class JClass : JObject {
         self.name = name
         super.init(ptr)
     }
-
-    public convenience init(name: String) throws {
-        guard let cls = jni.findClass(name) else {
-            throw ClassNotFoundError(name: name)
+    
+    /// Looks up the Java class by name.
+    /// - Parameters:
+    ///   - name: the name of the Java class, like `java/lang/String`
+    ///   - systemClass: whether this is a system class provided by the bootclassloader, or a class that may only be available through the `JClassLoader.globalClassLoader` (which is set when JNI initializes, and typically will contain all the classes packaged with an application).
+    public convenience init(name: String, systemClass: Bool = false) throws {
+        if systemClass {
+            // findClass will use the Thread's ClassLoader, and when the thread is created natively, it will only be the bootstrap ClassLoader, which doesn't contain any classes embedded in the app itself
+            guard let cls = jni.findClass(name) else {
+                throw ClassNotFoundError(name: name)
+            }
+            self.init(cls, name: name)
+        } else {
+            // use the same ClassLoader as when JNI was initialized, which will include the classes bundles with the app
+            let cls = try JClassLoader.globalClassLoader.loadClass(name.replacing("/", with: "."))
+            self.init(cls, name: name)
         }
-        self.init(cls, name: name)
     }
 
     public func getFieldID(name: String, sig: String) -> JavaFieldID? {
@@ -515,8 +532,44 @@ public final class JClass : JObject {
     }
 }
 
+public final class JClassLoader: JObject {
+    private static let javaClass = try! JClass(name: "java/lang/ClassLoader", systemClass: true)
+    private static let loadClassID = javaClass.getMethodID(name: "loadClass", sig: "(Ljava/lang/String;)Ljava/lang/Class;")!
+
+    public static let globalClassLoader: JClassLoader = try! JThread.currentThread.getContextClassLoader()!
+
+    /// Sets the current thread's ClassLoader to be the single global classLoader
+    public static func setThreadClassLoader() {
+        try! JThread.currentThread.setContextClassLoader(globalClassLoader)
+    }
+
+    fileprivate func loadClass(_ name: String) throws -> jclass {
+        try call(method: Self.loadClassID, args: [name.toJavaParameter()])
+    }
+}
+
+public final class JThread: JObject {
+    private static let javaClass = try! JClass(name: "java/lang/Thread", systemClass: true)
+    private static let threadCurrentThreadID = javaClass.getStaticMethodID(name: "currentThread", sig: "()Ljava/lang/Thread;")!
+    private static let getContextClassLoaderID = javaClass.getMethodID(name: "getContextClassLoader", sig: "()Ljava/lang/ClassLoader;")!
+    private static let setContextClassLoaderID = javaClass.getMethodID(name: "setContextClassLoader", sig: "(Ljava/lang/ClassLoader;)V")!
+
+    /// Returns the current thread for the caller
+    public static var currentThread: JThread {
+        JThread(try! javaClass.callStatic(method: threadCurrentThreadID, args: []))
+    }
+
+    public func getContextClassLoader() throws -> JClassLoader? {
+        JClassLoader(try call(method: Self.getContextClassLoaderID, args: []))
+    }
+
+    public func setContextClassLoader(_ loader: JClassLoader?) throws {
+        try call(method: Self.setContextClassLoaderID, args: [loader?.ptr.toJavaParameter() ?? .init()])
+    }
+}
+
 public final class JThrowable: JObject {
-    private static let javaClass = try! JClass(name: "java/lang/Throwable")
+    private static let javaClass = try! JClass(name: "java/lang/Throwable", systemClass: true)
 
     public static func toError(_ ptr: JavaObjectPointer) -> ThrowableError {
         let str = try? String.call(toStringID, on: ptr, args: [])
@@ -547,7 +600,7 @@ public final class JThrowable: JObject {
 
 public final class JBoolean: JObject, JPrimitiveWrapperProtocol {
     public typealias JConvertibleType = Bool
-    public static let javaClass = try! JClass(name: "java/lang/Boolean")
+    public static let javaClass = try! JClass(name: "java/lang/Boolean", systemClass: true)
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(Z)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "booleanValue", sig: "()Z")!
 }
@@ -586,7 +639,7 @@ extension Bool: JPrimitiveProtocol {
 
 final public class JByte: JObject, JPrimitiveWrapperProtocol {
     public typealias JConvertibleType = Int8
-    public static let javaClass = try! JClass(name: "java/lang/Byte")
+    public static let javaClass = try! JClass(name: "java/lang/Byte", systemClass: true)
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(B)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "byteValue", sig: "()B")!
 }
@@ -625,7 +678,7 @@ extension Int8: JPrimitiveProtocol {
 
 public final class JChar: JObject, JPrimitiveWrapperProtocol {
     public typealias JConvertibleType = UInt16
-    public static let javaClass = try! JClass(name: "java/lang/Character")
+    public static let javaClass = try! JClass(name: "java/lang/Character", systemClass: true)
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(C)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "charValue", sig: "()C")!
 }
@@ -664,7 +717,7 @@ extension UInt16: JPrimitiveProtocol {
 
 public final class JShort: JObject, JPrimitiveWrapperProtocol {
     public typealias JConvertibleType = Int16
-    public static let javaClass = try! JClass(name: "java/lang/Short")
+    public static let javaClass = try! JClass(name: "java/lang/Short", systemClass: true)
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(S)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "shortValue", sig: "()S")!
 }
@@ -703,7 +756,7 @@ extension Int16: JPrimitiveProtocol {
 
 public final class JInteger: JObject, JPrimitiveWrapperProtocol {
     public typealias JConvertibleType = Int32
-    public static let javaClass = try! JClass(name: "java/lang/Integer")
+    public static let javaClass = try! JClass(name: "java/lang/Integer", systemClass: true)
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(I)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "intValue", sig: "()I")!
 }
@@ -742,7 +795,7 @@ extension Int32: JPrimitiveProtocol {
 
 public final class JLong: JObject, JPrimitiveWrapperProtocol {
     public typealias JConvertibleType = Int64
-    public static let javaClass = try! JClass(name: "java/lang/Long")
+    public static let javaClass = try! JClass(name: "java/lang/Long", systemClass: true)
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(J)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "longValue", sig: "()J")!
 }
@@ -821,7 +874,7 @@ extension Int: JPrimitiveProtocol {
 
 public final class JFloat: JObject, JPrimitiveWrapperProtocol {
     public typealias JConvertibleType = Float
-    public static let javaClass = try! JClass(name: "java/lang/Float")
+    public static let javaClass = try! JClass(name: "java/lang/Float", systemClass: true)
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(F)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "floatValue", sig: "()F")!
 }
@@ -860,7 +913,7 @@ extension Float: JPrimitiveProtocol {
 
 public final class JDouble: JObject, JPrimitiveWrapperProtocol {
     public typealias JConvertibleType = Double
-    public static let javaClass = try! JClass(name: "java/lang/Double")
+    public static let javaClass = try! JClass(name: "java/lang/Double", systemClass: true)
     public static let initWithPrimitiveValueMethodID = javaClass.getMethodID(name: "<init>", sig: "(D)V")!
     public static let primitiveValueMethodID = javaClass.getMethodID(name: "doubleValue", sig: "()D")!
 }
@@ -898,7 +951,7 @@ extension Double: JPrimitiveProtocol {
 }
 
 extension String: JObjectProtocol, JConvertible {
-    private static let javaClass = try! JClass(name: "java/lang/String")
+    private static let javaClass = try! JClass(name: "java/lang/String", systemClass: true)
 
     public static func fromJavaObject(_ obj: JavaObjectPointer?) -> String {
         jni.withEnv { jni, env in
@@ -948,6 +1001,7 @@ public func JNI_OnLoad(jvm: UnsafeMutablePointer<JavaVM?>, reserved: UnsafeMutab
     if jni == nil {
         fatalError("SkipJNI: global jni variable was nil after JNI_OnLoad")
     }
+
     return JavaInt(JNI_VERSION_1_6)
 }
 
