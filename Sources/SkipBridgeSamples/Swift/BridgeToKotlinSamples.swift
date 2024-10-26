@@ -189,6 +189,24 @@ public var swiftIntArrayVar = [1, 2, 3]
 // SKIP @BridgeToKotlin
 public var swiftIntStringDictionaryVar = [1: "a", 2: "b", 3: "c"]
 
+// MARK: Functions
+
+// SKIP @BridgeToKotlin
+public func swiftThrowingFunction(shouldThrow: Bool) throws -> Int {
+    if shouldThrow {
+        throw SwiftSampleError()
+    } else {
+        return 1
+    }
+}
+
+// SKIP @BridgeToKotlin
+public func swiftThrowingVoidFunction(shouldThrow: Bool) throws {
+    if shouldThrow {
+        throw SwiftSampleError()
+    }
+}
+
 // MARK: Async
 
 // SKIP @BridgeToKotlin
@@ -219,6 +237,9 @@ public func swiftExerciseObservable() {
         let obj = ObservedClass()
         obj.i += 1
     }
+}
+
+struct SwiftSampleError: Error {
 }
 
 // MARK: Sanity check

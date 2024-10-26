@@ -191,10 +191,21 @@ public var kotlinIntStringDictionaryVar = [1: "a", 2: "b", 3: "c"]
 
 // MARK: Functions
 
-//// SKIP @BridgeToSwift
-//public func kotlinThrowingFunction() throws {
-//    throw KotlinError()
-//}
+// SKIP @BridgeToSwift
+public func kotlinThrowingFunction(shouldThrow: Bool) throws -> Int {
+    if shouldThrow {
+        throw KotlinSampleError()
+    } else {
+        return 1
+    }
+}
+
+// SKIP @BridgeToSwift
+public func kotlinThrowingVoidFunction(shouldThrow: Bool) throws {
+    if shouldThrow {
+        throw KotlinSampleError()
+    }
+}
 
 // MARK: Async
 
@@ -209,5 +220,5 @@ public func kotlinAsync1Function(i: Int) async -> Int {
     return i + 1
 }
 
-struct KotlinError: Error {
+struct KotlinSampleError: Error {
 }

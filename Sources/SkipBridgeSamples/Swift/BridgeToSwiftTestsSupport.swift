@@ -332,10 +332,15 @@ public func testSupport_kotlinIntStringDictionaryVar(value: [Int: String]) -> [I
     return kotlinIntStringDictionaryVar
 }
 
-//// SKIP @BridgeToKotlin
-//public func testSupport_callKotlinThrowingFunction() throws {
-//    try kotlinThrowingFunction()
-//}
+// SKIP @BridgeToKotlin
+public func testSupport_callKotlinThrowingFunction(shouldThrow: Bool) throws -> Int {
+    return try kotlinThrowingFunction(shouldThrow: shouldThrow)
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_callKotlinThrowingVoidFunction(shouldThrow: Bool) throws {
+    try kotlinThrowingVoidFunction(shouldThrow: shouldThrow)
+}
 
 // SKIP @BridgeToKotlin
 public func testSupport_callKotlinAsync0Function() async {
