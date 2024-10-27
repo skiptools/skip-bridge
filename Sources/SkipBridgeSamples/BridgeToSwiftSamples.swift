@@ -220,5 +220,21 @@ public func kotlinAsync1Function(i: Int) async -> Int {
     return i + 1
 }
 
+// SKIP @BridgeToSwift
+public func kotlinAsyncThrowingFunction(shouldThrow: Bool) async throws -> Int {
+    if shouldThrow {
+        throw KotlinSampleError()
+    } else {
+        return 1
+    }
+}
+
+// SKIP @BridgeToSwift
+public func kotlinAsyncThrowingVoidFunction(shouldThrow: Bool) async throws {
+    if shouldThrow {
+        throw KotlinSampleError()
+    }
+}
+
 struct KotlinSampleError: Error {
 }

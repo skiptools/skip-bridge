@@ -255,6 +255,16 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(result, 100)
     }
 
+    func testAsyncThrowsFunctions() async throws {
+        do {
+            try await swiftAsyncThrowingVoidFunction(shouldThrow: true)
+            XCTFail("Should have thrown")
+        } catch {
+        }
+        let result = try await swiftAsyncThrowingFunction(shouldThrow: false)
+        XCTAssertEqual(result, 1)
+    }
+
     func testUnicode() {
         XCTAssertEqual("😀", swiftUTF8StringVar1)
         XCTAssertEqual("🚀123456", swiftUTF8StringVar2)

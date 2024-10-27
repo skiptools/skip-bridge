@@ -164,6 +164,16 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(result, 100)
     }
 
+    func testAsyncThrowsFunctions() async throws {
+        do {
+            try await testSupport_callKotlinAsyncThrowingVoidFunction(shouldThrow: true)
+            XCTFail("Should have thrown")
+        } catch {
+        }
+        let result = try await testSupport_callKotlinAsyncThrowingFunction(shouldThrow: false)
+        XCTAssertEqual(result, 1)
+    }
+
     /*
     func testSwiftClassMemberConstant() {
         let value = SwiftClass()

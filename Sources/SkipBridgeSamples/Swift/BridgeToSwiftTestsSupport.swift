@@ -352,6 +352,16 @@ public func testSupport_callKotlinAsync1Function(with value: Int) async -> Int {
     return await kotlinAsync1Function(i: value)
 }
 
+// SKIP @BridgeToKotlin
+public func testSupport_callKotlinAsyncThrowingFunction(shouldThrow: Bool) async throws -> Int {
+    return try await kotlinAsyncThrowingFunction(shouldThrow: shouldThrow)
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_callKotlinAsyncThrowingVoidFunction(shouldThrow: Bool) async throws {
+    try await kotlinAsyncThrowingVoidFunction(shouldThrow: shouldThrow)
+}
+
 // MARK: Used by BridgeToKotlinTests
 
 // SKIP @BridgeToKotlin

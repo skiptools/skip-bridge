@@ -220,6 +220,22 @@ public func swiftAsync1Function(i: Int) async -> Int {
     return i + 1
 }
 
+// SKIP @BridgeToKotlin
+public func swiftAsyncThrowingFunction(shouldThrow: Bool) async throws -> Int {
+    if shouldThrow {
+        throw SwiftSampleError()
+    } else {
+        return 1
+    }
+}
+
+// SKIP @BridgeToKotlin
+public func swiftAsyncThrowingVoidFunction(shouldThrow: Bool) async throws {
+    if shouldThrow {
+        throw SwiftSampleError()
+    }
+}
+
 // MARK: Unicode
 
 // SKIP @BridgeToKotlin
