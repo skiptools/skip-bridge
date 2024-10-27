@@ -78,13 +78,13 @@ private let Java_Function0_invoke_methodID = Java_Function0_class.getMethodID(na
 private let Java_Function1_class = try! JClass(name: "kotlin/jvm/functions/Function1")
 private let Java_Function1_invoke_methodID = Java_Function1_class.getMethodID(name: "invoke", sig: "(Ljava/lang/Object;)Ljava/lang/Object;")!
 private let Java_Function2_class = try! JClass(name: "kotlin/jvm/functions/Function2")
-private let Java_Function2_invoke_methodID = Java_Function1_class.getMethodID(name: "invoke", sig: "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")!
+private let Java_Function2_invoke_methodID = Java_Function2_class.getMethodID(name: "invoke", sig: "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")!
 private let Java_Function3_class = try! JClass(name: "kotlin/jvm/functions/Function3")
-private let Java_Function3_invoke_methodID = Java_Function1_class.getMethodID(name: "invoke", sig: "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")!
+private let Java_Function3_invoke_methodID = Java_Function3_class.getMethodID(name: "invoke", sig: "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")!
 private let Java_Function4_class = try! JClass(name: "kotlin/jvm/functions/Function4")
-private let Java_Function4_invoke_methodID = Java_Function1_class.getMethodID(name: "invoke", sig: "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")!
+private let Java_Function4_invoke_methodID = Java_Function4_class.getMethodID(name: "invoke", sig: "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")!
 private let Java_Function5_class = try! JClass(name: "kotlin/jvm/functions/Function5")
-private let Java_Function5_invoke_methodID = Java_Function1_class.getMethodID(name: "invoke", sig: "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")!
+private let Java_Function5_invoke_methodID = Java_Function5_class.getMethodID(name: "invoke", sig: "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")!
 
 /// A Swift reference type that wraps a 0-parameters closure.
 public final class SwiftClosure0 {

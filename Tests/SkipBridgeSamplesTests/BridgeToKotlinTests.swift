@@ -239,11 +239,30 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftIntStringDictionaryVar, Dictionary<Int, String>())
     }
 
+    func testThrowsFunctions() throws {
+        do {
+            try swiftThrowingVoidFunction(shouldThrow: true)
+            XCTFail("Should have thrown")
+        } catch {
+        }
+        XCTAssertEqual(try swiftThrowingFunction(shouldThrow: false), 1)
+    }
+
     func testAsyncFunction() async {
         await swiftAsync0Function()
         
         let result = await swiftAsync1Function(i: 99)
         XCTAssertEqual(result, 100)
+    }
+
+    func testAsyncThrowsFunctions() async throws {
+        do {
+            try await swiftAsyncThrowingVoidFunction(shouldThrow: true)
+            XCTFail("Should have thrown")
+        } catch {
+        }
+        let result = try await swiftAsyncThrowingFunction(shouldThrow: false)
+        XCTAssertEqual(result, 1)
     }
 
     func testUnicode() {

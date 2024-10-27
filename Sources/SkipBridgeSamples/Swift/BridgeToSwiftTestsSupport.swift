@@ -332,10 +332,15 @@ public func testSupport_kotlinIntStringDictionaryVar(value: [Int: String]) -> [I
     return kotlinIntStringDictionaryVar
 }
 
-//// SKIP @BridgeToKotlin
-//public func testSupport_callKotlinThrowingFunction() throws {
-//    try kotlinThrowingFunction()
-//}
+// SKIP @BridgeToKotlin
+public func testSupport_callKotlinThrowingFunction(shouldThrow: Bool) throws -> Int {
+    return try kotlinThrowingFunction(shouldThrow: shouldThrow)
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_callKotlinThrowingVoidFunction(shouldThrow: Bool) throws {
+    try kotlinThrowingVoidFunction(shouldThrow: shouldThrow)
+}
 
 // SKIP @BridgeToKotlin
 public func testSupport_callKotlinAsync0Function() async {
@@ -345,6 +350,16 @@ public func testSupport_callKotlinAsync0Function() async {
 // SKIP @BridgeToKotlin
 public func testSupport_callKotlinAsync1Function(with value: Int) async -> Int {
     return await kotlinAsync1Function(i: value)
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_callKotlinAsyncThrowingFunction(shouldThrow: Bool) async throws -> Int {
+    return try await kotlinAsyncThrowingFunction(shouldThrow: shouldThrow)
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_callKotlinAsyncThrowingVoidFunction(shouldThrow: Bool) async throws {
+    try await kotlinAsyncThrowingVoidFunction(shouldThrow: shouldThrow)
 }
 
 // MARK: Used by BridgeToKotlinTests

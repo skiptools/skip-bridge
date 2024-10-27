@@ -189,6 +189,24 @@ public var swiftIntArrayVar = [1, 2, 3]
 // SKIP @BridgeToKotlin
 public var swiftIntStringDictionaryVar = [1: "a", 2: "b", 3: "c"]
 
+// MARK: Functions
+
+// SKIP @BridgeToKotlin
+public func swiftThrowingFunction(shouldThrow: Bool) throws -> Int {
+    if shouldThrow {
+        throw SwiftSampleError()
+    } else {
+        return 1
+    }
+}
+
+// SKIP @BridgeToKotlin
+public func swiftThrowingVoidFunction(shouldThrow: Bool) throws {
+    if shouldThrow {
+        throw SwiftSampleError()
+    }
+}
+
 // MARK: Async
 
 // SKIP @BridgeToKotlin
@@ -200,6 +218,22 @@ public func swiftAsync0Function() async {
 public func swiftAsync1Function(i: Int) async -> Int {
     try? await Task.sleep(nanoseconds: 10_000_000)
     return i + 1
+}
+
+// SKIP @BridgeToKotlin
+public func swiftAsyncThrowingFunction(shouldThrow: Bool) async throws -> Int {
+    if shouldThrow {
+        throw SwiftSampleError()
+    } else {
+        return 1
+    }
+}
+
+// SKIP @BridgeToKotlin
+public func swiftAsyncThrowingVoidFunction(shouldThrow: Bool) async throws {
+    if shouldThrow {
+        throw SwiftSampleError()
+    }
 }
 
 // MARK: Unicode
@@ -219,6 +253,9 @@ public func swiftExerciseObservable() {
         let obj = ObservedClass()
         obj.i += 1
     }
+}
+
+struct SwiftSampleError: Error {
 }
 
 // MARK: Sanity check

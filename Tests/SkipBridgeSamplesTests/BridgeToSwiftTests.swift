@@ -148,15 +148,30 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(roundtripped[5], "e")
     }
 
-//    func testThrowingFunction() throws {
-//        try testSupport_callKotlinThrowingFunction()
-//    }
+    func testThrowingFunctions() throws {
+        do {
+            try testSupport_callKotlinThrowingVoidFunction(shouldThrow: true)
+            XCTFail("Should have thrown")
+        } catch {
+        }
+        XCTAssertEqual(try testSupport_callKotlinThrowingFunction(shouldThrow: false), 1)
+    }
 
     func testAsyncFunctions() async {
         await testSupport_callKotlinAsync0Function()
 
         let result = await testSupport_callKotlinAsync1Function(with: 99)
         XCTAssertEqual(result, 100)
+    }
+
+    func testAsyncThrowsFunctions() async throws {
+        do {
+            try await testSupport_callKotlinAsyncThrowingVoidFunction(shouldThrow: true)
+            XCTFail("Should have thrown")
+        } catch {
+        }
+        let result = try await testSupport_callKotlinAsyncThrowingFunction(shouldThrow: false)
+        XCTAssertEqual(result, 1)
     }
 
     /*
