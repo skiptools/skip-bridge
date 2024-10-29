@@ -14,10 +14,12 @@ let package = Package(
     products: [
         .library(name: "SkipBridge", targets: ["SkipBridge"]),
         .library(name: "SkipBridgeSamples", type: .dynamic, targets: ["SkipBridgeSamples"]),
+        .library(name: "SkipBridgeMacros", targets: ["SkipBridgeMacros"])
     ],
     dependencies: [
         .package(url: "https://source.skip.tools/skip.git", branch: "main"),
         .package(url: "https://source.skip.tools/skip-lib.git", from: "1.0.0"),
+        .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.1")
     ],
     targets: [
         .target(name: "CJNI"),
@@ -25,6 +27,10 @@ let package = Package(
             dependencies: ["CJNI", .product(name: "SkipLib", package: "skip-lib")],
             swiftSettings: swiftSettings,
             plugins: [.plugin(name: "skipstone", package: "skip")]),
+        .target(name: "SkipBridgeMacros",
+            dependencies: ["SkipBridgeMacrosImpl"]),
+        .macro(name: "SkipBridgeMacrosImpl",
+            dependencies: [.product(name: "SwiftSyntax", package: "swift-syntax"), .product(name: "SwiftSyntaxMacros", package: "swift-syntax"), .product(name: "SwiftCompilerPlugin", package: "swift-syntax")]),
         .target(name: "SkipBridgeSamples",
             dependencies: ["SkipBridge"],
             plugins: [.plugin(name: "skipstone", package: "skip")]),
