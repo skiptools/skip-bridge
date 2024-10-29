@@ -247,6 +247,7 @@ public let swiftUTF8StringVar3 = "😀" + "🚀"
 
 // MARK: Observation
 
+#if compiler(>=6.0)
 // SKIP @BridgeToKotlin
 public func swiftExerciseObservable() {
     if #available(macOS 14, iOS 17, *) {
@@ -254,6 +255,7 @@ public func swiftExerciseObservable() {
         obj.i += 1
     }
 }
+#endif
 
 struct SwiftSampleError: Error {
 }
