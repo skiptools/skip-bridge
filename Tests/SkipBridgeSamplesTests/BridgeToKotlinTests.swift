@@ -184,6 +184,19 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(testSupport_swiftKotlinClassMemberVar_stringVar(value: "member"), "member")
     }
 
+    func testSwiftClassMemberStaticConstant() {
+        XCTAssertEqual(SwiftClass.staticIntConstant, 1)
+    }
+
+    func testSwiftClassMemberStaticVar() {
+        SwiftClass.staticIntVar = 99
+        XCTAssertEqual(SwiftClass.staticIntVar, 99)
+    }
+
+    func testSwiftClassMemberStaticFunc() {
+        XCTAssertEqual(SwiftClass.staticFunc(string: "Hello"), "swiftHello")
+    }
+
     public func testClosure0Var() {
         swiftClosure0Var()
         swiftClosure0Var = { print("reassigned") }

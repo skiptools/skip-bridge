@@ -119,6 +119,39 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(testSupport_kotlinClassComputedVar_stringVar(value: "computed"), "computed")
     }
 
+    func testKotlinClassMemberConstant() {
+        XCTAssertEqual(testSupport_kotlinClassMemberConstant(), 1)
+    }
+
+    func testKotlinClassMemberVar() {
+        XCTAssertEqual(testSupport_kotlinClassMemberVar(value: 99), 99)
+    }
+
+    func testKotlinClassMemberOptionalVar() {
+        XCTAssertEqual(testSupport_kotlinClassMemberOptionalVar(value: 99), 99)
+        XCTAssertNil(testSupport_kotlinClassMemberOptionalVar(value: nil))
+    }
+
+    func testKotlinClassMemberKotlinClassConstant() {
+        XCTAssertEqual(testSupport_kotlinClassMemberKotlinClassConstant_stringVar(), "s")
+    }
+
+    func testKotlinClassMemberKotlinClassVar() {
+        XCTAssertEqual(testSupport_kotlinClassMemberKotlinClassVar_stringVar(value: "member"), "member")
+    }
+
+    func testKotlinClassMemberStaticConstant() {
+        XCTAssertEqual(testSupport_kotlinClassMemberStaticConstant(), 1)
+    }
+
+    func testKotlinClassMemberStaticVar() {
+        XCTAssertEqual(testSupport_kotlinClassMemberStaticVar(value: 99), 99)
+    }
+
+    func testKotlinClassMemberStaticFunc() {
+        XCTAssertEqual(testSupport_kotlinClassMemberStaticFunc(value: "Hello"), "kotlinHello")
+    }
+
     func testClosure0Var() {
         testSupport_kotlinClosure0Var()
     }
@@ -173,45 +206,4 @@ final class BridgeToSwiftTests: XCTestCase {
         let result = try await testSupport_callKotlinAsyncThrowingFunction(shouldThrow: false)
         XCTAssertEqual(result, 1)
     }
-
-    /*
-    func testSwiftClassMemberConstant() {
-        let value = SwiftClass()
-        XCTAssertEqual(value.intConstant, 1)
-    }
-
-    func testSwiftClassMemberVar() {
-        let value = SwiftClass()
-        value.intVar = 99
-        XCTAssertEqual(value.intVar, 99)
-    }
-
-    func testSwiftClassMemberOptionalVar() {
-        let value = SwiftClass()
-        value.optionalIntVar = 100
-        XCTAssertEqual(value.optionalIntVar, 100)
-        value.optionalIntVar = nil
-        XCTAssertNil(value.optionalIntVar)
-    }
-
-    func testSwiftClassMemberSwiftClassConstant() {
-        let value = SwiftClass()
-        XCTAssertEqual(value.swiftClassConstant.stringVar, "s")
-    }
-
-    func testSwiftClassMemberSwiftClassVar() {
-        let helper = SwiftHelperClass()
-        helper.stringVar = "member"
-        let value = SwiftClass()
-        value.swiftClassVar = helper
-        XCTAssertEqual(value.swiftClassVar.stringVar, "member")
-    }
-
-    // TODO:
-//    #if SKIP
-//    func testSwiftClassMemberKotlinClassVar() {
-//        XCTAssertEqual(testSupport_swiftKotlinClassMemberVar_stringVar("member"), "member")
-//    }
-//    #endif
-     */
 }
