@@ -290,6 +290,57 @@ public func testSupport_kotlinSwiftClassComputedVar_stringVar(value: String) -> 
 }
 
 // SKIP @BridgeToKotlin
+public func testSupport_kotlinClassMemberConstant() -> Int {
+    let obj = KotlinClass()
+    return obj.intConstant
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_kotlinClassMemberVar(value: Int) -> Int {
+    let obj = KotlinClass()
+    obj.intVar = value
+    return obj.intVar
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_kotlinClassMemberOptionalVar(value: Int?) -> Int? {
+    let obj = KotlinClass()
+    obj.optionalIntVar = value
+    return obj.optionalIntVar
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_kotlinClassMemberKotlinClassConstant_stringVar() -> String {
+    let obj = KotlinClass()
+    return obj.kotlinClassConstant.stringVar
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_kotlinClassMemberKotlinClassVar_stringVar(value: String) -> String {
+    let helper = KotlinHelperClass()
+    helper.stringVar = value
+    let obj = KotlinClass()
+    obj.kotlinClassVar = helper
+    return obj.kotlinClassVar.stringVar
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_kotlinClassMemberStaticConstant() -> Int {
+    return KotlinClass.staticIntConstant
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_kotlinClassMemberStaticVar(value: Int) -> Int {
+    KotlinClass.staticIntVar = 99
+    return KotlinClass.staticIntVar
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_kotlinClassMemberStaticFunc(value: String) -> String {
+    return KotlinClass.staticFunc(string: value)
+}
+
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinClosure0Var() {
     kotlinClosure0Var()
     kotlinClosure0Var = { print("reassigned") }

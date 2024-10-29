@@ -150,6 +150,12 @@ public var swiftKotlinClassComputedVar: KotlinHelperClass {
 
 // SKIP @BridgeToKotlin
 public class SwiftClass {
+    public static let staticIntConstant = 1
+    public static var staticIntVar = 1
+    public static func staticFunc(string: String) -> String {
+        return "swift" + string
+    }
+
     public let intConstant = 1
     public let swiftClassConstant = SwiftHelperClass()
 
