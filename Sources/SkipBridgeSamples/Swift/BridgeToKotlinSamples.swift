@@ -247,13 +247,15 @@ public let swiftUTF8StringVar3 = "😀" + "🚀"
 
 // MARK: Observation
 
-//// SKIP @BridgeToKotlin
-//public func swiftExerciseObservable() {
-//    if #available(macOS 14, iOS 17, *) {
-//        let obj = ObservedClass()
-//        obj.i += 1
-//    }
-//}
+#if compiler(>=6.0)
+// SKIP @BridgeToKotlin
+public func swiftExerciseObservable() {
+    if #available(macOS 14, iOS 17, *) {
+        let obj = ObservedClass()
+        obj.i += 1
+    }
+}
+#endif
 
 struct SwiftSampleError: Error {
 }
