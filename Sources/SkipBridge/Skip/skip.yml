@@ -2,7 +2,7 @@ build:
   contents:
     # the location of the skipstone derived Swift package
     - 'val swiftPath = "src/main/swift"'
-    - 'var swiftBuildConfig = "unset"'
+    - 'var swiftBuildConfig = "debug"'
 
     - block: 'android'
       contents:
@@ -27,12 +27,13 @@ build:
           contents:
             # Output the environment (for debugging)
             - 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
-            - 'exec { commandLine("sh", "-c", "echo SKIP PATH: $(which skip)") }'
-            - 'exec { commandLine("sh", "-c", "skip version") }'
-            - 'exec { commandLine("sh", "-c", "echo SKIP BUILD CONFIG: ${swiftBuildConfig}") }'
             - block: 'exec'
               contents:
                 - 'commandLine("sh", "-c", "skip android build -d .build/jni-libs --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name} --arch aarch64 --arch x86_64")'
+                - 'environment("SKIP_PLUGIN_DISABLED", "1")'
+                - 'environment("SKIP_JNI_MODE", "1")'
+                # when we are running tests, insert the local build path for the local skipstone command
+                - 'environment("PATH", (System.getenv()["XCTestBundlePath"] + "/..") + ":" + System.getenv()["PATH"])'
 
     # For test cases, we compile locally with `swift build` against the derived Swift project
     - block: 'tasks.withType<Test>'
@@ -47,9 +48,6 @@ build:
           contents:
             # Output the environment (for debugging)
             - 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
-            - 'exec { commandLine("sh", "-c", "echo SKIP PATH: $(which skip)") }'
-            - 'exec { commandLine("sh", "-c", "skip version") }'
-            - 'exec { commandLine("sh", "-c", "echo SKIP BUILD CONFIG: ${swiftBuildConfig}") }'
             - block: 'exec'
               contents:
                 # build for local macOS in order to run tests
@@ -67,4 +65,5 @@ build:
         - block: 'packagingOptions'
           contents:
             # doNotStrip is needed to prevent errors like: java.lang.UnsatisfiedLinkError: dlopen failed: empty/missing DT_HASH/DT_GNU_HASH in "/data/app/~~Zoepnr93K9vyUtTUUM0POg==/skip.bridge.samples.test-3nePwd6ioGZtLQ0K0EJpBQ==/base.apk!/lib/arm64-v8a/libdispatch.so" (new hash type from the future?) (see: https://github.com/finagolfin/swift-android-sdk/issues/67)
-            - 'jniLibs.keepDebugSymbols.add("*/*/libdispatch.so")'
+            # also seems to affect libandroid-spawn.so
+            - 'jniLibs.keepDebugSymbols.add("*/*/*.so")'
