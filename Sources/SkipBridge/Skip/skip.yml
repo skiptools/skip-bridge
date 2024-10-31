@@ -62,8 +62,11 @@ build:
           contents:
             # .build/jni-libs/ is the folder where our toolchain outputs the natively-compiled .so files
             - 'getByName("main").jniLibs.srcDirs(".build/jni-libs")'
-        - block: 'packagingOptions'
+        - block: 'packaging'
           contents:
-            # doNotStrip is needed to prevent errors like: java.lang.UnsatisfiedLinkError: dlopen failed: empty/missing DT_HASH/DT_GNU_HASH in "/data/app/~~Zoepnr93K9vyUtTUUM0POg==/skip.bridge.samples.test-3nePwd6ioGZtLQ0K0EJpBQ==/base.apk!/lib/arm64-v8a/libdispatch.so" (new hash type from the future?) (see: https://github.com/finagolfin/swift-android-sdk/issues/67)
-            # also seems to affect libandroid-spawn.so
-            - 'jniLibs.keepDebugSymbols.add("*/*/*.so")'
+            - block: 'jniLibs'
+              contents:
+                # doNotStrip is needed to prevent errors like: java.lang.UnsatisfiedLinkError: dlopen failed: empty/missing DT_HASH/DT_GNU_HASH in "/data/app/~~Zoepnr93K9vyUtTUUM0POg==/skip.bridge.samples.test-3nePwd6ioGZtLQ0K0EJpBQ==/base.apk!/lib/arm64-v8a/libdispatch.so" (new hash type from the future?) (see: https://github.com/finagolfin/swift-android-sdk/issues/67)
+                # also seems to affect libandroid-spawn.so
+                - 'keepDebugSymbols.add("**/*.so")'
+                - 'pickFirsts.add("**/*.so")'
