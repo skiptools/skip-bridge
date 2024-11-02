@@ -4,6 +4,7 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
+import Foundation
 import SkipBridge
 
 // MARK: Global constants
@@ -262,6 +263,25 @@ public func swiftExerciseObservable() {
     }
 }
 #endif
+
+// MARK: Bridged Types
+
+//// SKIP @BridgeToKotlin
+//public func swiftMakeURL(matching url: URL) -> URL? {
+//    return URL(string: url.absoluteString)
+//}
+//
+//// SKIP @BridgeToKotlin
+//public func swiftMakeUUID(matching uuid: UUID) -> UUID? {
+//    return UUID(uuidString: uuid.uuidString)
+//}
+//
+//// SKIP @BridgeToKotlin
+//public func swiftMakeData(matching data: Data) -> Data {
+//    var copy = Data()
+//    copy.append(data)
+//    return copy
+//}
 
 struct SwiftSampleError: Error {
 }

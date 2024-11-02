@@ -4,6 +4,7 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
+import Foundation
 import SkipBridge
 
 // MARK: Global constants
@@ -241,6 +242,25 @@ public func kotlinAsyncThrowingVoidFunction(shouldThrow: Bool) async throws {
         throw KotlinSampleError()
     }
 }
+
+// MARK: Bridged Types
+
+//// SKIP @BridgeToSwift
+//public func kotlinMakeURL(matching url: URL) -> URL? {
+//    return URL(string: url.absoluteString)
+//}
+//
+//// SKIP @BridgeToSwift
+//public func kotlinMakeUUID(matching uuid: UUID) -> UUID? {
+//    return UUID(uuidString: uuid.uuidString)
+//}
+//
+//// SKIP @BridgeToSwift
+//public func kotlinMakeData(matching data: Data) -> Data {
+//    var copy = Data()
+//    copy.append(data)
+//    return copy
+//}
 
 struct KotlinSampleError: Error {
 }

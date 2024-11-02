@@ -242,6 +242,22 @@ extension JNI {
     public func getObjectClass(_ obj: JavaObjectPointer) -> JavaClassPointer! {
         withEnv { $0.GetObjectClass($1, obj) }
     }
+
+    public func getByteArrayElements(_ array: JavaByteArray) -> (UnsafeMutablePointer<jbyte>?, JavaInt) {
+        withEnv { ($0.GetByteArrayElements($1, array, nil), $0.GetArrayLength($1, array)) }
+    }
+
+    public func releaseByteArrayElements(_ array: JavaByteArray, elements: UnsafeMutablePointer<jbyte>?, size: JavaInt) {
+        withEnv { $0.ReleaseByteArrayElements($1, array, elements, size) }
+    }
+
+    public func newByteArray(_ array: UnsafeRawPointer?, size: JavaInt) -> JavaByteArray? {
+        withEnv {
+            let byteArray = $0.NewByteArray($1, size)
+            $0.SetByteArrayRegion($1, byteArray, 0, size, array)
+            return byteArray
+        }
+    }
 }
 
 // MARK: Errors
