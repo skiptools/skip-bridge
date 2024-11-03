@@ -247,8 +247,8 @@ extension JNI {
         withEnv { ($0.GetByteArrayElements($1, array, nil), $0.GetArrayLength($1, array)) }
     }
 
-    public func releaseByteArrayElements(_ array: JavaByteArray, elements: UnsafeMutablePointer<jbyte>?, size: JavaInt) {
-        withEnv { $0.ReleaseByteArrayElements($1, array, elements, size) }
+    public func releaseByteArrayElements(_ array: JavaByteArray, elements: UnsafeMutablePointer<jbyte>?, mode: JniReleaseArrayElementsMode) {
+        withEnv { $0.ReleaseByteArrayElements($1, array, elements, mode.rawValue) }
     }
 
     public func newByteArray(_ array: UnsafeRawPointer?, size: JavaInt) -> JavaByteArray? {
@@ -258,6 +258,16 @@ extension JNI {
             return byteArray
         }
     }
+}
+
+/// https://developer.android.com/training/articles/perf-jni#primitive-arrays
+public enum JniReleaseArrayElementsMode : jint {
+    /// Copy back the content and free the elems buffer
+    case unpin = 0
+    /// Copy back the content but do not free the elems buffer
+    case commit = 1 // JNI_COMMIT
+    /// Free the buffer without copying back the possible changes
+    case abort = 2 // JNI_ABORT
 }
 
 // MARK: Errors
