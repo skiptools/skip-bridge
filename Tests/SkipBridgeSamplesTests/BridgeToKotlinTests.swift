@@ -4,6 +4,7 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
+import Foundation
 import SkipBridgeSamples
 import SkipBridge
 import XCTest
@@ -240,6 +241,8 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftIntArrayVar[1], 5)
         swiftIntArrayVar = []
         XCTAssertEqual(swiftIntArrayVar, Array<Int>())
+        swiftIntArrayVar.append(99)
+        XCTAssertEqual(swiftIntArrayVar, [99])
     }
 
     func testDictionaries() {
@@ -276,6 +279,27 @@ final class BridgeToKotlinTests: XCTestCase {
         }
         let result = try await swiftAsyncThrowingFunction(shouldThrow: false)
         XCTAssertEqual(result, 1)
+    }
+
+    func testURL() {
+        let url = URL(string: "https://skip.tools")!
+        XCTAssertEqual(url.absoluteString, swiftMakeURL(matching: url)?.absoluteString)
+    }
+
+    func testUUID() {
+        let uuid = UUID()
+        XCTAssertEqual(uuid.uuidString, swiftMakeUUID(matching: uuid)?.uuidString)
+    }
+
+    func testData() {
+        let data = "testdata".data(using: .utf8)!
+        let roundtripped = swiftMakeData(matching: data)
+        XCTAssertEqual(String(data: data, encoding: .utf8), String(data: roundtripped, encoding: .utf8))
+    }
+
+    func testDate() {
+        let date = Date()
+        XCTAssertEqual(date, swiftMakeDate(matching: date))
     }
 
     func testUnicode() {

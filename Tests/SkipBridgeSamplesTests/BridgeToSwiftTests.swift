@@ -4,6 +4,7 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
+import Foundation
 import SkipBridgeSamples
 import SkipBridge
 import XCTest
@@ -205,5 +206,25 @@ final class BridgeToSwiftTests: XCTestCase {
         }
         let result = try await testSupport_callKotlinAsyncThrowingFunction(shouldThrow: false)
         XCTAssertEqual(result, 1)
+    }
+
+    func testURL() {
+        let string = "https://skip.tools"
+        XCTAssertEqual(string, testSupport_kotlinMakeURL(string: string))
+    }
+
+    func testUUID() {
+        let string = UUID().uuidString
+        XCTAssertEqual(string, testSupport_kotlinMakeUUID(string: string))
+    }
+
+    func testData() {
+        let string = "datastring"
+        XCTAssertEqual(string, testSupport_kotlinMakeData(string: string))
+    }
+
+    func testDate() {
+        let date = Date()
+        XCTAssertEqual(date.timeIntervalSinceReferenceDate, testSupport_kotlinMakeDate(timeIntervalSinceReferenceDate: date.timeIntervalSinceReferenceDate))
     }
 }
