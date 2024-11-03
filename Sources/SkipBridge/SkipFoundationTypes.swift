@@ -11,7 +11,7 @@ extension Data: JObjectProtocol, JConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?) -> Data {
         let kotlinByteArray = try! JavaObjectPointer.call(Java_Data_kotlin_methodID, on: obj!, args: [true.toJavaParameter()])
         let (bytes, length) = jni.getByteArrayElements(kotlinByteArray)
-        defer { jni.releaseByteArrayElements(kotlinByteArray, elements: bytes, size: length) }
+        defer { jni.releaseByteArrayElements(kotlinByteArray, elements: bytes, mode: .unpin) }
         guard let bytes else {
             return Data()
         }
