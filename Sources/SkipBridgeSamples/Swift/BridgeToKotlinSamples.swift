@@ -266,22 +266,27 @@ public func swiftExerciseObservable() {
 
 // MARK: Bridged Types
 
-//// SKIP @BridgeToKotlin
-//public func swiftMakeURL(matching url: URL) -> URL? {
-//    return URL(string: url.absoluteString)
-//}
-//
-//// SKIP @BridgeToKotlin
-//public func swiftMakeUUID(matching uuid: UUID) -> UUID? {
-//    return UUID(uuidString: uuid.uuidString)
-//}
-//
-//// SKIP @BridgeToKotlin
-//public func swiftMakeData(matching data: Data) -> Data {
-//    var copy = Data()
-//    copy.append(data)
-//    return copy
-//}
+// SKIP @BridgeToKotlin
+public func swiftMakeURL(matching url: URL) -> URL? {
+    return URL(string: url.absoluteString)
+}
+
+// SKIP @BridgeToKotlin
+public func swiftMakeUUID(matching uuid: UUID) -> UUID? {
+    return UUID(uuidString: uuid.uuidString)
+}
+
+// SKIP @BridgeToKotlin
+public func swiftMakeData(matching data: Data) -> Data {
+    var copy = Data()
+    copy.append(data)
+    return copy
+}
+
+// SKIP @BridgeToKotlin
+public func swiftMakeDate(matching date: Date) -> Date {
+    return Date(timeIntervalSinceReferenceDate: date.timeIntervalSinceReferenceDate)
+}
 
 struct SwiftSampleError: Error {
 }

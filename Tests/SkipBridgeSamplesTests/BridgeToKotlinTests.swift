@@ -281,21 +281,26 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(result, 1)
     }
 
-//    func testURL() {
-//        let url = URL(string: "https://skip.tools")!
-//        XCTAssertEqual(url.absoluteString, swiftMakeURL(matching: url)?.absoluteString)
-//    }
-//
-//    func testUUID() {
-//        let uuid = UUID()
-//        XCTAssertEqual(uuid.uuidString, swiftMakeUUID(matching: uuid)?.uuidString)
-//    }
-//
-//    func testData() {
-//        let data = "testdata".data(using: .utf8)!
-//        let roundtripped = swiftMakeData(matching: data)
-//        XCTAssertEqual(String(data: data, encoding: .utf8), String(data: roundtripped, encoding: .utf8))
-//    }
+    func testURL() {
+        let url = URL(string: "https://skip.tools")!
+        XCTAssertEqual(url.absoluteString, swiftMakeURL(matching: url)?.absoluteString)
+    }
+
+    func testUUID() {
+        let uuid = UUID()
+        XCTAssertEqual(uuid.uuidString, swiftMakeUUID(matching: uuid)?.uuidString)
+    }
+
+    func testData() {
+        let data = "testdata".data(using: .utf8)!
+        let roundtripped = swiftMakeData(matching: data)
+        XCTAssertEqual(String(data: data, encoding: .utf8), String(data: roundtripped, encoding: .utf8))
+    }
+
+    func testDate() {
+        let date = Date()
+        XCTAssertEqual(date, swiftMakeDate(matching: date))
+    }
 
     func testUnicode() {
         XCTAssertEqual("😀", swiftUTF8StringVar1)

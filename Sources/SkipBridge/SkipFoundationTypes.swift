@@ -30,6 +30,25 @@ private let Java_Data = try! JClass(name: "skip/foundation/Data")
 private let Java_Data_constructor_methodID = Java_Data.getMethodID(name: "<init>", sig: "([B)V")!
 private let Java_Data_kotlin_methodID = Java_Data.getMethodID(name: "kotlin", sig: "(Z)[B")!
 
+extension Date: JObjectProtocol, JConvertible {
+    public static func fromJavaObject(_ obj: JavaObjectPointer?) -> Date {
+        let timeInterval = try! Double.call(Java_Date_timeIntervalSince1970_methodID, on: obj!, args: [])
+        return Date(timeIntervalSince1970: timeInterval)
+    }
+
+    public func toJavaObject() -> JavaObjectPointer? {
+        let millis = Int64(timeIntervalSince1970 * 1000.0)
+        let utilDate = try! Java_UtilDate.create(ctor: Java_UtilDate_constructor_methodID, args: [millis.toJavaParameter()])
+        return try! Java_Date.create(ctor: Java_Date_constructor_methodID, args: [utilDate.toJavaParameter()])
+    }
+}
+
+private let Java_Date = try! JClass(name: "skip/foundation/Date")
+private let Java_Date_constructor_methodID = Java_Date.getMethodID(name: "<init>", sig: "(Ljava/util/Date;)V")!
+private let Java_Date_timeIntervalSince1970_methodID = Java_Date.getMethodID(name: "getTimeIntervalSince1970", sig: "()D")!
+private let Java_UtilDate = try! JClass(name: "java/util/Date")
+private let Java_UtilDate_constructor_methodID = Java_UtilDate.getMethodID(name: "<init>", sig: "(J)V")!
+
 extension UUID: JObjectProtocol, JConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?) -> UUID {
         let uuidString = try! String.call(Java_UUID_uuidString_methodID, on: obj!, args: [])

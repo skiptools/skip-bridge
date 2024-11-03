@@ -414,23 +414,29 @@ public func testSupport_callKotlinAsyncThrowingVoidFunction(shouldThrow: Bool) a
     try await kotlinAsyncThrowingVoidFunction(shouldThrow: shouldThrow)
 }
 
-//// SKIP @BridgeToKotlin
-//public func testSupport_kotlinMakeURL(string: String) -> String {
-//    let url = kotlinMakeURL(matching: URL(string: string)!)
-//    return url!.absoluteString
-//}
-//
-//// SKIP @BridgeToKotlin
-//public func testSupport_kotlinMakeUUID(string: String) -> String {
-//    let uuid = kotlinMakeUUID(matching: UUID(uuidString: string)!)
-//    return uuid!.uuidString
-//}
-//
-//// SKIP @BridgeToKotlin
-//public func testSupport_kotlinMakeData(string: String) -> String {
-//    let data = kotlinMakeData(matching: string.data(using: .utf8)!)
-//    return String(data: data, encoding: .utf8)!
-//}
+// SKIP @BridgeToKotlin
+public func testSupport_kotlinMakeURL(string: String) -> String {
+    let url = kotlinMakeURL(matching: URL(string: string)!)
+    return url!.absoluteString
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_kotlinMakeUUID(string: String) -> String {
+    let uuid = kotlinMakeUUID(matching: UUID(uuidString: string)!)
+    return uuid!.uuidString
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_kotlinMakeData(string: String) -> String {
+    let data = kotlinMakeData(matching: string.data(using: .utf8)!)
+    return String(data: data, encoding: .utf8)!
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_kotlinMakeDate(timeIntervalSinceReferenceDate: Double) -> Double {
+    let date = kotlinMakeDate(matching: Date(timeIntervalSinceReferenceDate: timeIntervalSinceReferenceDate))
+    return date.timeIntervalSinceReferenceDate
+}
 
 // MARK: Used by BridgeToKotlinTests
 
