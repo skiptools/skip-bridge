@@ -171,10 +171,22 @@ public class KotlinClass {
 }
 
 // SKIP @BridgeToSwift
-public class KotlinHelperClass {
+public class KotlinHelperClass: Hashable, Comparable {
     public var stringVar = "s"
 
     public init() {
+    }
+
+    public static func ==(lhs: KotlinHelperClass, rhs: KotlinHelperClass) -> Bool {
+        return lhs.stringVar == rhs.stringVar
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(stringVar)
+    }
+
+    public static func <(lhs: KotlinHelperClass, rhs: KotlinHelperClass) -> Bool {
+        return lhs.stringVar < rhs.stringVar
     }
 }
 

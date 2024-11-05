@@ -342,6 +342,33 @@ public func testSupport_kotlinClassMemberStaticFunc(value: String) -> String {
 }
 
 // SKIP @BridgeToKotlin
+public func testSupport_kotlinClassEquatable(lhs: String, rhs: String) -> Bool {
+    let lhsHelper = KotlinHelperClass()
+    lhsHelper.stringVar = lhs
+    let rhsHelper = KotlinHelperClass()
+    rhsHelper.stringVar = rhs
+    return lhsHelper == rhsHelper
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_kotlinClassHashable(lhs: String, rhs: String) -> Bool {
+    let lhsHelper = KotlinHelperClass()
+    lhsHelper.stringVar = lhs
+    let rhsHelper = KotlinHelperClass()
+    rhsHelper.stringVar = rhs
+    return lhsHelper.hashValue == rhsHelper.hashValue
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_kotlinClassComparable(lhs: String, rhs: String) -> Bool {
+    let lhsHelper = KotlinHelperClass()
+    lhsHelper.stringVar = lhs
+    let rhsHelper = KotlinHelperClass()
+    rhsHelper.stringVar = rhs
+    return lhsHelper < rhsHelper
+}
+
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinClosure0Var() {
     kotlinClosure0Var()
     kotlinClosure0Var = { print("reassigned") }

@@ -153,6 +153,21 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(testSupport_kotlinClassMemberStaticFunc(value: "Hello"), "kotlinHello")
     }
 
+    func testKotlinClassEquatable() {
+        XCTAssertTrue(testSupport_kotlinClassEquatable(lhs: "Hello", rhs: "Hello"))
+        XCTAssertFalse(testSupport_kotlinClassEquatable(lhs: "Hello", rhs: "Goodbye"))
+    }
+
+    func testKotlinClassHashable() {
+        XCTAssertTrue(testSupport_kotlinClassHashable(lhs: "Hello", rhs: "Hello"))
+        XCTAssertFalse(testSupport_kotlinClassHashable(lhs: "Hello", rhs: "Goodbye"))
+    }
+
+    func testKotlinClassComparable() {
+        XCTAssertTrue(testSupport_kotlinClassComparable(lhs: "aaa", rhs: "bbb"))
+        XCTAssertFalse(testSupport_kotlinClassComparable(lhs: "bbb", rhs: "aaa"))
+    }
+
     func testClosure0Var() {
         testSupport_kotlinClosure0Var()
     }
