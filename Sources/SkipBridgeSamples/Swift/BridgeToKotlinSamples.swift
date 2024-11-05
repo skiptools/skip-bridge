@@ -171,10 +171,22 @@ public class SwiftClass {
 }
 
 // SKIP @BridgeToKotlin
-public class SwiftHelperClass {
+public class SwiftHelperClass: Hashable, Comparable {
     public var stringVar = "s"
 
     public init() {
+    }
+
+    public static func ==(lhs: SwiftHelperClass, rhs: SwiftHelperClass) -> Bool {
+        return lhs.stringVar == rhs.stringVar
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(stringVar)
+    }
+
+    public static func <(lhs: SwiftHelperClass, rhs: SwiftHelperClass) -> Bool {
+        return lhs.stringVar < rhs.stringVar
     }
 }
 

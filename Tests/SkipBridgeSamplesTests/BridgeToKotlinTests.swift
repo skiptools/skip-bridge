@@ -198,6 +198,40 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(SwiftClass.staticFunc(string: "Hello"), "swiftHello")
     }
 
+    public func testSwiftClassEquatable() {
+        let lhs = SwiftHelperClass()
+        lhs.stringVar = "Hello"
+        let rhs = SwiftHelperClass()
+        rhs.stringVar = "Hello"
+        XCTAssertEqual(lhs, rhs)
+
+        rhs.stringVar = "Goodbye"
+        XCTAssertNotEqual(lhs, rhs)
+    }
+
+    public func testSwiftClassHashable() {
+        let lhs = SwiftHelperClass()
+        lhs.stringVar = "Hello"
+        let rhs = SwiftHelperClass()
+        rhs.stringVar = "Hello"
+        XCTAssertEqual(lhs.hashValue, rhs.hashValue)
+
+        rhs.stringVar = "Goodbye"
+        XCTAssertNotEqual(lhs.hashValue, rhs.hashValue)
+    }
+
+    public func testSwiftClassComparable() {
+        let lhs = SwiftHelperClass()
+        lhs.stringVar = "aaa"
+        let rhs = SwiftHelperClass()
+        rhs.stringVar = "bbb"
+        XCTAssertTrue(lhs < rhs)
+
+        lhs.stringVar = "bbb"
+        rhs.stringVar = "aaa"
+        XCTAssertFalse(lhs < rhs)
+    }
+
     public func testClosure0Var() {
         swiftClosure0Var()
         swiftClosure0Var = { print("reassigned") }
