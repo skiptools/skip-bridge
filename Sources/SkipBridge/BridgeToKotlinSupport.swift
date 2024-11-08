@@ -91,4 +91,13 @@ private let Java_peer_methodID = Java_fileClass.getStaticMethodID(name: "Swift_b
 private let Java_SwiftPeerBridged_class = try! JClass(name: "skip/bridge/SwiftPeerBridged")
 private let Java_SwiftPeerBridged_peer_methodID = Java_SwiftPeerBridged_class.getMethodID(name: "Swift_bridgedPeer", sig: "()J")!
 
+/// Reference type to hold a value type.
+public final class SwiftValueTypeBox<T> {
+    public var value: T
+
+    public init(_ value: T) {
+        self.value = value
+    }
+}
+
 #endif

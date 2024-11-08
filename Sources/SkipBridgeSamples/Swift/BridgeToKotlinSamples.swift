@@ -166,15 +166,27 @@ public class SwiftClass {
     public var swiftClassVar = SwiftHelperClass()
     public var optionalKotlinClassVar: KotlinHelperClass?
 
+    public var optionalSwiftProtocolVar: (any SwiftProtocol)?
+    public var optionalKotlinProtocolVar: (any KotlinProtocol)?
+
+    public var swiftStructVar = SwiftStruct(string: "1")
+
     public init() {
     }
 }
 
 // SKIP @BridgeToKotlin
-public class SwiftHelperClass: Hashable, Comparable {
+public class SwiftHelperClass: SwiftProtocol, Comparable, Identifiable {
+    public var id: String {
+        return stringVar
+    }
     public var stringVar = "s"
 
     public init() {
+    }
+
+    public func stringValue() -> String {
+        return stringVar
     }
 
     public static func ==(lhs: SwiftHelperClass, rhs: SwiftHelperClass) -> Bool {
@@ -187,6 +199,28 @@ public class SwiftHelperClass: Hashable, Comparable {
 
     public static func <(lhs: SwiftHelperClass, rhs: SwiftHelperClass) -> Bool {
         return lhs.stringVar < rhs.stringVar
+    }
+}
+
+// SKIP @BridgeToKotlin
+public protocol SwiftProtocol: Hashable {
+    func stringValue() -> String
+}
+
+// SKIP @BridgeToKotlin
+public struct SwiftStruct {
+    public var intVar = 1
+
+    public init(string: String) {
+        self.intVar = Int(string) ?? 0
+    }
+
+    public func intFunc() -> Int {
+        return intVar
+    }
+
+    public mutating func setIntFunc(_ i: Int) {
+        self.intVar = i
     }
 }
 

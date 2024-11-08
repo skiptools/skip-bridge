@@ -6,7 +6,7 @@
 
 #if !SKIP
 
-extension Array: JObjectProtocol, JConvertible where Element: JConvertible {
+extension Array: JObjectProtocol, JConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?) -> Array<Element> {
         // let list = arr.kotlin(nocopy: true)
         let list_java = try! JavaObjectPointer.call(Java_Array_kotlin_methodID, on: obj!, args: [true.toJavaParameter()])
@@ -15,11 +15,11 @@ extension Array: JObjectProtocol, JConvertible where Element: JConvertible {
         for i in 0..<count {
             // arr.append(list.get(i))
             let element_java = try! JavaObjectPointer?.call(Java_List_get_methodID, on: list_java, args: [i.toJavaParameter()])
-            let element = Element.fromJavaObject(element_java)
+            let element = (Element.self as! JConvertible.Type).fromJavaObject(element_java)
             if let element_java {
                 jni.deleteLocalRef(element_java)
             }
-            arr.append(element)
+            arr.append(element as! Element)
         }
         return arr
     }
@@ -29,7 +29,7 @@ extension Array: JObjectProtocol, JConvertible where Element: JConvertible {
         let list_java = try! Java_ArrayList.create(ctor: Java_ArrayList_constructor_methodID, args: [Int32(self.count).toJavaParameter()])
         for element in self {
             // list.add(element)
-            let element_java = element.toJavaObject()
+            let element_java = (element as! JConvertible).toJavaObject()
             let _ = try! Bool.call(Java_ArrayList_add_methodID, on: list_java, args: [element_java.toJavaParameter()])
             if let element_java {
                 jni.deleteLocalRef(element_java)
@@ -52,7 +52,7 @@ private let Java_List = try! JClass(name: "java/util/List")
 private let Java_List_size_methodID = Java_List.getMethodID(name: "size", sig: "()I")!
 private let Java_List_get_methodID = Java_List.getMethodID(name: "get", sig: "(I)Ljava/lang/Object;")!
 
-extension Dictionary: JObjectProtocol, JConvertible where Key: JConvertible, Value: JConvertible {
+extension Dictionary: JObjectProtocol, JConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?) -> Dictionary<Key, Value> {
         // let map = dict.kotlin(nocopy: true)
         let map_java = try! JavaObjectPointer.call(Java_Dictionary_kotlin_methodID, on: obj!, args: [true.toJavaParameter()])
@@ -65,15 +65,15 @@ extension Dictionary: JObjectProtocol, JConvertible where Key: JConvertible, Val
             // let key = itr.next(); let value = map.get(key)
             let key_java = try! JavaObjectPointer?.call(Java_Iterator_next_methodID, on: iterator_java, args: [])
             let value_java = try! JavaObjectPointer?.call(Java_Map_get_methodID, on: map_java, args: [key_java.toJavaParameter()])
-            let key = Key.fromJavaObject(key_java)
-            let value = Value.fromJavaObject(value_java)
+            let key = (Key.self as! JConvertible.Type).fromJavaObject(key_java)
+            let value = (Value.self as! JConvertible.Type).fromJavaObject(value_java)
             if let key_java {
                 jni.deleteLocalRef(key_java)
             }
             if let value_java {
                 jni.deleteLocalRef(value_java)
             }
-            dict[key] = value
+            dict[key as! Key] = value as? Value
         }
         return dict
     }
@@ -83,8 +83,8 @@ extension Dictionary: JObjectProtocol, JConvertible where Key: JConvertible, Val
         let map_java = try! Java_LinkedHashMap.create(ctor: Java_LinkedHashMap_constructor_methodID, args: [Int32(self.count).toJavaParameter()])
         for (key, value) in self {
             // map.put(key, value)
-            let key_java = key.toJavaObject()
-            let value_java = value.toJavaObject()
+            let key_java = (key as! JConvertible).toJavaObject()
+            let value_java = (value as! JConvertible).toJavaObject()
             let _ = try! JavaObjectPointer?.call(Java_LinkedHashMap_put_methodID, on: map_java, args: [key_java.toJavaParameter(), value_java.toJavaParameter()])
             if let key_java {
                 jni.deleteLocalRef(key_java)

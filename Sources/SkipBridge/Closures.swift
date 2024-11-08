@@ -15,51 +15,51 @@ public final class JavaBackedClosure<R>: JObject {
         }
     }
 
-    public func invoke(_ p0: JConvertible?) throws -> R {
+    public func invoke(_ p0: Any?) throws -> R {
         return try jniContext {
-            let p0_java = (p0?.toJavaObject()).toJavaParameter()
+            let p0_java = ((p0 as? JConvertible)?.toJavaObject()).toJavaParameter()
             let object: JavaObjectPointer? = try call(method: Java_Function1_invoke_methodID, args: [p0_java])
             return returnValue(for: object)
         }
     }
 
-    public func invoke(_ p0: JConvertible?, _ p1: JConvertible?) throws -> R {
+    public func invoke(_ p0: Any?, _ p1: Any?) throws -> R {
         return try jniContext {
-            let p0_java = (p0?.toJavaObject()).toJavaParameter()
-            let p1_java = (p1?.toJavaObject()).toJavaParameter()
+            let p0_java = ((p0 as? JConvertible)?.toJavaObject()).toJavaParameter()
+            let p1_java = ((p1 as? JConvertible)?.toJavaObject()).toJavaParameter()
             let object: JavaObjectPointer? = try call(method: Java_Function2_invoke_methodID, args: [p0_java, p1_java])
             return returnValue(for: object)
         }
     }
 
-    public func invoke(_ p0: JConvertible?, _ p1: JConvertible?, _ p2: JConvertible?) throws -> R {
+    public func invoke(_ p0: Any?, _ p1: Any?, _ p2: Any?) throws -> R {
         return try jniContext {
-            let p0_java = (p0?.toJavaObject()).toJavaParameter()
-            let p1_java = (p1?.toJavaObject()).toJavaParameter()
-            let p2_java = (p2?.toJavaObject()).toJavaParameter()
+            let p0_java = ((p0 as? JConvertible)?.toJavaObject()).toJavaParameter()
+            let p1_java = ((p1 as? JConvertible)?.toJavaObject()).toJavaParameter()
+            let p2_java = ((p2 as? JConvertible)?.toJavaObject()).toJavaParameter()
             let object: JavaObjectPointer? = try call(method: Java_Function3_invoke_methodID, args: [p0_java, p1_java, p2_java])
             return returnValue(for: object)
         }
     }
 
-    public func invoke(_ p0: JConvertible?, _ p1: JConvertible?, _ p2: JConvertible?, _ p3: JConvertible?) throws -> R {
+    public func invoke(_ p0: Any?, _ p1: Any?, _ p2: Any?, _ p3: Any?) throws -> R {
         return try jniContext {
-            let p0_java = (p0?.toJavaObject()).toJavaParameter()
-            let p1_java = (p1?.toJavaObject()).toJavaParameter()
-            let p2_java = (p2?.toJavaObject()).toJavaParameter()
-            let p3_java = (p3?.toJavaObject()).toJavaParameter()
+            let p0_java = ((p0 as? JConvertible)?.toJavaObject()).toJavaParameter()
+            let p1_java = ((p1 as? JConvertible)?.toJavaObject()).toJavaParameter()
+            let p2_java = ((p2 as? JConvertible)?.toJavaObject()).toJavaParameter()
+            let p3_java = ((p3 as? JConvertible)?.toJavaObject()).toJavaParameter()
             let object: JavaObjectPointer? = try call(method: Java_Function4_invoke_methodID, args: [p0_java, p1_java, p2_java, p3_java])
             return returnValue(for: object)
         }
     }
 
-    public func invoke(_ p0: JConvertible?, _ p1: JConvertible?, _ p2: JConvertible?, _ p3: JConvertible?, _ p4: JConvertible?) throws -> R {
+    public func invoke(_ p0: Any?, _ p1: Any?, _ p2: Any?, _ p3: Any?, _ p4: Any?) throws -> R {
         return try jniContext {
-            let p0_java = (p0?.toJavaObject()).toJavaParameter()
-            let p1_java = (p1?.toJavaObject()).toJavaParameter()
-            let p2_java = (p2?.toJavaObject()).toJavaParameter()
-            let p3_java = (p3?.toJavaObject()).toJavaParameter()
-            let p4_java = (p4?.toJavaObject()).toJavaParameter()
+            let p0_java = ((p0 as? JConvertible)?.toJavaObject()).toJavaParameter()
+            let p1_java = ((p1 as? JConvertible)?.toJavaObject()).toJavaParameter()
+            let p2_java = ((p2 as? JConvertible)?.toJavaObject()).toJavaParameter()
+            let p3_java = ((p3 as? JConvertible)?.toJavaObject()).toJavaParameter()
+            let p4_java = ((p4 as? JConvertible)?.toJavaObject()).toJavaParameter()
             let object: JavaObjectPointer? = try call(method: Java_Function5_invoke_methodID, args: [p0_java, p1_java, p2_java, p3_java, p4_java])
             return returnValue(for: object)
         }
@@ -130,12 +130,12 @@ func SwiftBackedFunction0_Swift_release(_ Java_env: JNIEnvPointer, _ Java_target
 func SwiftBackedFunction0_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer) -> JavaObjectPointer? {
     let value_swift: SwiftClosure0 = Swift_peer.pointee()!
     let c_return_swift = value_swift.closure()
-    return value_swift.returnType == Void.self ? nil : (c_return_swift as! JConvertible).toJavaObject()
+    return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject()
 }
 
 /// A Swift reference type that wraps a 1-parameter closure.
 public final class SwiftClosure1 {
-    public static func javaObject<P0: JConvertible, R>(for closure: ((P0) -> R)?) -> JavaObjectPointer? {
+    public static func javaObject<P0, R>(for closure: ((P0) -> R)?) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -144,7 +144,7 @@ public final class SwiftClosure1 {
         return try! Java_SwiftBackedFunction1_class.create(ctor: Java_SwiftBackedFunction1_constructor_methodID, args: [swiftPeerPtr.toJavaParameter()])
     }
 
-    public static func closure<P0: JConvertible, R>(forJavaObject function: JavaObjectPointer?) -> ((P0) -> R)? {
+    public static func closure<P0, R>(forJavaObject function: JavaObjectPointer?) -> ((P0) -> R)? {
         guard let function else {
             return nil
         }
@@ -157,11 +157,11 @@ public final class SwiftClosure1 {
         }
     }
 
-    public let closure: (JConvertible) -> Any?
+    public let closure: (Any?) -> Any?
     public let p0Type: Any.Type
     public let returnType: Any.Type
 
-    public init<P0: JConvertible, R>(closure: @escaping (P0) -> R) {
+    public init<P0, R>(closure: @escaping (P0) -> R) {
         self.closure = { p0 in closure(p0 as! P0) }
         self.p0Type = P0.self
         self.returnType = R.self
@@ -179,12 +179,12 @@ func SwiftBackedFunction1_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target:
     let value_swift: SwiftClosure1 = Swift_peer.pointee()!
     let p0_swift = (value_swift.p0Type as! JConvertible.Type).fromJavaObject(p0)
     let c_return_swift = value_swift.closure(p0_swift)
-    return value_swift.returnType == Void.self ? nil : (c_return_swift as! JConvertible).toJavaObject()
+    return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject()
 }
 
 /// A Swift reference type that wraps a 2-parameter closure.
 public final class SwiftClosure2 {
-    public static func javaObject<P0: JConvertible, P1: JConvertible, R>(for closure: ((P0, P1) -> R)?) -> JavaObjectPointer? {
+    public static func javaObject<P0, P1, R>(for closure: ((P0, P1) -> R)?) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -193,7 +193,7 @@ public final class SwiftClosure2 {
         return try! Java_SwiftBackedFunction2_class.create(ctor: Java_SwiftBackedFunction2_constructor_methodID, args: [swiftPeerPtr.toJavaParameter()])
     }
 
-    public static func closure<P0: JConvertible, P1: JConvertible, R>(forJavaObject function: JavaObjectPointer?) -> ((P0, P1) -> R)? {
+    public static func closure<P0, P1, R>(forJavaObject function: JavaObjectPointer?) -> ((P0, P1) -> R)? {
         guard let function else {
             return nil
         }
@@ -206,12 +206,12 @@ public final class SwiftClosure2 {
         }
     }
 
-    public let closure: (JConvertible, JConvertible) -> Any?
+    public let closure: (Any?, Any?) -> Any?
     public let p0Type: Any.Type
     public let p1Type: Any.Type
     public let returnType: Any.Type
 
-    public init<P0: JConvertible, P1: JConvertible, R>(closure: @escaping (P0, P1) -> R) {
+    public init<P0, P1, R>(closure: @escaping (P0, P1) -> R) {
         self.closure = { p0, p1 in closure(p0 as! P0, p1 as! P1) }
         self.p0Type = P0.self
         self.p1Type = P1.self
@@ -231,12 +231,12 @@ func SwiftBackedFunction2_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target:
     let p0_swift = (value_swift.p0Type as! JConvertible.Type).fromJavaObject(p0)
     let p1_swift = (value_swift.p1Type as! JConvertible.Type).fromJavaObject(p1)
     let c_return_swift = value_swift.closure(p0_swift, p1_swift)
-    return value_swift.returnType == Void.self ? nil : (c_return_swift as! JConvertible).toJavaObject()
+    return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject()
 }
 
 /// A Swift reference type that wraps a 3-parameter closure.
 public final class SwiftClosure3 {
-    public static func javaObject<P0: JConvertible, P1: JConvertible, P2: JConvertible, R>(for closure: ((P0, P1, P2) -> R)?) -> JavaObjectPointer? {
+    public static func javaObject<P0, P1, P2, R>(for closure: ((P0, P1, P2) -> R)?) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -245,7 +245,7 @@ public final class SwiftClosure3 {
         return try! Java_SwiftBackedFunction3_class.create(ctor: Java_SwiftBackedFunction3_constructor_methodID, args: [swiftPeerPtr.toJavaParameter()])
     }
 
-    public static func closure<P0: JConvertible, P1: JConvertible, P2: JConvertible, R>(forJavaObject function: JavaObjectPointer?) -> ((P0, P1, P2) -> R)? {
+    public static func closure<P0, P1, P2, R>(forJavaObject function: JavaObjectPointer?) -> ((P0, P1, P2) -> R)? {
         guard let function else {
             return nil
         }
@@ -258,13 +258,13 @@ public final class SwiftClosure3 {
         }
     }
 
-    public let closure: (JConvertible, JConvertible, JConvertible) -> Any?
+    public let closure: (Any?, Any?, Any?) -> Any?
     public let p0Type: Any.Type
     public let p1Type: Any.Type
     public let p2Type: Any.Type
     public let returnType: Any.Type
 
-    public init<P0: JConvertible, P1: JConvertible, P2: JConvertible, R>(closure: @escaping (P0, P1, P2) -> R) {
+    public init<P0, P1, P2, R>(closure: @escaping (P0, P1, P2) -> R) {
         self.closure = { p0, p1, p2 in closure(p0 as! P0, p1 as! P1, p2 as! P2) }
         self.p0Type = P0.self
         self.p1Type = P1.self
@@ -286,12 +286,12 @@ func SwiftBackedFunction3_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target:
     let p1_swift = (value_swift.p1Type as! JConvertible.Type).fromJavaObject(p1)
     let p2_swift = (value_swift.p2Type as! JConvertible.Type).fromJavaObject(p2)
     let c_return_swift = value_swift.closure(p0_swift, p1_swift, p2_swift)
-    return value_swift.returnType == Void.self ? nil : (c_return_swift as! JConvertible).toJavaObject()
+    return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject()
 }
 
 /// A Swift reference type that wraps a 4-parameter closure.
 public final class SwiftClosure4 {
-    public static func javaObject<P0: JConvertible, P1: JConvertible, P2: JConvertible, P3: JConvertible, R>(for closure: ((P0, P1, P2, P3) -> R)?) -> JavaObjectPointer? {
+    public static func javaObject<P0, P1, P2, P3, R>(for closure: ((P0, P1, P2, P3) -> R)?) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -300,7 +300,7 @@ public final class SwiftClosure4 {
         return try! Java_SwiftBackedFunction4_class.create(ctor: Java_SwiftBackedFunction4_constructor_methodID, args: [swiftPeerPtr.toJavaParameter()])
     }
 
-    public static func closure<P0: JConvertible, P1: JConvertible, P2: JConvertible, P3: JConvertible, R>(forJavaObject function: JavaObjectPointer?) -> ((P0, P1, P2, P3) -> R)? {
+    public static func closure<P0, P1, P2, P3, R>(forJavaObject function: JavaObjectPointer?) -> ((P0, P1, P2, P3) -> R)? {
         guard let function else {
             return nil
         }
@@ -313,14 +313,14 @@ public final class SwiftClosure4 {
         }
     }
 
-    public let closure: (JConvertible, JConvertible, JConvertible, JConvertible) -> Any?
+    public let closure: (Any?, Any?, Any?, Any?) -> Any?
     public let p0Type: Any.Type
     public let p1Type: Any.Type
     public let p2Type: Any.Type
     public let p3Type: Any.Type
     public let returnType: Any.Type
 
-    public init<P0: JConvertible, P1: JConvertible, P2: JConvertible, P3: JConvertible, R>(closure: @escaping (P0, P1, P2, P3) -> R) {
+    public init<P0, P1, P2, P3, R>(closure: @escaping (P0, P1, P2, P3) -> R) {
         self.closure = { p0, p1, p2, p3 in closure(p0 as! P0, p1 as! P1, p2 as! P2, p3 as! P3) }
         self.p0Type = P0.self
         self.p1Type = P1.self
@@ -344,12 +344,12 @@ func SwiftBackedFunction4_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target:
     let p2_swift = (value_swift.p2Type as! JConvertible.Type).fromJavaObject(p2)
     let p3_swift = (value_swift.p3Type as! JConvertible.Type).fromJavaObject(p3)
     let c_return_swift = value_swift.closure(p0_swift, p1_swift, p2_swift, p3_swift)
-    return value_swift.returnType == Void.self ? nil : (c_return_swift as! JConvertible).toJavaObject()
+    return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject()
 }
 
 /// A Swift reference type that wraps a 5-parameter closure.
 public final class SwiftClosure5 {
-    public static func javaObject<P0: JConvertible, P1: JConvertible, P2: JConvertible, P3: JConvertible, P4: JConvertible, R>(for closure: ((P0, P1, P2, P3, P4) -> R)?) -> JavaObjectPointer? {
+    public static func javaObject<P0, P1, P2, P3, P4, R>(for closure: ((P0, P1, P2, P3, P4) -> R)?) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -358,7 +358,7 @@ public final class SwiftClosure5 {
         return try! Java_SwiftBackedFunction5_class.create(ctor: Java_SwiftBackedFunction5_constructor_methodID, args: [swiftPeerPtr.toJavaParameter()])
     }
 
-    public static func closure<P0: JConvertible, P1: JConvertible, P2: JConvertible, P3: JConvertible, P4: JConvertible, R>(forJavaObject function: JavaObjectPointer?) -> ((P0, P1, P2, P3, P4) -> R)? {
+    public static func closure<P0, P1, P2, P3, P4, R>(forJavaObject function: JavaObjectPointer?) -> ((P0, P1, P2, P3, P4) -> R)? {
         guard let function else {
             return nil
         }
@@ -371,7 +371,7 @@ public final class SwiftClosure5 {
         }
     }
 
-    public let closure: (JConvertible, JConvertible, JConvertible, JConvertible, JConvertible) -> Any?
+    public let closure: (Any?, Any?, Any?, Any?, Any?) -> Any?
     public let p0Type: Any.Type
     public let p1Type: Any.Type
     public let p2Type: Any.Type
@@ -379,7 +379,7 @@ public final class SwiftClosure5 {
     public let p4Type: Any.Type
     public let returnType: Any.Type
 
-    public init<P0: JConvertible, P1: JConvertible, P2: JConvertible, P3: JConvertible, P4: JConvertible, R>(closure: @escaping (P0, P1, P2, P3, P4) -> R) {
+    public init<P0, P1, P2, P3, P4, R>(closure: @escaping (P0, P1, P2, P3, P4) -> R) {
         self.closure = { p0, p1, p2, p3, p4 in closure(p0 as! P0, p1 as! P1, p2 as! P2, p3 as! P3, p4 as! P4) }
         self.p0Type = P0.self
         self.p1Type = P1.self
@@ -405,7 +405,7 @@ func SwiftBackedFunction5_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target:
     let p3_swift = (value_swift.p3Type as! JConvertible.Type).fromJavaObject(p3)
     let p4_swift = (value_swift.p4Type as! JConvertible.Type).fromJavaObject(p4)
     let c_return_swift = value_swift.closure(p0_swift, p1_swift, p2_swift, p3_swift, p4_swift)
-    return value_swift.returnType == Void.self ? nil : (c_return_swift as! JConvertible).toJavaObject()
+    return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject()
 }
 
 #else

@@ -168,6 +168,14 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertFalse(testSupport_kotlinClassComparable(lhs: "bbb", rhs: "aaa"))
     }
 
+    func testKotlinProtocolMember() {
+        XCTAssertTrue(testSupport_kotlinProtocolMember())
+    }
+
+    func testSwiftProtocolMember() {
+        XCTAssertTrue(testSupport_swiftProtocolMember())
+    }
+
     func testClosure0Var() {
         testSupport_kotlinClosure0Var()
     }

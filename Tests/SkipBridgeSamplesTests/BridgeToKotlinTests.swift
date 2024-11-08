@@ -232,6 +232,68 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertFalse(lhs < rhs)
     }
 
+    public func testSwiftProtocolMember() {
+        let obj = SwiftClass()
+        obj.optionalSwiftProtocolVar = nil
+        XCTAssertNil(obj.optionalSwiftProtocolVar)
+
+        let helper = SwiftHelperClass()
+        helper.stringVar = "foo"
+        obj.optionalSwiftProtocolVar = helper
+        XCTAssertEqual(obj.optionalSwiftProtocolVar?.stringValue(), "foo")
+
+        let obj2 = SwiftClass()
+        obj2.optionalSwiftProtocolVar = helper
+        XCTAssertEqual(obj.optionalSwiftProtocolVar?.hashValue, obj2.optionalSwiftProtocolVar?.hashValue)
+    }
+
+    public func testKotlinProtocolMember() {
+        let obj = SwiftClass()
+        obj.optionalKotlinProtocolVar = nil
+        XCTAssertNil(obj.optionalKotlinProtocolVar)
+
+        let helper = KotlinHelperClass()
+        helper.stringVar = "foo"
+        obj.optionalKotlinProtocolVar = helper
+        XCTAssertEqual(obj.optionalKotlinProtocolVar?.stringValue(), "foo")
+
+        let obj2 = SwiftClass()
+        obj2.optionalKotlinProtocolVar = helper
+        XCTAssertEqual(obj.optionalSwiftProtocolVar?.hashValue, obj2.optionalSwiftProtocolVar?.hashValue)
+    }
+
+    public func testStruct() {
+        let s1 = SwiftStruct(string: "2")
+        XCTAssertEqual(s1.intVar, 2)
+
+        var s2 = s1
+        XCTAssertEqual(s1.intVar, 2)
+        s2.intVar = 3
+        XCTAssertEqual(s1.intVar, 2)
+        XCTAssertEqual(s2.intVar, 3)
+
+        s2.setIntFunc(4)
+        XCTAssertEqual(s1.intVar, 2)
+        XCTAssertEqual(s2.intVar, 4)
+    }
+
+    public func testSwiftStructMember() {
+        let obj = SwiftClass()
+        var s1 = SwiftStruct(string: "2")
+        obj.swiftStructVar = s1
+
+        s1.intVar = 3
+        XCTAssertEqual(s1.intVar, 3)
+        XCTAssertEqual(obj.swiftStructVar.intVar, 2)
+
+        obj.swiftStructVar.intVar = 99
+        var s2 = obj.swiftStructVar
+        s2.intVar = 100
+        XCTAssertEqual(s1.intVar, 3)
+        XCTAssertEqual(s2.intVar, 100)
+        XCTAssertEqual(obj.swiftStructVar.intVar, 99)
+    }
+
     public func testClosure0Var() {
         swiftClosure0Var()
         swiftClosure0Var = { print("reassigned") }
