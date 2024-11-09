@@ -369,6 +369,54 @@ public func testSupport_kotlinClassComparable(lhs: String, rhs: String) -> Bool 
 }
 
 // SKIP @BridgeToKotlin
+public func testSupport_kotlinProtocolMember() -> Bool {
+    let obj = KotlinClass()
+    obj.optionalKotlinProtocolVar = nil
+    guard obj.optionalKotlinProtocolVar == nil else {
+        return false
+    }
+
+    let helper = KotlinHelperClass()
+    helper.stringVar = "foo"
+    obj.optionalKotlinProtocolVar = helper
+    guard obj.optionalKotlinProtocolVar?.stringValue() == "foo" else {
+        return false
+    }
+
+    let obj2 = KotlinClass()
+    obj2.optionalKotlinProtocolVar = helper
+    guard obj.optionalKotlinProtocolVar?.hashValue == obj2.optionalKotlinProtocolVar?.hashValue else {
+        return false
+    }
+
+    return true
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_swiftProtocolMember() -> Bool {
+    let obj = KotlinClass()
+    obj.optionalSwiftProtocolVar = nil
+    guard obj.optionalSwiftProtocolVar == nil else {
+        return false
+    }
+
+    let helper = SwiftHelperClass()
+    helper.stringVar = "foo"
+    obj.optionalSwiftProtocolVar = helper
+    guard obj.optionalSwiftProtocolVar?.stringValue() == "foo" else {
+        return false
+    }
+
+    let obj2 = KotlinClass()
+    obj2.optionalSwiftProtocolVar = helper
+    guard obj.optionalSwiftProtocolVar?.hashValue == obj2.optionalSwiftProtocolVar?.hashValue else {
+        return false
+    }
+
+    return true
+}
+
+// SKIP @BridgeToKotlin
 public func testSupport_kotlinClosure0Var() {
     kotlinClosure0Var()
     kotlinClosure0Var = { print("reassigned") }
