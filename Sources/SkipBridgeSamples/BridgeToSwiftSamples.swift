@@ -169,6 +169,9 @@ public class KotlinClass {
     public var optionalKotlinProtocolVar: (any KotlinProtocol)?
     public var optionalSwiftProtocolVar: (any SwiftProtocol)?
 
+    public var kotlinStructVar = KotlinStruct(string: "1")
+    public var swiftStructVar = SwiftStruct(string: "2")
+
     public init() {
     }
 }
@@ -203,6 +206,23 @@ public class KotlinHelperClass: KotlinProtocol, Comparable, Identifiable {
 // SKIP @BridgeToSwift
 public protocol KotlinProtocol: Hashable {
     func stringValue() -> String
+}
+
+// SKIP @BridgeToSwift
+public struct KotlinStruct {
+    public var intVar = 1
+
+    public init(string: String) {
+        self.intVar = Int(string) ?? 0
+    }
+
+    public func intFunc() -> Int {
+        return intVar
+    }
+
+    public mutating func setIntFunc(_ i: Int) {
+        self.intVar = i
+    }
 }
 
 // MARK: Closures

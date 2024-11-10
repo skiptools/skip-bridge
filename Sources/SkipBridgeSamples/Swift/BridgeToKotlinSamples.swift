@@ -170,6 +170,7 @@ public class SwiftClass {
     public var optionalKotlinProtocolVar: (any KotlinProtocol)?
 
     public var swiftStructVar = SwiftStruct(string: "1")
+    public var kotlinStructVar = KotlinStruct(string: "2")
 
     public init() {
     }

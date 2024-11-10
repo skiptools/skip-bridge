@@ -294,6 +294,23 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(obj.swiftStructVar.intVar, 99)
     }
 
+    public func testKotlinStructMember() {
+        let obj = SwiftClass()
+        var s1 = KotlinStruct(string: "2")
+        obj.kotlinStructVar = s1
+
+        s1.intVar = 3
+        XCTAssertEqual(s1.intVar, 3)
+        XCTAssertEqual(obj.kotlinStructVar.intVar, 2)
+
+        obj.kotlinStructVar.intVar = 99
+        var s2 = obj.kotlinStructVar
+        s2.intVar = 100
+        XCTAssertEqual(s1.intVar, 3)
+        XCTAssertEqual(s2.intVar, 100)
+        XCTAssertEqual(obj.kotlinStructVar.intVar, 99)
+    }
+
     public func testClosure0Var() {
         swiftClosure0Var()
         swiftClosure0Var = { print("reassigned") }

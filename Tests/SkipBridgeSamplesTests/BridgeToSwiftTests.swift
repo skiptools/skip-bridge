@@ -169,11 +169,23 @@ final class BridgeToSwiftTests: XCTestCase {
     }
 
     func testKotlinProtocolMember() {
-        XCTAssertTrue(testSupport_kotlinProtocolMember())
+        XCTAssertNil(testSupport_kotlinProtocolMember())
     }
 
     func testSwiftProtocolMember() {
-        XCTAssertTrue(testSupport_swiftProtocolMember())
+        XCTAssertNil(testSupport_swiftProtocolMember())
+    }
+
+    public func testStruct() {
+        XCTAssertNil(testSupport_kotlinStruct())
+    }
+
+    public func testSwiftStructMember() {
+        XCTAssertNil(testSupport_swiftStructMember())
+    }
+
+    public func testKotlinStructMember() {
+        XCTAssertNil(testSupport_kotlinStructMember())
     }
 
     func testClosure0Var() {
