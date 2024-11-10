@@ -369,51 +369,137 @@ public func testSupport_kotlinClassComparable(lhs: String, rhs: String) -> Bool 
 }
 
 // SKIP @BridgeToKotlin
-public func testSupport_kotlinProtocolMember() -> Bool {
+public func testSupport_kotlinProtocolMember() -> String? {
     let obj = KotlinClass()
     obj.optionalKotlinProtocolVar = nil
     guard obj.optionalKotlinProtocolVar == nil else {
-        return false
+        return "obj.optionalKotlinProtocolVar == nil"
     }
 
     let helper = KotlinHelperClass()
     helper.stringVar = "foo"
     obj.optionalKotlinProtocolVar = helper
     guard obj.optionalKotlinProtocolVar?.stringValue() == "foo" else {
-        return false
+        return "obj.optionalKotlinProtocolVar?.stringValue() == \"foo\""
     }
 
     let obj2 = KotlinClass()
     obj2.optionalKotlinProtocolVar = helper
     guard obj.optionalKotlinProtocolVar?.hashValue == obj2.optionalKotlinProtocolVar?.hashValue else {
-        return false
+        return "obj.optionalKotlinProtocolVar?.hashValue == obj2.optionalKotlinProtocolVar?.hashValue"
     }
-
-    return true
+    return nil
 }
 
 // SKIP @BridgeToKotlin
-public func testSupport_swiftProtocolMember() -> Bool {
+public func testSupport_swiftProtocolMember() -> String? {
     let obj = KotlinClass()
     obj.optionalSwiftProtocolVar = nil
     guard obj.optionalSwiftProtocolVar == nil else {
-        return false
+        return "obj.optionalSwiftProtocolVar == nil"
     }
 
     let helper = SwiftHelperClass()
     helper.stringVar = "foo"
     obj.optionalSwiftProtocolVar = helper
     guard obj.optionalSwiftProtocolVar?.stringValue() == "foo" else {
-        return false
+        return "obj.optionalSwiftProtocolVar?.stringValue() == \"foo\""
     }
 
     let obj2 = KotlinClass()
     obj2.optionalSwiftProtocolVar = helper
     guard obj.optionalSwiftProtocolVar?.hashValue == obj2.optionalSwiftProtocolVar?.hashValue else {
-        return false
+        return "obj.optionalSwiftProtocolVar?.hashValue == obj2.optionalSwiftProtocolVar?.hashValue"
     }
 
-    return true
+    return nil
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_kotlinStruct() -> String? {
+    let s1 = KotlinStruct(string: "2")
+    guard s1.intVar == 2 else {
+        return "s1.intVar == 2"
+    }
+
+    var s2 = s1
+    guard s1.intVar == 2 else {
+        return "s1.intVar == 2"
+    }
+    s2.intVar = 3
+    guard s1.intVar == 2 else {
+        return "s1.intVar == 2"
+    }
+    guard s2.intVar == 3 else {
+        return "s2.intVar == 3"
+    }
+
+    s2.setIntFunc(4)
+    guard s1.intVar == 2 else {
+        return "s1.intVar == 2"
+    }
+    guard s2.intVar == 4 else {
+        return "s2.intVar == 4"
+    }
+    return nil
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_swiftStructMember() -> String? {
+    let obj = KotlinClass()
+    var s1 = SwiftStruct(string: "2")
+    obj.swiftStructVar = s1
+
+    s1.intVar = 3
+    guard s1.intVar == 3 else {
+        return "s1.intVar == 3"
+    }
+    guard obj.swiftStructVar.intVar == 2 else {
+        return "obj.swiftStructVar.intVar == 2"
+    }
+
+    obj.swiftStructVar.intVar = 99
+    var s2 = obj.swiftStructVar
+    s2.intVar = 100
+    guard s1.intVar == 3 else {
+        return "s1.intVar == 3"
+    }
+    guard s2.intVar == 100 else {
+        return "s2.intVar == 100"
+    }
+    guard obj.swiftStructVar.intVar == 99 else {
+        return "obj.swiftStructVar.intVar == 99"
+    }
+    return nil
+}
+
+// SKIP @BridgeToKotlin
+public func testSupport_kotlinStructMember() -> String? {
+    let obj = KotlinClass()
+    var s1 = KotlinStruct(string: "2")
+    obj.kotlinStructVar = s1
+
+    s1.intVar = 3
+    guard s1.intVar == 3 else {
+        return "s1.intVar == 3"
+    }
+    guard obj.kotlinStructVar.intVar == 2 else {
+        return "obj.kotlinStructVar.intVar == 2"
+    }
+
+    obj.kotlinStructVar.intVar = 99
+    var s2 = obj.kotlinStructVar
+    s2.intVar = 100
+    guard s1.intVar == 3 else {
+        return "s1.intVar == 3"
+    }
+    guard s2.intVar == 100 else {
+        return "s2.intVar == 100"
+    }
+    guard obj.kotlinStructVar.intVar == 99 else {
+        return "obj.kotlinStructVar.intVar == 99"
+    }
+    return nil
 }
 
 // SKIP @BridgeToKotlin
