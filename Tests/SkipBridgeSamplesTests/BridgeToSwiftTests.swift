@@ -18,10 +18,10 @@ final class BridgeToSwiftTests: XCTestCase {
 
     func testJNIMode() {
         #if SKIP
-        // when we are running the bridged tests we expect that SkipBridge will have been built with the `SKIP_JNI_MODE` flag
-        XCTAssertEqual(testSupport_isJNIMode(), true)
+        // when we are running the bridged tests we expect that SkipBridge will have been built with the `SKIP_BRIDGE` flag
+        XCTAssertEqual(testSupport_isBridgeMode(), true)
         #else
-        XCTAssertEqual(testSupport_isJNIMode(), false)
+        XCTAssertEqual(testSupport_isBridgeMode(), false)
         #endif
     }
 

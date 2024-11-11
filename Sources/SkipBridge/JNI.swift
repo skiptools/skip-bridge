@@ -110,11 +110,11 @@ public func jniContext<T>(_ block: () throws -> T) rethrows -> T {
 
 /// Gateway to JVM and JNI functionality.
 public class JNI {
-    /// `true` when the SkipBridge module was compiled with the `SKIP_JNI_MODE` flag.
-    #if SKIP_JNI_MODE
-    public static let isJNIMode: Bool = true
+    /// `true` when the SkipBridge module was compiled with the `SKIP_BRIDGE` flag.
+    #if SKIP_BRIDGE
+    public static let isBridgeMode: Bool = true
     #else
-    public static let isJNIMode: Bool = false
+    public static let isBridgeMode: Bool = false
     #endif
 
     /// Our reference to the Java Virtual Machine, to be set on init

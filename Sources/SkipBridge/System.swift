@@ -72,7 +72,7 @@ public func loadPeerLibrary(packageName: String, moduleName libName: String) thr
         arch = osArch == "aarch64" ? "arm64-apple-macosx" : "x86_64-apple-macosx"
     }
     let sharedObject = "lib\(libName).\(libext)"
-    let libPath = "src/main/swift/.build/\(arch)/debug/\(sharedObject)"
+    let libPath = ".build/\(libName)/swift/\(arch)/debug/\(sharedObject)"
 
     let cwd = System.getProperty("user.dir")
 
