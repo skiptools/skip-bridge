@@ -2,6 +2,7 @@ build:
   contents:
     # the location of the skipstone derived Swift package
     - 'val swiftPath = "src/main/swift"'
+    - 'val buildDir = layout.buildDirectory.get().getAsFile().absolutePath'
     - 'var swiftBuildConfig = "debug"'
 
     - block: 'android'
@@ -29,15 +30,17 @@ build:
             - 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
             - block: 'exec'
               contents:
-                - 'commandLine("sh", "-c", "skip android build -d .build/jni-libs --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name} --arch aarch64 --arch x86_64")'
+                - 'commandLine("sh", "-c", "skip android build -d ${buildDir}/jni-libs --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name} --arch aarch64 --arch x86_64 -Xswiftc -DSKIP_BRIDGE --scratch-path ${buildDir}/swift")'
                 - 'environment("SKIP_PLUGIN_DISABLED", "1")'
-                - 'environment("SKIP_JNI_MODE", "1")'
+                - 'environment("SKIP_BRIDGE", "1")'
                 # when we are running tests, insert the local build path for the local skipstone command
                 - 'environment("PATH", (System.getenv()["XCTestBundlePath"] + "/..") + ":" + System.getenv()["PATH"])'
 
     # For test cases, we compile locally with `swift build` against the derived Swift project
     - block: 'tasks.withType<Test>'
       contents:
+        - 'jvmArgs("-verbose:jni")'
+        - 'jvmArgs("-Xcheck:jni")'
         - block: 'if (file(swiftPath).exists())'
           contents:
             - 'dependsOn("buildLocalSwiftPackage")'
@@ -51,22 +54,23 @@ build:
             - block: 'exec'
               contents:
                 # build for local macOS in order to run tests
-                - 'commandLine("sh", "-c", "swift build --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name}")'
+                - 'commandLine("sh", "-c", "swift build --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name} -Xswiftc -DSKIP_BRIDGE --scratch-path ${buildDir}/swift")'
                 # Do not run the skipstone plugin when building again, because we have already performed transpilation.
                 - 'environment("SKIP_PLUGIN_DISABLED", "1")'
-                - 'environment("SKIP_JNI_MODE", "1")'
+                - 'environment("SKIP_BRIDGE", "1")'
 
     - block: 'android'
       contents:
         - block: 'sourceSets'
           contents:
-            # .build/jni-libs/ is the folder where our toolchain outputs the natively-compiled .so files
-            - 'getByName("main").jniLibs.srcDirs(".build/jni-libs")'
+            # ${buildDir}/jni-libs is the folder where our toolchain outputs the natively-compiled .so files
+            - 'getByName("main").jniLibs.srcDirs("${buildDir}/jni-libs")'
         - block: 'packaging'
           contents:
             - block: 'jniLibs'
               contents:
-                # doNotStrip is needed to prevent errors like: java.lang.UnsatisfiedLinkError: dlopen failed: empty/missing DT_HASH/DT_GNU_HASH in "/data/app/~~Zoepnr93K9vyUtTUUM0POg==/skip.bridge.samples.test-3nePwd6ioGZtLQ0K0EJpBQ==/base.apk!/lib/arm64-v8a/libdispatch.so" (new hash type from the future?) (see: https://github.com/finagolfin/swift-android-sdk/issues/67)
+                # doNotStrip is needed to prevent errors like: java.lang.UnsatisfiedLinkError: dlopen failed: empty/missing DT_HASH/DT_GNU_HASH in "/data/app/…/base.apk!/lib/arm64-v8a/libdispatch.so" (new hash type from the future?) (see: https://github.com/finagolfin/swift-android-sdk/issues/67)
                 # also seems to affect libandroid-spawn.so
                 - 'keepDebugSymbols.add("**/*.so")'
+                # pickFirsts needed to prevent errors like: 2 files found with path 'lib/arm64-v8a/libSkipAndroidBridge.so' from inputs:
                 - 'pickFirsts.add("**/*.so")'

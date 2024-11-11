@@ -79,7 +79,7 @@ private final class BridgeObservationSupport: @unchecked Sendable {
         Java_update(index)
     }
 
-    #if SKIP_JNI_MODE
+    #if SKIP_BRIDGE
     private static let Java_stateClass = try? JClass(name: "skip/model/MutableStateBacking")
     private static let Java_state_init_methodID = Java_stateClass?.getMethodID(name: "<init>", sig: "()V")
     private static let Java_state_access_methodID = Java_stateClass?.getMethodID(name: "access", sig: "(I)V")

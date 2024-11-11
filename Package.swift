@@ -3,16 +3,11 @@ import Foundation
 import CompilerPluginSupport
 import PackageDescription
 
-var swiftSettings: [SwiftSetting] = []
-if ProcessInfo.processInfo.environment["SKIP_JNI_MODE"] == "1" {
-    swiftSettings.append(.define("SKIP_JNI_MODE"))
-}
-
 let package = Package(
     name: "skip-bridge",
     platforms: [.iOS(.v16), .macOS(.v13)],
     products: [
-        .library(name: "SkipBridge", targets: ["SkipBridge"]),
+        .library(name: "SkipBridge", type: .dynamic, targets: ["SkipBridge"]),
         .library(name: "SkipBridgeSamples", type: .dynamic, targets: ["SkipBridgeSamples"]),
         .library(name: "SkipBridgeMacros", targets: ["SkipBridgeMacros"])
     ],
@@ -26,7 +21,6 @@ let package = Package(
         .target(name: "CJNI"),
         .target(name: "SkipBridge",
             dependencies: ["CJNI", .product(name: "SkipLib", package: "skip-lib")],
-            swiftSettings: swiftSettings,
             plugins: [.plugin(name: "skipstone", package: "skip")]),
         .target(name: "SkipBridgeMacros",
             dependencies: ["SkipBridgeMacrosImpl"]),
