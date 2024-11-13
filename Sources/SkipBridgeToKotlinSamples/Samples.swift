@@ -5,7 +5,7 @@
 // as published by the Free Software Foundation https://fsf.org
 
 import Foundation
-import SkipBridge
+import SkipBridgeToKotlinSamplesHelpers
 
 // MARK: Global constants
 
@@ -343,7 +343,6 @@ struct SwiftSampleError: Error {
 
 // SKIP @BridgeToKotlin
 public func multiplyInt32s(i1: Int32, i2: Int32) -> Int32 {
-    // FIXME: no-name parameters don't bridge: multiplyInt32s(_ i1: Int32, _ i2: Int32):
     i1.multiplex(with: i2)
 }
 

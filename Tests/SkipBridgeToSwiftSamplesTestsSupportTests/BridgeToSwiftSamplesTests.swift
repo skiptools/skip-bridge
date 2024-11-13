@@ -5,14 +5,15 @@
 // as published by the Free Software Foundation https://fsf.org
 
 import Foundation
-import SkipBridgeSamples
 import SkipBridgeKt
+import SkipBridgeToSwiftSamplesTestsSupport
 import XCTest
 
 final class BridgeToSwiftTests: XCTestCase {
     override func setUp() {
         #if SKIP
         loadPeerLibrary(packageName: "skip-bridge", moduleName: "SkipBridgeSamples")
+        loadPeerLibrary(packageName: "skip-bridge", moduleName: "SkipBridgeToSwiftSampleHelpers")
         #endif
     }
 

@@ -5,10 +5,11 @@
 // as published by the Free Software Foundation https://fsf.org
 
 import Foundation
-import SkipBridge
+import SkipBridgeToSwiftSamples
+import SkipBridgeToSwiftSamplesHelpers
 
-// Current limitations on Roboelectric testing require us to go through a compiled wrapper in order to perform our
-// tests of bridging Kotlin to Swift.
+// Current limitations on testing require us to go through a compiled wrapper in order to perform our
+// tests of bridging to Swift.
 
 // SKIP @BridgeToKotlin
 public func testSupport_kotlinBoolConstant() -> Bool {
@@ -53,11 +54,6 @@ public func testSupport_kotlinIntConstant() -> Int {
 // SKIP @BridgeToKotlin
 public func testSupport_kotlinStringConstant() -> String {
     return kotlinStringConstant
-}
-
-// SKIP @BridgeToKotlin
-public func testSupport_swiftKotlinClassConstant_stringVar() -> String {
-    return swiftKotlinClassConstant.stringVar
 }
 
 // SKIP @BridgeToKotlin
@@ -592,43 +588,4 @@ public func testSupport_kotlinMakeData(string: String) -> String {
 public func testSupport_kotlinMakeDate(timeIntervalSinceReferenceDate: Double) -> Double {
     let date = kotlinMakeDate(matching: Date(timeIntervalSinceReferenceDate: timeIntervalSinceReferenceDate))
     return date.timeIntervalSinceReferenceDate
-}
-
-// MARK: Used by BridgeToKotlinTests
-
-// SKIP @BridgeToKotlin
-public func testSupport_swiftKotlinClassVar_stringVar(value: String) -> String {
-    let helper = KotlinHelperClass()
-    helper.stringVar = value
-    swiftKotlinClassVar = helper
-    return swiftKotlinClassVar.stringVar
-}
-
-// SKIP @BridgeToKotlin
-public func testSupport_swiftOptionalKotlinClassVar_stringVar(value: String?) -> String? {
-    if let value {
-        let helper = KotlinHelperClass()
-        helper.stringVar = value
-        swiftOptionalKotlinClassVar = helper
-    } else {
-        swiftOptionalKotlinClassVar = nil
-    }
-    return swiftOptionalKotlinClassVar?.stringVar
-}
-
-// SKIP @BridgeToKotlin
-public func testSupport_swiftKotlinClassComputedVar_stringVar(value: String) -> String {
-    let helper = KotlinHelperClass()
-    helper.stringVar = value
-    swiftKotlinClassComputedVar = helper
-    return swiftKotlinClassComputedVar.stringVar
-}
-
-// SKIP @BridgeToKotlin
-public func testSupport_swiftKotlinClassMemberVar_stringVar(value: String) -> String? {
-    let helper = KotlinHelperClass()
-    helper.stringVar = value
-    let subject = SwiftClass()
-    subject.optionalKotlinClassVar = helper
-    return subject.optionalKotlinClassVar?.stringVar
 }

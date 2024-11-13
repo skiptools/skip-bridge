@@ -5,7 +5,7 @@
 // as published by the Free Software Foundation https://fsf.org
 
 import Foundation
-import SkipBridge
+import SkipBridgeToSwiftSamplesHelpers
 
 // MARK: Global constants
 
