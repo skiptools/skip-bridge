@@ -6,7 +6,7 @@
 
 import Foundation
 import SkipBridgeSamples
-import SkipBridge
+import SkipBridgeKt
 import XCTest
 
 final class BridgeToKotlinTests: XCTestCase {

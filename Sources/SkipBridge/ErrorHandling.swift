@@ -4,8 +4,6 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
-#if !SKIP
-
 /// Throw a Swift error to Kotlin.
 public func JavaThrowError(_ error: any Error, env: JNIEnvPointer) {
     let jniEnv = env.pointee!.pointee
@@ -20,5 +18,3 @@ public func JavaErrorThrowable(_ error: any Error, env: JNIEnvPointer) -> JavaOb
 
 private let Java_errorExceptionClass = try! JClass(name: "skip/lib/ErrorException")
 private let Java_errorException_init_methodID = Java_errorExceptionClass.getMethodID(name: "<init>", sig: "(Ljava/lang/String;)V")!
-
-#endif

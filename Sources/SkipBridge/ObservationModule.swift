@@ -4,7 +4,8 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
-#if !SKIP
+#if SKIP_BRIDGE
+
 #if canImport(Observation)
 import Observation
 import func Observation.withObservationTracking
@@ -22,4 +23,5 @@ public struct ObservationModule {
         return withObservationTracking(apply, onChange: onChange())
     }
 }
+
 #endif

@@ -4,35 +4,13 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
-#if !SKIP
-
 /// Protocol added to `@BridgeToKotlin` types.
 public protocol BridgedToKotlin: JObjectProtocol, JConvertible {
 }
 
-#else
-
-/// Protocol added to the generated class for a Swift class bridged to Kotlin.
-public protocol SwiftPeerBridged {
-    func Swift_bridgedPeer() -> SwiftObjectPointer
-}
-
-/// Return an object's peer if it is `SwiftPeerBridged`, else `SwiftObjectNil`.
-public func Swift_bridgedPeer(object: Any) -> SwiftObjectPointer {
-    return (object as? SwiftPeerBridged)?.Swift_bridgedPeer() ?? SwiftObjectNil
-}
-
-/// Marker type used to guarantee uniqueness of our `Swift_peer` constructor.
-public final class SwiftPeerMarker {
-}
-
-#endif
-
 /// An opaque reference to a Swift object.
 public typealias SwiftObjectPointer = Int64
 public let SwiftObjectNil = Int64(0)
-
-#if !SKIP
 
 extension SwiftObjectPointer {
     /// Get a pointer to the given object.
@@ -86,9 +64,9 @@ extension SwiftObjectPointer {
         return ptr == SwiftObjectNil ? nil : ptr
     }
 }
-private let Java_fileClass = try! JClass(name: "skip/bridge/BridgeToKotlinSupportKt")
+private let Java_fileClass = try! JClass(name: "skip/bridge/kt/BridgeToKotlinSupportKt")
 private let Java_peer_methodID = Java_fileClass.getStaticMethodID(name: "Swift_bridgedPeer", sig: "(Ljava/lang/Object;)J")!
-private let Java_SwiftPeerBridged_class = try! JClass(name: "skip/bridge/SwiftPeerBridged")
+private let Java_SwiftPeerBridged_class = try! JClass(name: "skip/bridge/kt/SwiftPeerBridged")
 private let Java_SwiftPeerBridged_peer_methodID = Java_SwiftPeerBridged_class.getMethodID(name: "Swift_bridgedPeer", sig: "()J")!
 
 /// Reference type to hold a value type.
@@ -99,5 +77,3 @@ public final class SwiftValueTypeBox<T> {
         self.value = value
     }
 }
-
-#endif

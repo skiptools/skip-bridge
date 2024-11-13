@@ -6,22 +6,13 @@
 
 import Foundation
 import SkipBridgeSamples
-import SkipBridge
+import SkipBridgeKt
 import XCTest
 
 final class BridgeToSwiftTests: XCTestCase {
     override func setUp() {
         #if SKIP
         loadPeerLibrary(packageName: "skip-bridge", moduleName: "SkipBridgeSamples")
-        #endif
-    }
-
-    func testJNIMode() {
-        #if SKIP
-        // when we are running the bridged tests we expect that SkipBridge will have been built with the `SKIP_BRIDGE` flag
-        XCTAssertEqual(testSupport_isBridgeMode(), true)
-        #else
-        XCTAssertEqual(testSupport_isBridgeMode(), false)
         #endif
     }
 

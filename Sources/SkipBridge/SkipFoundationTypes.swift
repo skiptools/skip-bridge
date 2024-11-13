@@ -4,7 +4,6 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
-#if !SKIP
 import Foundation
 
 extension Data: JObjectProtocol, JConvertible {
@@ -80,5 +79,3 @@ extension URL: JObjectProtocol, JConvertible {
 private let Java_URL = try! JClass(name: "skip/foundation/URL")
 private let Java_URL_constructor_methodID = Java_URL.getMethodID(name: "<init>", sig: "(Ljava/lang/String;Lskip/foundation/URL;)V")!
 private let Java_URL_absoluteString_methodID = Java_URL.getMethodID(name: "getAbsoluteString", sig: "()Ljava/lang/String;")!
-
-#endif
