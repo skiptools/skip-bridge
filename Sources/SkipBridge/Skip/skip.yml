@@ -5,7 +5,7 @@ build:
     # the location of the skipstone derived Swift package
     - 'val swiftPath = "src/main/swift"'
     - 'val buildDir = layout.buildDirectory.get().getAsFile().absolutePath'
-    - 'val skipCommand = (System.getenv("__XCODE_BUILT_PRODUCTS_DIR_PATHS") ?: System.getenv("BUILT_PRODUCTS_DIR")) + "/skip"'
+    - 'val skipCommand = (System.getenv("__XCODE_BUILT_PRODUCTS_DIR_PATHS") ?: System.getenv("BUILT_PRODUCTS_DIR")) + "/../Debug/skip"'
     - 'var swiftBuildConfig = "debug"'
 
     - block: 'android'
