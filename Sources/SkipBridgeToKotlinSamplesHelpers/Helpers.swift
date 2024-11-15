@@ -6,7 +6,6 @@
 
 #if !SKIP_BRIDGE
 
-// SKIP @BridgeToSwift
 public class KotlinHelperClass: KotlinProtocol {
     public var stringVar = "s"
 
@@ -26,12 +25,10 @@ public class KotlinHelperClass: KotlinProtocol {
     }
 }
 
-// SKIP @BridgeToSwift
 public protocol KotlinProtocol: Hashable {
     func stringValue() -> String
 }
 
-// SKIP @BridgeToSwift
 public struct KotlinStruct {
     public var intVar = 1
 

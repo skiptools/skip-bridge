@@ -10,9 +10,9 @@ import Observation
 
 @available(macOS 14, iOS 17, *)
 @Observable
-class ObservedClass {
-    var i = 1
-    var array: [String]?
+public class ObservedClass {
+    public var i = 1
+    public var array: [String]?
 }
 
 #endif

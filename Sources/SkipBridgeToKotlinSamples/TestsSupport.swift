@@ -6,7 +6,6 @@
 
 import SkipBridgeToKotlinSamplesHelpers
 
-// SKIP @BridgeToKotlin
 public func testSupport_swiftKotlinClassVar_stringVar(value: String) -> String {
     let helper = KotlinHelperClass()
     helper.stringVar = value
@@ -14,7 +13,6 @@ public func testSupport_swiftKotlinClassVar_stringVar(value: String) -> String {
     return swiftKotlinClassVar.stringVar
 }
 
-// SKIP @BridgeToKotlin
 public func testSupport_swiftOptionalKotlinClassVar_stringVar(value: String?) -> String? {
     if let value {
         let helper = KotlinHelperClass()
@@ -26,7 +24,6 @@ public func testSupport_swiftOptionalKotlinClassVar_stringVar(value: String?) ->
     return swiftOptionalKotlinClassVar?.stringVar
 }
 
-// SKIP @BridgeToKotlin
 public func testSupport_swiftKotlinClassComputedVar_stringVar(value: String) -> String {
     let helper = KotlinHelperClass()
     helper.stringVar = value
@@ -34,7 +31,6 @@ public func testSupport_swiftKotlinClassComputedVar_stringVar(value: String) -> 
     return swiftKotlinClassComputedVar.stringVar
 }
 
-// SKIP @BridgeToKotlin
 public func testSupport_swiftKotlinClassMemberVar_stringVar(value: String) -> String? {
     let helper = KotlinHelperClass()
     helper.stringVar = value
@@ -43,7 +39,6 @@ public func testSupport_swiftKotlinClassMemberVar_stringVar(value: String) -> St
     return subject.optionalKotlinClassVar?.stringVar
 }
 
-// SKIP @BridgeToKotlin
 public func testSupport_swiftKotlinClassConstant_stringVar() -> String {
     return swiftKotlinClassConstant.stringVar
 }
