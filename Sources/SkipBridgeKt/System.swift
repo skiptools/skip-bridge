@@ -58,6 +58,7 @@ public func loadPeerLibrary(packageName: String, moduleName libName: String) thr
     var libraryPath: String
     if let testBundlePath = env["XCTestBundlePath"] { // running from within an Xcode test case, the XCTestBundlePath points to somewhere like: ~/Library/Developer/Xcode/DerivedData/*-*/Build/Products/Debug/SkipBridgeSamplesTests.xctest
         // cwd from Xcode: /Users/marc/Library/Developer/Xcode/DerivedData/Skip-Everything-aqywrhrzhkbvfseiqgxuufbdwdft/SourcePackages/plugins/skip-bridge.output/SkipBridgeSamplesTests/skipstone
+        // libraryPath = cwd + "/../../../\(libName)/skipstone/\(libName)/" + libPath
         libraryPath = cwd + "/" + libPath
     } else {
         // need to update for forked swift build output

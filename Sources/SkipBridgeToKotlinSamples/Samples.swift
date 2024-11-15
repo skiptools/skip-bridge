@@ -167,7 +167,8 @@ public class SwiftClass {
     public var optionalKotlinClassVar: KotlinHelperClass?
 
     public var optionalSwiftProtocolVar: (any SwiftProtocol)?
-    public var optionalKotlinProtocolVar: (any KotlinProtocol)?
+    // FIXME: `final class KotlinProtocol_BridgeImpl` is non-public
+    //public var optionalKotlinProtocolVar: (any KotlinProtocol)?
 
     public var swiftStructVar = SwiftStruct(string: "1")
     public var kotlinStructVar = KotlinStruct(string: "2")

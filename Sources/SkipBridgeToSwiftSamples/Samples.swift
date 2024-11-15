@@ -4,6 +4,8 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
+#if !SKIP_BRIDGE
+
 import Foundation
 import SkipBridgeToSwiftSamplesHelpers
 
@@ -167,7 +169,8 @@ public class KotlinClass {
     public var optionalSwiftClassVar: SwiftHelperClass?
 
     public var optionalKotlinProtocolVar: (any KotlinProtocol)?
-    public var optionalSwiftProtocolVar: (any SwiftProtocol)?
+    // FIXME: `final class SwiftProtocol_BridgeImpl` is non-public
+    //public var optionalSwiftProtocolVar: (any SwiftProtocol)?
 
     public var kotlinStructVar = KotlinStruct(string: "1")
     public var swiftStructVar = SwiftStruct(string: "2")
@@ -316,3 +319,5 @@ public func kotlinMakeDate(matching date: Date) -> Date {
 
 struct KotlinSampleError: Error {
 }
+
+#endif

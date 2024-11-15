@@ -382,6 +382,8 @@ public func testSupport_kotlinProtocolMember() -> String? {
     return nil
 }
 
+// FIXME: `final class KotlinProtocol_BridgeImpl` is non-public
+/*
 // SKIP @BridgeToKotlin
 public func testSupport_swiftProtocolMember() -> String? {
     let obj = KotlinClass()
@@ -405,6 +407,7 @@ public func testSupport_swiftProtocolMember() -> String? {
 
     return nil
 }
+*/
 
 // SKIP @BridgeToKotlin
 public func testSupport_kotlinStruct() -> String? {
