@@ -4,7 +4,6 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
-#if !SKIP
 import CJNI
 import Foundation
 
@@ -110,13 +109,6 @@ public func jniContext<T>(_ block: () throws -> T) rethrows -> T {
 
 /// Gateway to JVM and JNI functionality.
 public class JNI {
-    /// `true` when the SkipBridge module was compiled with the `SKIP_BRIDGE` flag.
-    #if SKIP_BRIDGE
-    public static let isBridgeMode: Bool = true
-    #else
-    public static let isBridgeMode: Bool = false
-    #endif
-
     /// Our reference to the Java Virtual Machine, to be set on init
     let _jvm: UnsafeMutablePointer<JavaVM?>
 
@@ -1077,8 +1069,6 @@ public func ensureJVMAttached(options: JVMOptions = .default, launch: Bool = fal
     }
 }
 
-#if !SKIP
-
 public struct JVMOptions {
     public static let `default` = JVMOptions()
 
@@ -1109,8 +1099,6 @@ public struct JVMOptions {
         return opts
     }
 }
-
-#endif
 
 #if os(macOS)
 /// Instantiate an embedded Java Virtual Machine.
@@ -1220,5 +1208,3 @@ private func loadLibJava() throws -> UnsafeMutableRawPointer {
     return dylib
 }
 #endif
-
-#endif // !SKIP

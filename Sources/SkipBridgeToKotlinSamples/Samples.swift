@@ -5,7 +5,7 @@
 // as published by the Free Software Foundation https://fsf.org
 
 import Foundation
-import SkipBridge
+import SkipBridgeToKotlinSamplesHelpers
 
 // MARK: Global constants
 
@@ -167,7 +167,8 @@ public class SwiftClass {
     public var optionalKotlinClassVar: KotlinHelperClass?
 
     public var optionalSwiftProtocolVar: (any SwiftProtocol)?
-    public var optionalKotlinProtocolVar: (any KotlinProtocol)?
+    // FIXME: `final class KotlinProtocol_BridgeImpl` is non-public
+    //public var optionalKotlinProtocolVar: (any KotlinProtocol)?
 
     public var swiftStructVar = SwiftStruct(string: "1")
     public var kotlinStructVar = KotlinStruct(string: "2")
@@ -343,7 +344,6 @@ struct SwiftSampleError: Error {
 
 // SKIP @BridgeToKotlin
 public func multiplyInt32s(i1: Int32, i2: Int32) -> Int32 {
-    // FIXME: no-name parameters don't bridge: multiplyInt32s(_ i1: Int32, _ i2: Int32):
     i1.multiplex(with: i2)
 }
 

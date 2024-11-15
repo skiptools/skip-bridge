@@ -4,8 +4,6 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
-#if !SKIP
-
 extension Array: JObjectProtocol, JConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?) -> Array<Element> {
         // let list = arr.kotlin(nocopy: true)
@@ -113,7 +111,3 @@ private let Java_Set_size_methodID = Java_Set.getMethodID(name: "size", sig: "()
 private let Java_Set_iterator_methodID = Java_Set.getMethodID(name: "iterator", sig: "()Ljava/util/Iterator;")!
 private let Java_Iterator = try! JClass(name: "java/util/Iterator")
 private let Java_Iterator_next_methodID = Java_Iterator.getMethodID(name: "next", sig: "()Ljava/lang/Object;")!
-
-#endif
-
-
