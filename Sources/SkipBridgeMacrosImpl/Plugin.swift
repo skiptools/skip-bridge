@@ -10,8 +10,6 @@ import SwiftSyntaxMacros
 @main
 struct SkipBridgeMacrosPlugin: CompilerPlugin {
     var providingMacros: [Macro.Type] = [
-        BridgeToKotlinMacro.self,
-        BridgeToSwiftMacro.self,
         BridgeIgnoredMacro.self,
     ]
 }
