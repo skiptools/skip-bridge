@@ -9,8 +9,8 @@ build:
     - 'var swiftBuildConfig = "debug"'
     # Sets a global build flag that is shared between modules in a multi-module build.
     # We use this to only build the native libraries a single time rather that once for each dependent module.
-    #- 'fun setBuildFlag(prop: String): Boolean { if (rootProject.extra.has(prop)) { return false } else { rootProject.extra[prop] = true; return true } }'
-    - 'fun setBuildFlag(prop: String): Boolean { return true }'
+    - 'fun setBuildFlag(prop: String): Boolean { if (rootProject.extra.has(prop)) { return false } else { rootProject.extra[prop] = true; return true } }'
+    #- 'fun setBuildFlag(prop: String): Boolean { return true }'
     - block: 'android'
       contents:
         - block: 'sourceSets'
