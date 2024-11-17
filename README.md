@@ -42,5 +42,5 @@ demo-package.output/ModB/skipstone/ModB/test/main/swift/Package.swift
 
 ## Tips
 
-To speed up local testing, set the `SKIP_BRIDGE_ANDROID_BUILD_DISABLED=1` envrionment variable from Xcode, which will prevent the `skip android` command from building the Android libraries for each supported architecture, leaving just the local Robolectric build. Conversly, if you are *only* testing against an Android emulator/device (by setting the `ANDROID_SERIAL` envrionment variable), you can disable the local Robolectric build by setting the `SKIP_BRIDGE_ROBOLECTRIC_BUILD_DISABLED=1` variable, which will only build for the support Android architectures and avoid building locally.
+To speed up local testing, set the `SKIP_BRIDGE_ANDROID_BUILD_DISABLED=1` environment variable from Xcode, which will prevent the `skip android` command from building the Android libraries for each supported architecture, leaving just the local Robolectric build. Conversly, if you are *only* testing against an Android emulator/device (by setting the `ANDROID_SERIAL` environment variable), you can disable the local Robolectric build by setting the `SKIP_BRIDGE_ROBOLECTRIC_BUILD_DISABLED=1` variable, which will only build for the support Android architectures and avoid building locally.
 

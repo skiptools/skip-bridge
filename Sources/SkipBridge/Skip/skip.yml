@@ -4,16 +4,19 @@ build:
   contents:
     # the location of the skipstone derived Swift package
     - 'val swiftPath = "src/main/swift"'
-    - 'val buildDir = layout.buildDirectory.get().getAsFile().absolutePath'
     - 'val skipCommand = (System.getenv("__XCODE_BUILT_PRODUCTS_DIR_PATHS") ?: System.getenv("BUILT_PRODUCTS_DIR")) + "/../Debug/skip"'
     - 'var swiftBuildConfig = "debug"'
-
+    # Sets a global build flag that is shared between modules in a multi-module build.
+    # We use this to only build the native libraries a single time rather that once for each dependent module.
+    - 'fun setBuildFlag(prop: String): Boolean { if (rootProject.extra.has(prop)) { return false } else { rootProject.extra[prop] = true; return true } }'
     - block: 'android'
       contents:
         - block: 'sourceSets'
           contents:
-            # ${buildDir}/jni-libs is the folder where our toolchain outputs the natively-compiled .so files
-            - 'getByName("main").jniLibs.srcDirs("${buildDir}/jni-libs")'
+            - block: 'getByName("main")'
+              contents:
+                # ${buildDir}/jni-libs is the folder where our toolchain outputs the natively-compiled .so files
+                - 'jniLibs.srcDir("${layout.buildDirectory.get().asFile}/jni-libs")'
         - block: 'packaging'
           contents:
             - block: 'jniLibs'
@@ -21,8 +24,10 @@ build:
                 # doNotStrip is needed to prevent errors like: java.lang.UnsatisfiedLinkError: dlopen failed: empty/missing DT_HASH/DT_GNU_HASH in "/data/app/…/base.apk!/lib/arm64-v8a/libdispatch.so" (new hash type from the future?) (see: https://github.com/finagolfin/swift-android-sdk/issues/67)
                 # also seems to affect libandroid-spawn.so
                 - 'keepDebugSymbols.add("**/*.so")'
-                # pickFirsts needed to prevent errors like: 2 files found with path 'lib/arm64-v8a/libSkipAndroidBridge.so' from inputs:
-                - 'pickFirsts.add("**/*.so")'
+                # pickFirsts needed to prevent errors like: 2 files found with path 'lib/arm64-v8a/libSkipAndroidBridge.so' from inputs
+                # note that this only needs to be enabled if we are using multiple JNI output folders,
+                # which we currently avoif using the SKIP_BRIDGE_ANDROID_BUILT semaphore
+                #- 'pickFirsts.add("**/*.so")'
         - block: 'buildTypes'
           contents:
             - block: 'release'
@@ -34,7 +39,8 @@ build:
 
     - block: 'tasks.withType<org.gradle.api.tasks.compile.AbstractCompile>'
       contents:
-        - block: 'if ((file(swiftPath).exists() == true) && (System.getenv("SKIP_BRIDGE_ANDROID_BUILD_DISABLED") != "1"))'
+        # only perform a single build for the entire multi-module project
+        - block: 'if ((file(swiftPath).exists() == true) && (System.getenv("SKIP_BRIDGE_ANDROID_BUILD_DISABLED") != "1") && (setBuildFlag("SKIP_BRIDGE_ANDROID_BUILT") == true))'
           contents:
             - 'dependsOn("buildAndroidSwiftPackage")'
 
@@ -44,18 +50,19 @@ build:
           contents:
             - block: 'exec'
               contents:
-                - 'commandLine("sh", "-cx", "${skipCommand} android build -d ${buildDir}/jni-libs --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name} --arch aarch64 --arch x86_64 -Xswiftc -DSKIP_BRIDGE --scratch-path ${buildDir}/swift")'
+                - 'commandLine("sh", "-cx", "${skipCommand} android build -d ${layout.buildDirectory.get().asFile}/jni-libs --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name} --arch aarch64 --arch x86_64 -Xswiftc -DSKIP_BRIDGE --scratch-path ${layout.buildDirectory.get().asFile}/swift")'
                 - 'environment("SKIP_BRIDGE", "1")'
                 # for local transpiler development, we need to ensure that the tool we are using is the locally-built skip, and not the one that is downloaded from the binary package
                 # TODO: figure out how to implement this for swiftpm command-line builds
-                - 'environment("SKIP_COMMAND_OVERRIDE", skipCommand)'
+                - 'if (file(skipCommand).exists() && System.getenv("SKIP_COMMAND_OVERRIDE") == null) { environment("SKIP_COMMAND_OVERRIDE", skipCommand) }'
 
     # For test cases, we compile locally with `swift build` against the derived Swift project
     - block: 'tasks.withType<Test>'
       contents:
         - 'jvmArgs("-verbose:jni")'
         - 'jvmArgs("-Xcheck:jni")'
-        - block: 'if ((file(swiftPath).exists() == true) && (System.getenv("SKIP_BRIDGE_ROBOLECTRIC_BUILD_DISABLED") != "1"))'
+        # only perform a single build for the entire multi-module project
+        - block: 'if ((file(swiftPath).exists() == true) && (System.getenv("SKIP_BRIDGE_ROBOLECTRIC_BUILD_DISABLED") != "1") && (setBuildFlag("SKIP_BRIDGE_ROBOLECTRIC_BUILT") == true))'
           contents:
             - 'dependsOn("buildLocalSwiftPackage")'
 
@@ -68,8 +75,8 @@ build:
             - block: 'exec'
               contents:
                 # build for local macOS in order to run tests
-                - 'commandLine("sh", "-cx", "swift build --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name} -Xswiftc -DSKIP_BRIDGE --scratch-path ${buildDir}/swift")'
+                - 'commandLine("sh", "-cx", "swift build --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name} -Xswiftc -DSKIP_BRIDGE --scratch-path ${layout.buildDirectory.get().asFile}/swift")'
                 - 'environment("SKIP_BRIDGE", "1")'
                 # for local transpiler development, we need to ensure that the tool we are using is the locally-built skip, and not the one that is downloaded from the binary package
                 # TODO: figure out how to implement this for swiftpm command-line builds
-                - 'environment("SKIP_COMMAND_OVERRIDE", skipCommand)'
+                - 'if (file(skipCommand).exists() && System.getenv("SKIP_COMMAND_OVERRIDE") == null) { environment("SKIP_COMMAND_OVERRIDE", skipCommand) }'
