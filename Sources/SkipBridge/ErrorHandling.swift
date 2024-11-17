@@ -12,7 +12,7 @@ public func JavaThrowError(_ error: any Error, env: JNIEnvPointer) {
 
 /// Create a Kotlin throwable.
 public func JavaErrorThrowable(_ error: any Error, env: JNIEnvPointer) -> JavaObjectPointer {
-    let throwable = try! Java_errorExceptionClass.create(ctor: Java_errorException_init_methodID, args: [String(describing: error).toJavaParameter()])
+    let throwable = try! Java_errorExceptionClass.create(ctor: Java_errorException_init_methodID, args: [String(describing: error).toJavaParameter(options: [])])
     return throwable
 }
 

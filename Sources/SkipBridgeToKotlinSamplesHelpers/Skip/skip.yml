@@ -2,4 +2,3 @@
 skip:
   mode: 'kotlin'
   bridging: true
-

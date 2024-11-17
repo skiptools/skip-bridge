@@ -163,10 +163,9 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertNil(testSupport_kotlinProtocolMember())
     }
 
-    // FIXME: `final class KotlinProtocol_BridgeImpl` is non-public
-    //func testSwiftProtocolMember() {
-    //    XCTAssertNil(testSupport_swiftProtocolMember())
-    //}
+    func testSwiftProtocolMember() {
+        XCTAssertNil(testSupport_swiftProtocolMember())
+    }
 
     public func testStruct() {
         XCTAssertNil(testSupport_kotlinStruct())
