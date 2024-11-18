@@ -11,8 +11,12 @@ build:
 
     # Sets a global build flag that is shared between modules in a multi-module build.
     # We use this to only build the native libraries a single time rather that once for each dependent module.
-    #- 'fun setBuildFlag(prop: String): Boolean { if (rootProject.extra.has(prop)) { return false } else { rootProject.extra[prop] = true; return true } }'
-    - 'fun setBuildFlag(prop: String): Boolean { return true }'
+    - 'fun setBuildFlag(prop: String): Boolean { if (rootProject.extra.has(prop)) { return false } else { rootProject.extra[prop] = true; return true } }'
+    #- 'fun setBuildFlag(prop: String): Boolean { return true }'
+
+    - 'val buildAndroidSwiftPackageEnabled = (file(swiftPath).exists() == true) && (System.getenv("SKIP_BRIDGE_ANDROID_BUILD_DISABLED") != "1") && (setBuildFlag("SKIP_BRIDGE_ANDROID_BUILT") == true)'
+    - 'val buildLocalSwiftPackageEnabled = (file(swiftPath).exists() == true) && (System.getenv("SKIP_BRIDGE_ROBOLECTRIC_BUILD_DISABLED") != "1") && (setBuildFlag("SKIP_BRIDGE_ROBOLECTRIC_BUILT") == true)'
+
     - block: 'android'
       contents:
         - block: 'sourceSets'
@@ -44,7 +48,7 @@ build:
     - block: 'tasks.withType<org.gradle.api.tasks.compile.AbstractCompile>'
       contents:
         # only perform a single build for the entire multi-module project
-        - block: 'if ((file(swiftPath).exists() == true) && (System.getenv("SKIP_BRIDGE_ANDROID_BUILD_DISABLED") != "1") && (setBuildFlag("SKIP_BRIDGE_ANDROID_BUILT") == true))'
+        - block: 'if (buildAndroidSwiftPackageEnabled)'
           contents:
             - 'dependsOn("buildAndroidSwiftPackage")'
 
@@ -68,7 +72,7 @@ build:
         - 'jvmArgs("-verbose:jni")'
         - 'jvmArgs("-Xcheck:jni")'
         # only perform a single build for the entire multi-module project
-        - block: 'if ((file(swiftPath).exists() == true) && (System.getenv("SKIP_BRIDGE_ROBOLECTRIC_BUILD_DISABLED") != "1") && (setBuildFlag("SKIP_BRIDGE_ROBOLECTRIC_BUILT") == true))'
+        - block: 'if (buildLocalSwiftPackageEnabled)'
           contents:
             - 'dependsOn("buildLocalSwiftPackage")'
 
