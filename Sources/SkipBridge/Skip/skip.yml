@@ -7,6 +7,8 @@ build:
     - 'val skipCommand = System.getenv("SKIP_COMMAND_OVERRIDE") ?: ((System.getenv("__XCODE_BUILT_PRODUCTS_DIR_PATHS") ?: System.getenv("BUILT_PRODUCTS_DIR")) + "/../Debug/skip")'
     - 'val skipcmd = if(file(skipCommand).exists()) skipCommand else "skip"'
     - 'var swiftBuildConfig = "debug"'
+    - 'fun swiftBuildFolder(): String { return layout.buildDirectory.get().asFile.absolutePath }'
+
     # Sets a global build flag that is shared between modules in a multi-module build.
     # We use this to only build the native libraries a single time rather that once for each dependent module.
     #- 'fun setBuildFlag(prop: String): Boolean { if (rootProject.extra.has(prop)) { return false } else { rootProject.extra[prop] = true; return true } }'
@@ -18,7 +20,7 @@ build:
             - block: 'getByName("main")'
               contents:
                 # ${buildDir}/jni-libs is the folder where our toolchain outputs the natively-compiled .so files
-                - 'jniLibs.srcDir("${layout.buildDirectory.get().asFile}/jni-libs")'
+                - 'jniLibs.srcDir("${swiftBuildFolder()}/jni-libs")'
         - block: 'packaging'
           contents:
             - block: 'jniLibs'
@@ -52,7 +54,9 @@ build:
           contents:
             - block: 'exec'
               contents:
-                - 'commandLine("sh", "-cx", "${skipcmd} android build -d ${layout.buildDirectory.get().asFile}/jni-libs --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name} --arch aarch64 --arch x86_64 -Xswiftc -DSKIP_BRIDGE --scratch-path ${layout.buildDirectory.get().asFile}/swift")'
+                # the -module-cache-path and -no-clang-module-breadcrumbs flag is needed to avoid this sort of error with `skip export`:
+                # <unknown>:0: error: PCH was compiled with module cache path '/opt/src/github/skiptools/skip-bridge/.build/plugins/outputs/skip-bridge/SkipBridgeToSwiftSamples/destination/skipstone/SkipBridgeToSwiftSamplesHelpers/build/swift/aarch64-unknown-linux-android24/debug/ModuleCache/336QL0GS3Q4T0', but the path is currently '/opt/src/github/skiptools/skip-bridge/.build/plugins/outputs/skip-bridge/SkipBridgeToSwiftSamplesTestsSupport/destination/skipstone/SkipBridgeToSwiftSamplesHelpers/build/swift/aarch64-unknown-linux-android24/debug/ModuleCache/336QL0GS3Q4T0'
+                - 'commandLine("sh", "-cx", "${skipcmd} android build -d ${swiftBuildFolder()}/jni-libs --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name} --scratch-path ${swiftBuildFolder()}/swift --arch aarch64 --arch x86_64 -Xswiftc -DSKIP_BRIDGE -Xswiftc -Xfrontend -Xswiftc -no-clang-module-breadcrumbs -Xswiftc -Xfrontend -Xswiftc -module-cache-path -Xswiftc -Xfrontend -Xswiftc ${swiftBuildFolder()}/swift/module-cache/${project.name}")'
                 - 'environment("SKIP_BRIDGE", "1")'
                 # for local transpiler development, we need to ensure that the tool we are using is the locally-built skip, and not the one that is downloaded from the binary package
                 # TODO: figure out how to implement this for swiftpm command-line builds
@@ -77,7 +81,7 @@ build:
             - block: 'exec'
               contents:
                 # build for local macOS in order to run tests
-                - 'commandLine("sh", "-cx", "swift build --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name} -Xswiftc -DSKIP_BRIDGE --scratch-path ${layout.buildDirectory.get().asFile}/swift")'
+                - 'commandLine("sh", "-cx", "swift build --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name} -Xswiftc -DSKIP_BRIDGE -Xswiftc -Xfrontend -Xswiftc -no-clang-module-breadcrumbs --scratch-path ${swiftBuildFolder()}/swift")'
                 - 'environment("SKIP_BRIDGE", "1")'
                 # for local transpiler development, we need to ensure that the tool we are using is the locally-built skip, and not the one that is downloaded from the binary package
                 # TODO: figure out how to implement this for swiftpm command-line builds
