@@ -54,13 +54,13 @@ extension SwiftObjectPointer {
 
 extension SwiftObjectPointer {
     /// Return the `Swift_peer` of the given `SwiftPeerBridged` object.
-    public static func peer(of bridged: JavaObjectPointer) -> SwiftObjectPointer {
-        return try! SwiftObjectPointer.call(Java_SwiftPeerBridged_peer_methodID, on: bridged, args: [])
+    public static func peer(of bridged: JavaObjectPointer, options: JConvertibleOptions) -> SwiftObjectPointer {
+        return try! SwiftObjectPointer.call(Java_SwiftPeerBridged_peer_methodID, on: bridged, options: options, args: [])
     }
 
     /// Check whether the given object is `SwiftPeerBridged` and if so, return its `Swift_peer`.
-    public static func filterPeer(of bridged: JavaObjectPointer) -> SwiftObjectPointer? {
-        let ptr: SwiftObjectPointer = try! Java_fileClass.callStatic(method: Java_peer_methodID, args: [bridged.toJavaParameter()])
+    public static func filterPeer(of bridged: JavaObjectPointer, options: JConvertibleOptions) -> SwiftObjectPointer? {
+        let ptr: SwiftObjectPointer = try! Java_fileClass.callStatic(method: Java_peer_methodID, options: options, args: [bridged.toJavaParameter(options: options)])
         return ptr == SwiftObjectNil ? nil : ptr
     }
 }

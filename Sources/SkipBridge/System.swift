@@ -15,8 +15,8 @@
 /// 3. SwiftPM-launched Swift tests where the embedded JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
 /// 4. SwiftPM-launched Skip gradle tests, where gradle's JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
 public func loadLibrary(packageName: String, moduleName libName: String) throws {
-    let libName_java = libName.toJavaParameter()
-    try Java_systemClass.get().callStatic(method: Java_loadLibrary_methodID.get(), args: [libName_java])
+    let libName_java = libName.toJavaParameter(options: [])
+    try Java_systemClass.get().callStatic(method: Java_loadLibrary_methodID.get(), options: [], args: [libName_java])
 }
 
 private let Java_systemClass = Result { try JClass(name: "skip.bridge.kt.SystemKt") }

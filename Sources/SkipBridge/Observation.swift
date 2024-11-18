@@ -122,7 +122,7 @@ private final class BridgeObservationSupport: @unchecked Sendable {
             guard let accessMethod = Self.Java_state_access_methodID else {
                 return
             }
-            try! peer.call(method: accessMethod, args: [Int32(index).toJavaParameter()])
+            try! peer.call(method: accessMethod, options: [], args: [Int32(index).toJavaParameter(options: [])])
         }
     }
 
@@ -134,7 +134,7 @@ private final class BridgeObservationSupport: @unchecked Sendable {
             guard let updateMethod = Self.Java_state_update_methodID else {
                 return
             }
-            try! peer.call(method: updateMethod, args: [Int32(index).toJavaParameter()])
+            try! peer.call(method: updateMethod, options: [], args: [Int32(index).toJavaParameter(options: [])])
         }
     }
 
