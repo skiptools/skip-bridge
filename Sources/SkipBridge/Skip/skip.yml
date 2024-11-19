@@ -1,5 +1,5 @@
 skip:
-  mode: 'swift'
+  mode: 'native'
 build:
   contents:
     # the location of the skipstone derived Swift package

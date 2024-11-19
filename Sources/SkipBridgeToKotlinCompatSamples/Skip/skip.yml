@@ -1,6 +1,6 @@
 # Configuration file for https://skip.tools project
 skip:
-  mode: 'swift'
+  mode: 'native'
   bridging:
     enabled: true
     options: 'kotlincompat'

@@ -1,5 +1,5 @@
 # Configuration file for https://skip.tools project
 skip:
-  mode: 'kotlin'
+  mode: 'transpiled'
   bridging: true
 
