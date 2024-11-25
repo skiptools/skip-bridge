@@ -235,11 +235,11 @@ extension JNI {
         withEnv { $0.GetObjectClass($1, obj) }
     }
 
-    public func getByteArrayElements(_ array: JavaByteArray) -> (UnsafeMutablePointer<jbyte>?, JavaInt) {
+    public func getByteArrayElements(_ array: JavaByteArray) -> (UnsafeMutablePointer<JavaByte>?, JavaInt) {
         withEnv { ($0.GetByteArrayElements($1, array, nil), $0.GetArrayLength($1, array)) }
     }
 
-    public func releaseByteArrayElements(_ array: JavaByteArray, elements: UnsafeMutablePointer<jbyte>?, mode: JniReleaseArrayElementsMode) {
+    public func releaseByteArrayElements(_ array: JavaByteArray, elements: UnsafeMutablePointer<JavaByte>?, mode: JniReleaseArrayElementsMode) {
         withEnv { $0.ReleaseByteArrayElements($1, array, elements, mode.rawValue) }
     }
 
