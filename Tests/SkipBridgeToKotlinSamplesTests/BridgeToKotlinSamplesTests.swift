@@ -444,4 +444,26 @@ final class BridgeToKotlinTests: XCTestCase {
     func testGlobalFunction() {
         XCTAssertEqual(8, multiplyInt32s(i1: 2, i2: 4))
     }
+
+    #if SKIP
+    func testDynamicJavaObjectProperties() throws {
+        XCTAssertTrue(try testSupport_dynamicJavaObjectProperties())
+    }
+
+    func testDynamicJavaObjectFunctions() throws {
+        XCTAssertTrue(try testSupport_dynamicJavaObjectFunctions())
+    }
+
+    func testDynamicJavaObjectTraversal() throws {
+        XCTAssertTrue(try testSupport_dynamicJavaObjectTraversal())
+    }
+
+    func testDynamicKotlinObjects() throws {
+        XCTAssertTrue(try testSupport_dynamicKotlinObjects())
+    }
+
+    func testDynamicConverting() throws {
+        XCTAssertTrue(try testSupport_dynamicConverting())
+    }
+    #endif
 }
