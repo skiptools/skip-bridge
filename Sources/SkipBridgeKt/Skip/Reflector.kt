@@ -12,10 +12,18 @@ import kotlin.reflect.jvm.jvmErasure
 
 /// Interact with an object through reflection.
 class Reflector {
-    private val obj: Any
+    private val obj: Any?
+    private val cls: KClass<*>?
 
     constructor(reflecting: Any) {
         this.obj = reflecting
+        this.cls = null
+    }
+
+    constructor(reflectingStaticsOfClassName: String) {
+        val javaCls = Class.forName(reflectingStaticsOfClassName)
+        this.obj = javaCls.kotlin.companionObjectInstance
+        this.cls = javaCls.kotlin
     }
 
     constructor(className: String, arguments: List<Any?>?) {
@@ -26,6 +34,7 @@ class Reflector {
         }
         val (matchConstructor, matchArguments) = match
         this.obj = matchConstructor.callBy(matchArguments)!!
+        this.cls = null
     }
 
     constructor(className: String, arguments: Map<String, Any?>?) {
@@ -36,10 +45,11 @@ class Reflector {
         }
         val (matchConstructor, matchArguments) = match
         this.obj = matchConstructor.callBy(matchArguments)!!
+        this.cls = null
     }
 
     val reflecting: Any
-        get() = obj
+        get() = obj ?: cls!!
 
     fun booleanProperty(name: String): Boolean? {
         return toBoolean(propertyValue(name))
@@ -174,37 +184,59 @@ class Reflector {
     }
 
     private fun propertyValue(name: String): Any? {
-        val property = obj::class.memberProperties.firstOrNull { it.name == name }
-        if (property != null && property.visibility == KVisibility.PUBLIC) {
-            return (property as KProperty1<Any, *>).get(obj)
+        if (obj != null) {
+            val property = obj::class.memberProperties.firstOrNull { it.name == name }
+            if (property != null && property.visibility == KVisibility.PUBLIC) {
+                return (property as KProperty1<Any, *>).get(obj)
+            }
         }
+        if (cls != null) {
+            val property = cls.staticProperties.firstOrNull { it.name == name }
+            if (property != null && property.visibility == KVisibility.PUBLIC) {
+                return property.get()
+            }
+        }
+
         val getter = matchFunction(name.getter(), listOf<Any?>())
         if (getter != null) {
             val (getterFunction, getterArguments) = getter
             return getterFunction.callBy(getterArguments)
         }
-        throw NoSuchFieldError("${obj::class}.$name")
+        val target = if (obj != null) obj::class else cls
+        throw NoSuchFieldError("$target.$name")
     }
 
     private fun setPropertyValue(name: String, value: Any?) {
-        val property = obj::class.memberProperties.firstOrNull { it.name == name }
-        if (property is KMutableProperty1 && property.visibility == KVisibility.PUBLIC) {
-            (property as KMutableProperty1<Any, Any?>).set(obj, convertArgument(value, property.setter.parameters.last()))
-            return
+        if (obj != null) {
+            val property = obj::class.memberProperties.firstOrNull { it.name == name }
+            if (property is KMutableProperty1 && property.visibility == KVisibility.PUBLIC) {
+                (property as KMutableProperty1<Any, Any?>).set(obj, convertArgument(value, property.setter.parameters.last()))
+                return
+            }
         }
+        if (cls != null) {
+            val property = cls.staticProperties.firstOrNull { it.name == name }
+            if (property is KMutableProperty0 && property.visibility == KVisibility.PUBLIC) {
+                (property as KMutableProperty0<Any?>).set(convertArgument(value, property.setter.parameters.last()))
+                return
+            }
+        }
+
         val setter = matchFunction(name.setter(), listOf(value))
         if (setter != null) {
             val (setterFunction, setterArguments) = setter
             setterFunction.callBy(setterArguments)
             return
         }
-        throw NoSuchFieldError("${obj::class}.$name")
+        val target = if (obj != null) obj::class else cls
+        throw NoSuchFieldError("$target.$name")
     }
 
     private fun functionValue(name: String, arguments: List<Any?>): Any? {
         val match = matchFunction(name, arguments)
         if (match == null) {
-            throw NoSuchMethodError("${obj::class}.$name(${argumentsString(arguments)})")
+            val target = if (obj != null) obj::class else cls
+            throw NoSuchMethodError("$target.$name(${argumentsString(arguments)})")
         }
         val (matchFunction, matchArguments) = match
         return matchFunction.callBy(matchArguments)
@@ -213,14 +245,28 @@ class Reflector {
     private fun functionValue(name: String, arguments: Map<String, Any?>): Any? {
         val match = matchFunction(name, arguments)
         if (match == null) {
-            throw NoSuchMethodError("${obj::class}.$name(${argumentsString(arguments)})")
+            val target = if (obj != null) obj::class else cls
+            throw NoSuchMethodError("$target.$name(${argumentsString(arguments)})")
         }
         val (matchFunction, matchArguments) = match
         return matchFunction.callBy(matchArguments)
     }
 
     private fun matchFunction(name: String, arguments: Any): Pair<KFunction<*>, Map<KParameter, Any?>>? {
-        val scored = obj::class.memberFunctions.mapNotNull {
+        val functions: Collection<KFunction<*>>
+        if (obj != null && cls != null) {
+            val allFunctions = mutableListOf<KFunction<*>>()
+            allFunctions.addAll(obj::class.memberFunctions)
+            allFunctions.addAll(cls.staticFunctions)
+            functions = allFunctions
+        } else if (obj != null) {
+            functions = obj::class.memberFunctions
+        } else if (cls != null) {
+            functions = cls.staticFunctions
+        } else {
+            return null
+        }
+        val scored = functions.mapNotNull {
             if (it.name != name) return@mapNotNull null
             val scoredArguments: Pair<Double, List<Pair<Any?, KParameter>>>?
             if (arguments is List<*>) {

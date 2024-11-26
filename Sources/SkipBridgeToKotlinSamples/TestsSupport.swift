@@ -121,3 +121,17 @@ public func testSupport_dynamicConverting() throws -> Bool {
 
     return true
 }
+
+public func testSupport_dynamicStatics() throws -> Bool {
+    let math = try AnyDynamicObject(reflectingStaticsOfClassName: "java.lang.Math")
+    let abs: Double = try math.abs(-1.0)
+    guard abs == 1.0 else {
+        return false
+    }
+
+    let pi: Double = math.PI
+    guard Int(pi * 100.0) == 314 else {
+        return false
+    }
+    return true
+}
