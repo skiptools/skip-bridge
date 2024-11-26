@@ -465,5 +465,9 @@ final class BridgeToKotlinTests: XCTestCase {
     func testDynamicConverting() throws {
         XCTAssertTrue(try testSupport_dynamicConverting())
     }
+
+    func testDynamicStatics() throws {
+        XCTAssertTrue(try testSupport_dynamicStatics())
+    }
     #endif
 }
