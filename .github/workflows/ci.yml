@@ -14,11 +14,11 @@ permissions:
 jobs:
   call-workflow:
     uses: skiptools/actions/.github/workflows/skip-framework.yml@main
-    with:
+    #with:
       # skip running local tests because they crash on macos-13
       #run-local-tests: false
       #runs-on: "['macos-13', 'macos-14', 'macos-15']"
       # disable export because there are currently problems with shared PCH module cache files with multi-module native export
-      run-export: false
+      #run-export: false
       #run-local-tests: false
 
