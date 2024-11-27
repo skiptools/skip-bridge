@@ -179,6 +179,10 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertNil(testSupport_kotlinStructMember())
     }
 
+    public func testEnum() {
+        XCTAssertNil(testSupport_kotlinEnum())
+    }
+
     func testClosure0Var() {
         testSupport_kotlinClosure0Var()
     }

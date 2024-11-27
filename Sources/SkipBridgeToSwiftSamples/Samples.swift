@@ -176,6 +176,15 @@ public struct KotlinStruct {
     }
 }
 
+public enum KotlinEnum: String, CaseIterable {
+    case name
+    case age = "years"
+
+    public func isName() -> Bool {
+        return self == .name
+    }
+}
+
 // MARK: Closures
 
 public var kotlinClosure0Var: () -> Void = { print("original") }

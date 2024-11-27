@@ -432,6 +432,25 @@ public func testSupport_kotlinStructMember() -> String? {
     return nil
 }
 
+public func testSupport_kotlinEnum() -> String? {
+    let e1: KotlinEnum = .age
+    guard !e1.isName() else {
+        return "e1.isName() == false"
+    }
+    guard e1.rawValue == "years" else {
+        return "e1.rawValue == 'years'"
+    }
+
+    let e2: KotlinEnum = .name
+    guard e2.isName() else {
+        return "e2.isName() == true"
+    }
+    guard KotlinEnum.allCases.count == 2 else {
+        return "KotlinEnum.allCases.count == 2"
+    }
+    return nil
+}
+
 public func testSupport_kotlinClosure0Var() {
     kotlinClosure0Var()
     kotlinClosure0Var = { print("reassigned") }
