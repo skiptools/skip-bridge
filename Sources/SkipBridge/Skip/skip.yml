@@ -12,10 +12,8 @@ build:
     # A project that has bridging modules will have extra["bridgeModules"] set in the settings.gradle.kts
     # We only want to build for the first (root) module, since any other builds would be redundant
     # We use this to only build the native libraries a single time rather that once for each dependent module.
-    - 'fun isRootBridgeModule(): Boolean { val bridgeModules: List<String>? by gradle.extra; return bridgeModules?.first() == "${project.name}" }'
-
-    - 'val buildAndroidSwiftPackageEnabled = (System.getenv("SKIP_BRIDGE_ANDROID_BUILD_DISABLED") != "1") && (isRootBridgeModule() == true)'
-    - 'val buildLocalSwiftPackageEnabled = (System.getenv("SKIP_BRIDGE_ROBOLECTRIC_BUILD_DISABLED") != "1") && (isRootBridgeModule() == true)'
+    - 'fun rootBridgeModule(): String? { val bridgeModules: List<String>? by gradle.extra; return bridgeModules?.first() }'
+    - 'fun isRootBridgeModule(): Boolean { return rootBridgeModule() == "${project.name}" }'
 
     - block: 'android'
       contents:
@@ -44,11 +42,15 @@ build:
             - block: 'debug'
               contents:
                 - 'swiftBuildConfig = "debug"'
+        # the SKIP_BRIDGE_MODULES is included in the AndroidManifest.xml app metadata and is used by SkipBridge to load the root module on app startup
+        - block: 'defaultConfig'
+          contents:
+            - 'manifestPlaceholders["SKIP_BRIDGE_MODULES"] = rootBridgeModule() ?: ""'
 
     - block: 'tasks.configureEach'
       contents:
         # When building the APK, depend on the skip android toolchain build of the root bridge module
-        - block: 'if ((name == "mergeDebugJniLibFolders" || name == "mergeReleaseJniLibFolders") && buildAndroidSwiftPackageEnabled)'
+        - block: 'if ((name == "mergeDebugJniLibFolders" || name == "mergeReleaseJniLibFolders") && (System.getenv("SKIP_BRIDGE_ANDROID_BUILD_DISABLED") != "1") && (isRootBridgeModule() == true))'
           contents:
             - 'dependsOn("buildAndroidSwiftPackage")'
 
@@ -56,7 +58,7 @@ build:
       contents:
         - block: 'doLast'
           contents:
-            - block: 'exec'
+            - block: 'project.exec'
               contents:
                 # the -module-cache-path and -no-clang-module-breadcrumbs flag is needed to avoid this sort of error with `skip export`:
                 # <unknown>:0: error: PCH was compiled with module cache path '/opt/src/github/skiptools/skip-bridge/.build/plugins/outputs/skip-bridge/SkipBridgeToSwiftSamples/destination/skipstone/SkipBridgeToSwiftSamplesHelpers/build/swift/aarch64-unknown-linux-android24/debug/ModuleCache/336QL0GS3Q4T0', but the path is currently '/opt/src/github/skiptools/skip-bridge/.build/plugins/outputs/skip-bridge/SkipBridgeToSwiftSamplesTestsSupport/destination/skipstone/SkipBridgeToSwiftSamplesHelpers/build/swift/aarch64-unknown-linux-android24/debug/ModuleCache/336QL0GS3Q4T0'
@@ -72,7 +74,7 @@ build:
         - 'jvmArgs("-verbose:jni")'
         - 'jvmArgs("-Xcheck:jni")'
         # only perform a single build for the entire multi-module project
-        - block: 'if (buildLocalSwiftPackageEnabled)'
+        - block: 'if ((System.getenv("SKIP_BRIDGE_ROBOLECTRIC_BUILD_DISABLED") != "1") && (isRootBridgeModule() == true))'
           contents:
             - 'dependsOn("buildLocalSwiftPackage")'
 
@@ -82,7 +84,7 @@ build:
           contents:
             # Output the environment (for debugging)
             - 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
-            - block: 'exec'
+            - block: 'project.exec'
               contents:
                 # build for local macOS in order to run tests
                 - 'commandLine("sh", "-cx", "swift build --package-path ${swiftPath} --configuration ${swiftBuildConfig} --product ${project.name} -Xswiftc -DSKIP_BRIDGE -Xswiftc -DROBOLECTRIC -Xswiftc -Xfrontend -Xswiftc -no-clang-module-breadcrumbs --scratch-path ${swiftBuildFolder()}/swift")'
