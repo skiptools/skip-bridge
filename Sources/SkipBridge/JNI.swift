@@ -400,6 +400,22 @@ extension JavaObjectPointer: JObjectProtocol {
 }
 
 extension JavaObjectPointer: JConvertible {
+    public func get<T: JConvertible>(field: JavaFieldID) -> T {
+        return T.load(field, of: self, options: [])
+    }
+
+    public func set<T: JConvertible>(field: JavaFieldID, value: T, options: JConvertibleOptions) {
+        value.store(field, of: self, options: options)
+    }
+
+    public func call(method: JavaMethodID, options: JConvertibleOptions, args : [JavaParameter]) throws -> Void {
+        try jni.withEnvThrowing { $0.CallVoidMethodA($1, self, method, args) }
+    }
+
+    public func call<T>(method: JavaMethodID, options: JConvertibleOptions, args: [JavaParameter]) throws -> T where T: JConvertible {
+        return try T.call(method, on: self, options: options, args: args)
+    }
+
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> JavaObjectPointer {
         return obj!
     }
