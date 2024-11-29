@@ -183,6 +183,20 @@ public enum KotlinEnum: String, CaseIterable {
     public func isName() -> Bool {
         return self == .name
     }
+
+    public var intValue: Int {
+        switch self {
+        case .name: return 0
+        case .age: return 1
+        }
+    }
+
+    public init(intValue: Int) {
+        switch intValue {
+        case 0: self = .name
+        default: self = .age
+        }
+    }
 }
 
 // MARK: Closures

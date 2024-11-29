@@ -312,6 +312,19 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(obj.kotlinStructVar.intVar, 99)
     }
 
+    public func testEnum() {
+        let e1: SwiftEnum = .age
+        XCTAssertFalse(e1.isName())
+        XCTAssertEqual(e1.rawValue, "years")
+        XCTAssertEqual(e1.intValue, 1)
+
+        let e2 = SwiftEnum(intValue: 0)
+        XCTAssertTrue(e2 == .name)
+        XCTAssertTrue(e2.isName())
+
+        XCTAssertEqual(SwiftEnum.allCases.count, 2)
+    }
+
     public func testClosure0Var() {
         swiftClosure0Var()
         swiftClosure0Var = { print("reassigned") }

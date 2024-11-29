@@ -440,8 +440,14 @@ public func testSupport_kotlinEnum() -> String? {
     guard e1.rawValue == "years" else {
         return "e1.rawValue == 'years'"
     }
+    guard e1.intValue == 1 else {
+        return "e1.intValue == 1"
+    }
 
-    let e2: KotlinEnum = .name
+    let e2 = KotlinEnum(intValue: 0)
+    guard e2 == .name else {
+        return "e2 == .name"
+    }
     guard e2.isName() else {
         return "e2.isName() == true"
     }

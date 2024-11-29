@@ -174,6 +174,29 @@ public struct SwiftStruct {
     }
 }
 
+public enum SwiftEnum: String, CaseIterable {
+    case name
+    case age = "years"
+
+    public func isName() -> Bool {
+        return self == .name
+    }
+
+    public var intValue: Int {
+        switch self {
+        case .name: return 0
+        case .age: return 1
+        }
+    }
+
+    public init(intValue: Int) {
+        switch intValue {
+        case 0: self = .name
+        default: self = .age
+        }
+    }
+}
+
 // MARK: Closures
 
 public var swiftClosure0Var: () -> Void = { print("original") }
