@@ -26,11 +26,11 @@ class Reflector {
         this.cls = javaCls.kotlin
     }
 
-    constructor(className: String, arguments: List<Any?>?) {
-        val cls = Class.forName(className).kotlin
+    constructor(reflectingClassName: String, arguments: List<Any?>?) {
+        val cls = Class.forName(reflectingClassName).kotlin
         val match = matchConstructor(cls, arguments ?: listOf<Any?>())
         if (match == null) {
-            throw NoSuchMethodError("${className}.<init>(${argumentsString(arguments)})")
+            throw NoSuchMethodError("${reflectingClassName}.<init>(${argumentsString(arguments)})")
         }
         val (matchConstructor, matchArguments) = match
         this.obj = matchConstructor.callBy(matchArguments)!!

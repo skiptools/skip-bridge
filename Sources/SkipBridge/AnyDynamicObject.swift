@@ -11,26 +11,31 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
     private var object: JObject!
 
     /// Supply the class name of the object and arguments to pass to the constructor.
-    public init(reflectingClassName: String, arguments: [Any?]) throws {
+    public convenience init(className: String, _ arguments: Any?...) throws {
+        try self.init(className: className, arguments: arguments)
+    }
+
+    /// Supply the class name of the object and arguments to pass to the constructor.
+    public init(className: String, arguments: [Any?]) throws {
         try jniContext {
             let arguments: [Any?]? = arguments.isEmpty ? nil : arguments
-            let ptr = try Java_reflectorClass.create(ctor: Java_reflectorClassNameConstructor, args: [reflectingClassName.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+            let ptr = try Java_reflectorClass.create(ctor: Java_reflectorClassNameConstructor, args: [className.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
             self.object = JObject(ptr)
         }
     }
 
     /// Supply the class name of the statics to access.
-    public init(reflectingStaticsOfClassName: String) throws {
+    public init(forStaticsOfClassName className: String) throws {
         try jniContext {
-            let ptr = try Java_reflectorClass.create(ctor: Java_reflectorStaticsOfClassNameConstructor, args: [reflectingStaticsOfClassName.toJavaParameter(options: [])])
+            let ptr = try Java_reflectorClass.create(ctor: Java_reflectorStaticsOfClassNameConstructor, args: [className.toJavaParameter(options: [])])
             self.object = JObject(ptr)
         }
     }
 
     /// Interact wih the given Kotlin object in Swift.
-    public required init(reflecting: JavaObjectPointer) throws {
+    public required init(for object: JavaObjectPointer) throws {
         try jniContext {
-            let reflectorPtr = try Java_reflectorClass.create(ctor: Java_reflectorConstructor, args: [reflecting.toJavaParameter(options: [])])
+            let reflectorPtr = try Java_reflectorClass.create(ctor: Java_reflectorConstructor, args: [object.toJavaParameter(options: [])])
             self.object = JObject(reflectorPtr)
         }
     }
@@ -286,7 +291,7 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
         get {
             jniContext {
                 let ptr: JavaObjectPointer? = try! object.call(method: Java_reflectorObjectProperty, options: [], args: [member.toJavaParameter(options: [])])
-                return try! T.init(reflecting: ptr!)
+                return try! T.init(for: ptr!)
             }
         }
         set {
@@ -302,7 +307,7 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
                 guard let ptr = try! object.call(method: Java_reflectorObjectProperty, options: [], args: [member.toJavaParameter(options: [])]) as JavaObjectPointer? else {
                     return nil
                 }
-                return try! T.init(reflecting: ptr)
+                return try! T.init(for: ptr)
             }
         }
         set {
@@ -363,7 +368,7 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
     // JConvertible
 
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Self {
-        return try! .init(reflecting: obj!)
+        return try! .init(for: obj!)
     }
 
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
@@ -684,7 +689,7 @@ public struct AnyDynamicObjectFunction {
         try jniContext {
             let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
             let ptr: JavaObjectPointer? = try object.call(method: Java_reflectorObjectFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return try T.init(reflecting: ptr!)
+            return try T.init(for: ptr!)
         }
     }
 
@@ -692,7 +697,7 @@ public struct AnyDynamicObjectFunction {
         try jniContext {
             let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
             let ptr: JavaObjectPointer? = try object.call(method: Java_reflectorObjectKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return try T.init(reflecting: ptr!)
+            return try T.init(for: ptr!)
         }
     }
 
@@ -702,7 +707,7 @@ public struct AnyDynamicObjectFunction {
             guard let ptr = try object.call(method: Java_reflectorObjectFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)]) as JavaObjectPointer? else {
                 return nil
             }
-            return try T.init(reflecting: ptr)
+            return try T.init(for: ptr)
         }
     }
 
@@ -712,7 +717,7 @@ public struct AnyDynamicObjectFunction {
             guard let ptr = try object.call(method: Java_reflectorObjectKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)]) as JavaObjectPointer? else {
                 return nil
             }
-            return try T.init(reflecting: ptr)
+            return try T.init(for: ptr)
         }
     }
 

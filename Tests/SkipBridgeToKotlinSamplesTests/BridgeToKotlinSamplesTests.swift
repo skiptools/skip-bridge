@@ -482,5 +482,10 @@ final class BridgeToKotlinTests: XCTestCase {
     func testDynamicStatics() throws {
         XCTAssertTrue(try testSupport_dynamicStatics())
     }
+
+    func testDynamicCodeGen() throws {
+        XCTAssertNotEqual(try testSupport_dynamicCodeGenJavaDateTime(), Int64(0))
+        XCTAssertNotEqual(try testSupport_dynamicCodeGenSkipDateTime(), 0.0)
+    }
     #endif
 }
