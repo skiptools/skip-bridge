@@ -1,3 +1,14 @@
+## 0.1.1
+
+Released 2024-12-01
+
+  - Add -fPIC compiler argument when building (works around https://github.com/finagolfin/swift-android-sdk/issues/195)
+  - Merge pull request #30 from skiptools/dynamicconfig
+  - Tweaks to dynamic object support
+  - Merge pull request #29 from skiptools/enums2
+  - Add additional enum tests
+  - Attempt to re-enable skip export in CI
+
 ## 0.1.0
 
 Released 2024-11-27
