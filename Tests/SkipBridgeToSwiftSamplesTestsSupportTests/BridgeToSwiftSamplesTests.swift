@@ -206,6 +206,12 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(roundtripped[1], 5)
     }
 
+    func testSets() {
+        let roundtripped = testSupport_kotlinStringSetVar(value: Set(["d", "e", "f"]))
+        XCTAssertEqual(roundtripped, Set(["d", "e", "f"]))
+        XCTAssertEqual(roundtripped.count, 3)
+    }
+
     func testDictionaries() {
         let roundtripped = testSupport_kotlinIntStringDictionaryVar(value: [4: "d", 5: "e", 6: "f"])
         XCTAssertEqual(roundtripped, [4: "d", 5: "e", 6: "f"])

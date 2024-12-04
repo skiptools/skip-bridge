@@ -372,6 +372,19 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftIntArrayVar, [99])
     }
 
+    func testSets() {
+        XCTAssertEqual(swiftStringSetVar, Set(["a", "b", "c"]))
+        XCTAssertEqual(swiftStringSetVar.count, 3)
+        XCTAssertTrue(swiftStringSetVar.contains("b"))
+        XCTAssertFalse(swiftStringSetVar.contains("d"))
+        swiftStringSetVar = ["d", "e", "f", "g"]
+        XCTAssertEqual(swiftStringSetVar, ["d", "e", "f", "g"])
+        swiftStringSetVar = []
+        XCTAssertEqual(swiftStringSetVar, Set<String>())
+        swiftStringSetVar.insert("x")
+        XCTAssertEqual(swiftStringSetVar, Set(["x"]))
+    }
+
     func testDictionaries() {
         XCTAssertEqual(swiftIntStringDictionaryVar, [1: "a", 2: "b", 3: "c"])
         XCTAssertEqual(swiftIntStringDictionaryVar[2], "b")
