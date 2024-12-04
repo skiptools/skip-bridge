@@ -489,6 +489,11 @@ public func testSupport_kotlinIntArrayVar(value: [Int]) -> [Int] {
     return kotlinIntArrayVar
 }
 
+public func testSupport_kotlinStringSetVar(value: Set<String>) -> Set<String> {
+    kotlinStringSetVar = value
+    return kotlinStringSetVar
+}
+
 public func testSupport_kotlinIntStringDictionaryVar(value: [Int: String]) -> [Int: String] {
     kotlinIntStringDictionaryVar = value
     return kotlinIntStringDictionaryVar

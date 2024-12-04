@@ -209,6 +209,7 @@ public var kotlinClosure1OptionalsVar: (String?) -> Int? = { s in s?.count }
 // MARK: Containers
 
 public var kotlinIntArrayVar = [1, 2, 3]
+public var kotlinStringSetVar: Set<String> = ["a", "b", "c"]
 public var kotlinIntStringDictionaryVar = [1: "a", 2: "b", 3: "c"]
 
 // MARK: Functions
