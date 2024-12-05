@@ -484,6 +484,10 @@ public func testSupport_kotlinClosure1OptionalsVar(value: String?) -> Int? {
     return i1 == i2 ? i1 : (i1 ?? 0) * 10000 + (i2 ?? 0)
 }
 
+public func testSupport_kotlinClosure1Parameter(value: (Int) -> String) {
+    // We're only testing that using a closure as a parameter compiles cleanly
+}
+
 public func testSupport_kotlinIntArrayVar(value: [Int]) -> [Int] {
     kotlinIntArrayVar = value
     return kotlinIntArrayVar
@@ -497,6 +501,11 @@ public func testSupport_kotlinStringSetVar(value: Set<String>) -> Set<String> {
 public func testSupport_kotlinIntStringDictionaryVar(value: [Int: String]) -> [Int: String] {
     kotlinIntStringDictionaryVar = value
     return kotlinIntStringDictionaryVar
+}
+
+public func testSupport_kotlinIntStringTupleVar(value: (Int, String)) -> (Int, String) {
+    kotlinIntStringTupleVar = value
+    return kotlinIntStringTupleVar
 }
 
 public func testSupport_callKotlinThrowingFunction(shouldThrow: Bool) throws -> Int {

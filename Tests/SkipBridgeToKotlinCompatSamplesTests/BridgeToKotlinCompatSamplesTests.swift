@@ -32,4 +32,17 @@ final class BridgeToKotlinCompatTests: XCTestCase {
         XCTAssertEqual(list2[0], url)
         #endif
     }
+
+    func testCompatTuplePair() {
+        #if SKIP
+        let uuid = java.util.UUID.randomUUID()
+        let compat = Compat(id: uuid)
+        XCTAssertEqual(uuid, compat.id)
+
+        let url = java.net.URI("https://skip.tools")
+        compat.attempts = Pair(2, url)
+        XCTAssertEqual(2, compat.attempts?.first)
+        XCTAssertEqual(url, compat.attempts?.second)
+        #endif
+    }
 }

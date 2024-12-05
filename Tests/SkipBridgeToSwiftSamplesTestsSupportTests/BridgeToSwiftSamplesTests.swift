@@ -218,6 +218,12 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(roundtripped[5], "e")
     }
 
+    func testTuples() {
+        let roundtripped = testSupport_kotlinIntStringTupleVar(value: (2, "a"))
+        XCTAssertEqual(roundtripped.0, 2)
+        XCTAssertEqual(roundtripped.1, "a")
+    }
+
     func testThrowingFunctions() throws {
         do {
             try testSupport_callKotlinThrowingVoidFunction(shouldThrow: true)
