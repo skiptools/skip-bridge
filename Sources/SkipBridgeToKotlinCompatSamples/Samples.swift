@@ -9,6 +9,7 @@ import Foundation
 public class Compat {
     public let id: UUID
     public var urls: [URL] = []
+    public var attempts: (Int, URL)?
 
     public init(id: UUID) {
         self.id = id

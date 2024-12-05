@@ -395,6 +395,14 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftIntStringDictionaryVar, Dictionary<Int, String>())
     }
 
+    func testTuples() {
+        XCTAssertEqual(swiftIntStringTuple.0, 1)
+        XCTAssertEqual(swiftIntStringTuple.1, "s")
+        swiftIntStringTuple = (2, "a")
+        XCTAssertEqual(swiftIntStringTuple.0, 2)
+        XCTAssertEqual(swiftIntStringTuple.1, "a")
+    }
+
     func testThrowsFunctions() throws {
         do {
             try swiftThrowingVoidFunction(shouldThrow: true)
