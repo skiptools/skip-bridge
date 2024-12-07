@@ -155,6 +155,7 @@ private final class BridgeObservationSupport: @unchecked Sendable {
 #if os(Android)
 // Without this we get the crash on launch: 08-09 18:45:51.978 10431 10431 E AndroidRuntime: java.lang.UnsatisfiedLinkError: dlopen failed: cannot locate symbol "_ZN5swift9threading5fatalEPKcz" referenced by "/data/app/~~aevIacTPjMLuc5Cymf5l-A==/skip.droid.app--cf8i3s7JV9Ln9saNnThMg==/base.apk!/lib/arm64-v8a/libswiftObservation.so"...
 // Seem like Swift/lib/Threading/Errors.cpp (https://github.com/swiftlang/swift/blob/3934f78ecdd53031ac40d68499f9ee046a5abe50/lib/Threading/Errors.cpp#L13) is missing
+// Should be fixed by: https://github.com/swiftlang/swift/pull/77890
 @_cdecl("_ZN5swift9threading5fatalEPKcz")
 func swiftThreadingFatal() { }
 #endif
