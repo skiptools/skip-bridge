@@ -64,6 +64,10 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(testSupport_kotlinClassVar_stringVar(value: "ss"), "ss")
     }
 
+    func testKotlinInnerClassVar() {
+        XCTAssertEqual(testSupport_kotlinInnerClassVar_intVar(value: 2), 2)
+    }
+
     func testSwiftClassVar() {
         XCTAssertEqual(testSupport_kotlinSwiftClassVar_stringVar(value: "ss"), "ss")
     }

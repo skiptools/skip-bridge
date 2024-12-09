@@ -27,7 +27,7 @@ public final class SwiftBackedFunction0<R>: kotlin.jvm.functions.Function0<R>, S
     // SKIP EXTERN
     private func Swift_invoke(Swift_peer: SwiftObjectPointer) -> Any?
 
-    override func Swift_bridgedPeer() -> SwiftObjectPointer {
+    override func Swift_peer() -> SwiftObjectPointer {
         return Swift_peer
     }
 }
@@ -53,7 +53,7 @@ public final class SwiftBackedFunction1<P0, R>: kotlin.jvm.functions.Function1<P
     // SKIP EXTERN
     private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?) -> Any?
 
-    override func Swift_bridgedPeer() -> SwiftObjectPointer {
+    override func Swift_peer() -> SwiftObjectPointer {
         return Swift_peer
     }
 }
@@ -79,7 +79,7 @@ public final class SwiftBackedFunction2<P0, P1, R>: kotlin.jvm.functions.Functio
     // SKIP EXTERN
     private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?) -> Any?
 
-    override func Swift_bridgedPeer() -> SwiftObjectPointer {
+    override func Swift_peer() -> SwiftObjectPointer {
         return Swift_peer
     }
 }
@@ -105,7 +105,7 @@ public final class SwiftBackedFunction3<P0, P1, P2, R>: kotlin.jvm.functions.Fun
     // SKIP EXTERN
     private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?, p2: Any?) -> Any?
 
-    override func Swift_bridgedPeer() -> SwiftObjectPointer {
+    override func Swift_peer() -> SwiftObjectPointer {
         return Swift_peer
     }
 }
@@ -131,7 +131,7 @@ public final class SwiftBackedFunction4<P0, P1, P2, P3, R>: kotlin.jvm.functions
     // SKIP EXTERN
     private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?, p2: Any?, p3: Any?) -> Any?
 
-    override func Swift_bridgedPeer() -> SwiftObjectPointer {
+    override func Swift_peer() -> SwiftObjectPointer {
         return Swift_peer
     }
 }
@@ -157,7 +157,7 @@ public final class SwiftBackedFunction5<P0, P1, P2, P3, P4, R>: kotlin.jvm.funct
     // SKIP EXTERN
     private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?, p2: Any?, p3: Any?, p4: Any?) -> Any?
 
-    override func Swift_bridgedPeer() -> SwiftObjectPointer {
+    override func Swift_peer() -> SwiftObjectPointer {
         return Swift_peer
     }
 }

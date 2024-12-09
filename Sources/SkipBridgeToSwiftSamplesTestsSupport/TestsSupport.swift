@@ -143,6 +143,13 @@ public func testSupport_kotlinClassVar_stringVar(value: String) -> String {
     return kotlinClassVar.stringVar
 }
 
+public func testSupport_kotlinInnerClassVar_intVar(value: Int) -> Int {
+    let inner = KotlinHelperClass.Inner()
+    inner.intVar = value
+    kotlinInnerClassVar = inner
+    return kotlinInnerClassVar.intVar
+}
+
 public func testSupport_kotlinSwiftClassVar_stringVar(value: String) -> String {
     let helper = SwiftHelperClass()
     helper.stringVar = value

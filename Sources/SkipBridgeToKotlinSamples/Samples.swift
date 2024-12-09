@@ -53,6 +53,7 @@ public var swiftIntVar = 7
 // TODO: Unsigned values
 public var swiftStringVar = "s"
 public var swiftClassVar = SwiftHelperClass()
+public var swiftInnerClassVar = SwiftHelperClass.Inner()
 public var swiftKotlinClassVar = KotlinHelperClass()
 
 // MARK: Global optional vars
@@ -151,6 +152,13 @@ public class SwiftHelperClass: SwiftProtocol, Comparable, Identifiable {
 
     public static func <(lhs: SwiftHelperClass, rhs: SwiftHelperClass) -> Bool {
         return lhs.stringVar < rhs.stringVar
+    }
+
+    public class Inner {
+        public var intVar = 0
+
+        public init() {
+        }
     }
 }
 

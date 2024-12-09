@@ -4,8 +4,12 @@
 // under the terms of the GNU Lesser General Public License 3.0
 // as published by the Free Software Foundation https://fsf.org
 
-/// Protocol added to `@BridgeToKotlin` types.
+/// Protocol added to compiled Swift types that are bridged to Kotlin.
 public protocol BridgedToKotlin: JObjectProtocol, JConvertible {
+}
+
+/// Protocol added to compiled Swift projections generated from bridged Kotlin types.
+public protocol BridgedFromKotlin: JObjectProtocol, JConvertible {
 }
 
 /// An opaque reference to a Swift object.
@@ -53,21 +57,24 @@ extension SwiftObjectPointer {
 }
 
 extension SwiftObjectPointer {
-    /// Return the `Swift_peer` of the given `SwiftPeerBridged` object.
+    /// Return the `Swift_peer` of the given `SwiftPeerBridged` Kotlin object.
     public static func peer(of bridged: JavaObjectPointer, options: JConvertibleOptions) -> SwiftObjectPointer {
-        return try! SwiftObjectPointer.call(Java_SwiftPeerBridged_peer_methodID, on: bridged, options: options, args: [])
+        return try! SwiftObjectPointer.call(Java_PeerBridged_peer_methodID, on: bridged, options: options, args: [])
     }
 
-    /// Check whether the given object is `SwiftPeerBridged` and if so, return its `Swift_peer`.
-    public static func filterPeer(of bridged: JavaObjectPointer, options: JConvertibleOptions) -> SwiftObjectPointer? {
-        let ptr: SwiftObjectPointer = try! Java_fileClass.callStatic(method: Java_peer_methodID, options: options, args: [bridged.toJavaParameter(options: options)])
+    /// Return a pointer to the Swift instance for a given Java object.
+    public static func projection(of object: JavaObjectPointer, options: JConvertibleOptions, peerOnly: Bool = false) -> SwiftObjectPointer? {
+        let object_java = object.toJavaParameter(options: options)
+        let options_java = options.rawValue.toJavaParameter(options: options)
+        let peerOnly_java = peerOnly.toJavaParameter(options: options)
+        let ptr: SwiftObjectPointer = try! Java_fileClass.callStatic(method: Java_projection_methodID, options: options, args: [object_java, options_java, peerOnly_java])
         return ptr == SwiftObjectNil ? nil : ptr
     }
 }
-private let Java_fileClass = try! JClass(name: "skip/bridge/kt/BridgeToKotlinSupportKt")
-private let Java_peer_methodID = Java_fileClass.getStaticMethodID(name: "Swift_bridgedPeer", sig: "(Ljava/lang/Object;)J")!
-private let Java_SwiftPeerBridged_class = try! JClass(name: "skip/bridge/kt/SwiftPeerBridged")
-private let Java_SwiftPeerBridged_peer_methodID = Java_SwiftPeerBridged_class.getMethodID(name: "Swift_bridgedPeer", sig: "()J")!
+private let Java_fileClass = try! JClass(name: "skip/bridge/kt/BridgeSupportKt")
+private let Java_projection_methodID = Java_fileClass.getStaticMethodID(name: "Swift_projection", sig: "(Ljava/lang/Object;IZ)J")!
+private let Java_PeerBridged_class = try! JClass(name: "skip/bridge/kt/SwiftPeerBridged")
+private let Java_PeerBridged_peer_methodID = Java_PeerBridged_class.getMethodID(name: "Swift_peer", sig: "()J")!
 
 /// Reference type to hold a value type.
 public final class SwiftValueTypeBox<T> {
