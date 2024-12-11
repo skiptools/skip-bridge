@@ -106,7 +106,7 @@ public final class SwiftClosure0 {
         guard let function else {
             return nil
         }
-        if let ptr = SwiftObjectPointer.filterPeer(of: function, options: options) {
+        if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
             let closure: SwiftClosure0 = ptr.pointee()!
             return { closure.closure() as! R }
         } else {
@@ -155,7 +155,7 @@ public final class SwiftClosure1 {
         guard let function else {
             return nil
         }
-        if let ptr = SwiftObjectPointer.filterPeer(of: function, options: options) {
+        if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
             let closure: SwiftClosure1 = ptr.pointee()!
             return { p0 in closure.closure(p0) as! R }
         } else {
@@ -206,7 +206,7 @@ public final class SwiftClosure2 {
         guard let function else {
             return nil
         }
-        if let ptr = SwiftObjectPointer.filterPeer(of: function, options: options) {
+        if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
             let closure: SwiftClosure2 = ptr.pointee()!
             return { p0, p1 in closure.closure(p0, p1) as! R }
         } else {
@@ -260,7 +260,7 @@ public final class SwiftClosure3 {
         guard let function else {
             return nil
         }
-        if let ptr = SwiftObjectPointer.filterPeer(of: function, options: options) {
+        if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
             let closure: SwiftClosure3 = ptr.pointee()!
             return { p0, p1, p2 in closure.closure(p0, p1, p2) as! R }
         } else {
@@ -317,7 +317,7 @@ public final class SwiftClosure4 {
         guard let function else {
             return nil
         }
-        if let ptr = SwiftObjectPointer.filterPeer(of: function, options: options) {
+        if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
             let closure: SwiftClosure4 = ptr.pointee()!
             return { p0, p1, p2, p3 in closure.closure(p0, p1, p2, p3) as! R }
         } else {
@@ -377,7 +377,7 @@ public final class SwiftClosure5 {
         guard let function else {
             return nil
         }
-        if let ptr = SwiftObjectPointer.filterPeer(of: function, options: options) {
+        if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
             let closure: SwiftClosure5 = ptr.pointee()!
             return { p0, p1, p2, p3, p4 in closure.closure(p0, p1, p2, p3, p4) as! R }
         } else {

@@ -8,6 +8,131 @@ import Foundation
 
 //
 // NOTE:
+// Keep this in sync with `SkipBridgeKt.BridgedTypes`
+//
+
+/// Supported bridged type constants.
+public enum BridgedTypes: String {
+    case boolean_
+    case byte_
+    case char_
+    case double_
+    case float_
+    case int_
+    case long_
+    case short_
+    case string_
+
+    case byteArray
+    case date
+    case list
+    case map
+    case set
+    case uuid
+    case uri
+
+    case swiftArray
+    case swiftData
+    case swiftDate
+    case swiftDictionary
+    case swiftSet
+    case swiftUUID
+    case swiftURL
+
+    case other
+}
+
+/// Utilities to convert unknown bridged objects.
+public struct AnyBridging {
+    /// Convert an unknown Kotlin/Java instance to its Swift projection.
+    public static func fromJavaObject(_ ptr: JavaObjectPointer?, options: JConvertibleOptions, fallback: (() -> Any)? = nil) -> Any? {
+        guard let ptr else {
+            return nil
+        }
+        if let projection = tryProjection(of: ptr, options: options) {
+            return projection
+        }
+
+        let bridgedTypeString = bridgedTypeString(of: ptr, options: options)
+        let bridgedType = BridgedTypes(rawValue: bridgedTypeString) ?? .other
+        switch bridgedType {
+        case .boolean_:
+            return Bool.fromJavaObject(ptr, options: options)
+        case .byte_:
+            return Int8.fromJavaObject(ptr, options: options)
+        case .char_:
+            // TODO
+            // return Character.fromJavaObject(ptr, options: options)
+            fatalError("Character is not yet bridgable")
+        case .double_:
+            return Double.fromJavaObject(ptr, options: options)
+        case .float_:
+            return Float.fromJavaObject(ptr, options: options)
+        case .int_:
+            return Int.fromJavaObject(ptr, options: options)
+        case .long_:
+            return Int64.fromJavaObject(ptr, options: options)
+        case .short_:
+            return Int16.fromJavaObject(ptr, options: options)
+        case .string_:
+            return String.fromJavaObject(ptr, options: options)
+        case .byteArray:
+            return Data.fromJavaObject(ptr, options: options)
+        case .date:
+            return Date.fromJavaObject(ptr, options: options)
+        case .list:
+            return Array<Any>.fromJavaObject(ptr, options: options)
+        case .map:
+            return Dictionary<AnyHashable, Any>.fromJavaObject(ptr, options: options)
+        case .set:
+            return Array<AnyHashable>.fromJavaObject(ptr, options: options)
+        case .uuid:
+            return UUID.fromJavaObject(ptr, options: options)
+        case .uri:
+            return URL.fromJavaObject(ptr, options: options)
+        case .swiftArray:
+            return Array<Any>.fromJavaObject(ptr, options: options)
+        case .swiftData:
+            return Data.fromJavaObject(ptr, options: options)
+        case .swiftDate:
+            return Date.fromJavaObject(ptr, options: options)
+        case .swiftDictionary:
+            return Dictionary<AnyHashable, Any>.fromJavaObject(ptr, options: options)
+        case .swiftSet:
+            return Array<AnyHashable>.fromJavaObject(ptr, options: options)
+        case .swiftUUID:
+            return UUID.fromJavaObject(ptr, options: options)
+        case .swiftURL:
+            return URL.fromJavaObject(ptr, options: options)
+        case .other:
+            if let fallback {
+                return fallback()
+            } else {
+                fatalError("Unable to bridge Kotlin/Java instance \(ptr)")
+            }
+        }
+    }
+
+    private static func tryProjection(of ptr: JavaObjectPointer, options: JConvertibleOptions) -> Any? {
+        let ptr_java = ptr.toJavaParameter(options: options)
+        let options_java = options.rawValue.toJavaParameter(options: options)
+        let closure_java: JavaObjectPointer? = try! Java_fileClass.callStatic(method: Java_tryProjection_methodID, options: options, args: [ptr_java, options_java])
+        let closure: (() -> Any)? = SwiftClosure0.closure(forJavaObject: closure_java, options: options)
+        return closure?()
+    }
+
+    private static func bridgedTypeString(of ptr: JavaObjectPointer, options: JConvertibleOptions) -> String {
+        let ptr_java = ptr.toJavaParameter(options: options)
+        return try! Java_fileClass.callStatic(method: Java_bridgedTypeString_methodID, options: options, args: [ptr_java])
+    }
+}
+
+private let Java_fileClass = try! JClass(name: "skip/bridge/kt/BridgeSupportKt")
+private let Java_tryProjection_methodID = Java_fileClass.getStaticMethodID(name: "Swift_projection", sig: "(Ljava/lang/Object;I)Lkotlin/jvm/functions/Function0;")!
+private let Java_bridgedTypeString_methodID = Java_fileClass.getStaticMethodID(name: "bridgedTypeStringOf", sig: "(Ljava/lang/Object;)Ljava/lang/String;")!
+
+//
+// NOTE:
 // The Kotlin version of custom converting types should conform to `SwiftCustomBridged`.
 // If it also conforms to `KotlinConverting`, it should convert to and from its underlying
 // Kotlin type when the `kotlincompat` option is given.
@@ -29,11 +154,17 @@ extension Array: JObjectProtocol, JConvertible {
         for i in 0..<count {
             // arr.append(list.get(i))
             let element_java = try! JavaObjectPointer?.call(Java_List_get_methodID, on: list_java, options: options, args: [i.toJavaParameter(options: options)])
-            let element = (Element.self as! JConvertible.Type).fromJavaObject(element_java, options: options)
+            // Convert non-polymorphic JConvertibles directly, else fall back to AnyBridging
+            let element: Element
+            if let convertibleElement = Element.self as? JConvertible.Type, !(Element.self is AnyObject.Type) {
+                element = convertibleElement.fromJavaObject(element_java, options: options) as! Element
+            } else {
+                element = AnyBridging.fromJavaObject(element_java, options: options) as! Element
+            }
+            arr.append(element)
             if let element_java {
                 jni.deleteLocalRef(element_java)
             }
-            arr.append(element as! Element)
         }
         return arr
     }
@@ -155,15 +286,27 @@ extension Dictionary: JObjectProtocol, JConvertible {
             // let key = itr.next(); let value = map.get(key)
             let key_java = try! JavaObjectPointer?.call(Java_Iterator_next_methodID, on: iterator_java, options: options, args: [])
             let value_java = try! JavaObjectPointer?.call(Java_Map_get_methodID, on: map_java, options: options, args: [key_java.toJavaParameter(options: options)])
-            let key = (Key.self as! JConvertible.Type).fromJavaObject(key_java, options: options)
-            let value = (Value.self as! JConvertible.Type).fromJavaObject(value_java, options: options)
+
+            // Convert non-polymorphic JConvertibles directly, else fall back to AnyBridging
+            let key: Key
+            let value: Value
+            if let convertibleKey = Key.self as? JConvertible.Type, !(Key.self is AnyObject.Type) {
+                key = convertibleKey.fromJavaObject(key_java, options: options) as! Key
+            } else {
+                key = AnyBridging.fromJavaObject(key_java, options: options) as! Key
+            }
+            if let convertibleValue = Value.self as? JConvertible.Type, !(Value.self is AnyObject.Type) {
+                value = convertibleValue.fromJavaObject(value_java, options: options) as! Value
+            } else {
+                value = AnyBridging.fromJavaObject(value_java, options: options) as! Value
+            }
+            dict[key] = value
             if let key_java {
                 jni.deleteLocalRef(key_java)
             }
             if let value_java {
                 jni.deleteLocalRef(value_java)
             }
-            dict[key as! Key] = value as? Value
         }
         return dict
     }
@@ -225,11 +368,18 @@ extension Set: JObjectProtocol, JConvertible {
         for _ in 0..<size {
             // set.insert(itr.next())
             let element_java = try! JavaObjectPointer?.call(Java_Iterator_next_methodID, on: iterator_java, options: options, args: [])
-            let element = (Element.self as! JConvertible.Type).fromJavaObject(element_java, options: options)
+            // Convert non-polymorphic JConvertibles directly, else fall back to AnyBridging
+            let element: Element
+            if let convertibleElement = Element.self as? JConvertible.Type, !(Element.self is AnyObject.Type) {
+                element = convertibleElement.fromJavaObject(element_java, options: options) as! Element
+            } else {
+                element = AnyBridging.fromJavaObject(element_java, options: options) as! Element
+            }
+            set.insert(element)
             if let element_java {
                 jni.deleteLocalRef(element_java)
             }
-            set.insert(element as! Element)
+
         }
         return set
     }

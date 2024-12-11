@@ -77,8 +77,45 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftClassVar.stringVar, "ss")
     }
 
+    func testSwiftInnerClassVar() {
+        let inner = SwiftHelperClass.Inner()
+        inner.intVar = 2
+        swiftInnerClassVar = inner
+        XCTAssertEqual(swiftInnerClassVar.intVar, 2)
+    }
+
     func testKotlinClassVar() {
         XCTAssertEqual(testSupport_swiftKotlinClassVar_stringVar(value: "ss"), "ss")
+    }
+
+    func testAnyVar() {
+        swiftAnyVar = 1
+        XCTAssertEqual(swiftAnyVar as? Int, 1)
+
+        swiftAnyVar = "a"
+        XCTAssertEqual(swiftAnyVar as? String, "a")
+
+        let helper = SwiftHelperClass()
+        swiftAnyVar = helper
+        XCTAssertTrue(swiftAnyVar is SwiftHelperClass)
+        XCTAssertEqual(swiftAnyVar as? SwiftHelperClass, helper)
+    }
+
+    func testAnyVarContainerValues() {
+        swiftAnyVar = ["a", 2, 3.0]
+        guard let anyArray = swiftAnyVar as? [Any] else {
+            return XCTFail()
+        }
+        XCTAssertEqual(anyArray[0] as? String, "a")
+        XCTAssertEqual(anyArray[1] as? Int, 2)
+        XCTAssertEqual(anyArray[2] as? Double, 3.0)
+
+        swiftAnyVar = ["a": 1, "b": 2]
+        guard let anyDictionary = swiftAnyVar as? [AnyHashable: Any] else {
+            return XCTFail()
+        }
+        XCTAssertEqual(anyDictionary["a"] as? Int, 1)
+        XCTAssertEqual(anyDictionary["b"] as? Int, 2)
     }
 
     func testOptionalSimpleVars() {
@@ -242,10 +279,8 @@ final class BridgeToKotlinTests: XCTestCase {
         helper.stringVar = "foo"
         obj.optionalSwiftProtocolVar = helper
         XCTAssertEqual(obj.optionalSwiftProtocolVar?.stringValue(), "foo")
-
-        let obj2 = SwiftClass()
-        obj2.optionalSwiftProtocolVar = helper
-        XCTAssertEqual(obj.optionalSwiftProtocolVar?.hashValue, obj2.optionalSwiftProtocolVar?.hashValue)
+        XCTAssertTrue(obj.optionalSwiftProtocolVar is SwiftHelperClass)
+        XCTAssertEqual(obj.optionalSwiftProtocolVar?.hashValue, helper.hashValue)
     }
 
     public func testKotlinProtocolMember() {
@@ -257,10 +292,8 @@ final class BridgeToKotlinTests: XCTestCase {
         helper.stringVar = "foo"
         obj.optionalKotlinProtocolVar = helper
         XCTAssertEqual(obj.optionalKotlinProtocolVar?.stringValue(), "foo")
-
-        let obj2 = SwiftClass()
-        obj2.optionalKotlinProtocolVar = helper
-        XCTAssertEqual(obj.optionalSwiftProtocolVar?.hashValue, obj2.optionalSwiftProtocolVar?.hashValue)
+        XCTAssertTrue(obj.optionalKotlinProtocolVar is KotlinHelperClass)
+        XCTAssertEqual(obj.optionalKotlinProtocolVar?.hashValue, helper.hashValue)
     }
     
     public func testStruct() {
