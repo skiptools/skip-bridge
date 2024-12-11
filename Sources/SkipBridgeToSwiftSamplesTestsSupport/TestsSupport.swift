@@ -157,6 +157,18 @@ public func testSupport_kotlinSwiftClassVar_stringVar(value: String) -> String {
     return kotlinSwiftClassVar.stringVar
 }
 
+public func testSupport_kotlinAnyVar(value: Any) -> Any {
+    kotlinAnyVar = value
+    return kotlinAnyVar
+}
+
+public func testSupport_kotlinAnyVar_kotlinClass(value: String) -> String? {
+    let helper = KotlinHelperClass()
+    helper.stringVar = value
+    kotlinAnyVar = helper
+    return (kotlinAnyVar as? KotlinHelperClass)?.stringVar
+}
+
 public func testSupport_kotlinOptionalBoolVar(value: Bool?) -> Bool? {
     kotlinOptionalBoolVar = value
     return kotlinOptionalBoolVar
@@ -323,11 +335,11 @@ public func testSupport_kotlinProtocolMember() -> String? {
     guard obj.optionalKotlinProtocolVar?.stringValue() == "foo" else {
         return "obj.optionalKotlinProtocolVar?.stringValue() == \"foo\""
     }
-
-    let obj2 = KotlinClass()
-    obj2.optionalKotlinProtocolVar = helper
-    guard obj.optionalKotlinProtocolVar?.hashValue == obj2.optionalKotlinProtocolVar?.hashValue else {
-        return "obj.optionalKotlinProtocolVar?.hashValue == obj2.optionalKotlinProtocolVar?.hashValue"
+    guard obj.optionalKotlinProtocolVar is KotlinHelperClass else {
+        return "obj.optionalKotlinProtocolVar is KotlinHelperClass"
+    }
+    guard obj.optionalKotlinProtocolVar?.hashValue == helper.hashValue else {
+        return "obj.optionalKotlinProtocolVar?.hashValue == helper.hashValue"
     }
     return nil
 }
@@ -345,13 +357,12 @@ public func testSupport_swiftProtocolMember() -> String? {
     guard obj.optionalSwiftProtocolVar?.stringValue() == "foo" else {
         return "obj.optionalSwiftProtocolVar?.stringValue() == \"foo\""
     }
-
-    let obj2 = KotlinClass()
-    obj2.optionalSwiftProtocolVar = helper
-    guard obj.optionalSwiftProtocolVar?.hashValue == obj2.optionalSwiftProtocolVar?.hashValue else {
-        return "obj.optionalSwiftProtocolVar?.hashValue == obj2.optionalSwiftProtocolVar?.hashValue"
+    guard obj.optionalSwiftProtocolVar is SwiftHelperClass else {
+        return "obj.optionalKotlinProtocolVar is SwiftHelperClass"
     }
-
+    guard obj.optionalSwiftProtocolVar?.hashValue == helper.hashValue else {
+        return "obj.optionalSwiftProtocolVar?.hashValue == helper.hashValue"
+    }
     return nil
 }
 

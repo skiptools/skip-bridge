@@ -57,6 +57,7 @@ public var kotlinStringVar = "s"
 public var kotlinClassVar = KotlinHelperClass()
 public var kotlinInnerClassVar = KotlinHelperClass.Inner()
 public var kotlinSwiftClassVar = SwiftHelperClass()
+public var kotlinAnyVar: Any = "a"
 
 // MARK: Global optional vars
 

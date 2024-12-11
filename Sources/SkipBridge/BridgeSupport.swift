@@ -62,17 +62,15 @@ extension SwiftObjectPointer {
         return try! SwiftObjectPointer.call(Java_PeerBridged_peer_methodID, on: bridged, options: options, args: [])
     }
 
-    /// Return a pointer to the Swift instance for a given Java object.
-    public static func projection(of object: JavaObjectPointer, options: JConvertibleOptions, peerOnly: Bool = false) -> SwiftObjectPointer? {
+    /// Return the `Swift_peer` of the given Kotlin object if it is `SwiftPeerBridged`.
+    public static func tryPeer(of object: JavaObjectPointer, options: JConvertibleOptions) -> SwiftObjectPointer? {
         let object_java = object.toJavaParameter(options: options)
-        let options_java = options.rawValue.toJavaParameter(options: options)
-        let peerOnly_java = peerOnly.toJavaParameter(options: options)
-        let ptr: SwiftObjectPointer = try! Java_fileClass.callStatic(method: Java_projection_methodID, options: options, args: [object_java, options_java, peerOnly_java])
+        let ptr: SwiftObjectPointer = try! Java_fileClass.callStatic(method: Java_tryPeer_methodID, options: options, args: [object_java])
         return ptr == SwiftObjectNil ? nil : ptr
     }
 }
 private let Java_fileClass = try! JClass(name: "skip/bridge/kt/BridgeSupportKt")
-private let Java_projection_methodID = Java_fileClass.getStaticMethodID(name: "Swift_projection", sig: "(Ljava/lang/Object;IZ)J")!
+private let Java_tryPeer_methodID = Java_fileClass.getStaticMethodID(name: "Swift_peer", sig: "(Ljava/lang/Object;)J")!
 private let Java_PeerBridged_class = try! JClass(name: "skip/bridge/kt/SwiftPeerBridged")
 private let Java_PeerBridged_peer_methodID = Java_PeerBridged_class.getMethodID(name: "Swift_peer", sig: "()J")!
 

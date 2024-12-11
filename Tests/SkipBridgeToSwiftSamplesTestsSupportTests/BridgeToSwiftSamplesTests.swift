@@ -72,6 +72,29 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(testSupport_kotlinSwiftClassVar_stringVar(value: "ss"), "ss")
     }
 
+    func testAnyVar() {
+        XCTAssertEqual(testSupport_kotlinAnyVar(value: 1) as? Int, 1)
+        XCTAssertEqual(testSupport_kotlinAnyVar(value: "a") as? String, "a")
+        XCTAssertEqual(testSupport_kotlinAnyVar_kotlinClass(value: "ss"), "ss")
+    }
+
+    func testAnyVarContainerValues() {
+        let anyArray = testSupport_kotlinAnyVar(value: ["a", 2, 3.0]) as? [Any]
+        guard let anyArray else {
+            return XCTFail()
+        }
+        XCTAssertEqual(anyArray[0] as? String, "a")
+        XCTAssertEqual(anyArray[1] as? Int, 2)
+        XCTAssertEqual(anyArray[2] as? Double, 3.0)
+
+        let anyDictionary = testSupport_kotlinAnyVar(value: ["a": 1, "b": 2]) as? [AnyHashable: Any]
+        guard let anyDictionary else {
+            return XCTFail()
+        }
+        XCTAssertEqual(anyDictionary["a"] as? Int, 1)
+        XCTAssertEqual(anyDictionary["b"] as? Int, 2)
+    }
+
     func testOptionalSimpleVars() {
         XCTAssertEqual(testSupport_kotlinOptionalBoolVar(value: false), false)
         XCTAssertNil(testSupport_kotlinOptionalBoolVar(value: nil))
