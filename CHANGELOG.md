@@ -1,3 +1,12 @@
+## 0.2.1
+
+Released 2024-12-12
+
+  - Merge pull request #33 from skiptools/anybridge
+  - Bridge 'Any' types
+  - Snapshot progress towards bridging Any and polymorphic types
+  - Update README
+
 ## 0.1.1
 
 Released 2024-12-01
