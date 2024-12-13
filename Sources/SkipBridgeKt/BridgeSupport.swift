@@ -27,12 +27,7 @@ public final class SwiftPeerMarker {
 
 /// Return a closure that creates a Swift projection of this Kotlin instance, else nil.
 public func Swift_projection(of object: Any, options: Int) -> (() -> Any)? {
-    return (object as? SwiftProjectable)?.Swift_projection(options: options)
-}
-
-/// Protocol added to a Kotlin type that can project to Swift.
-public protocol SwiftProjectable {
-    func Swift_projection(options: Int) -> () -> Any
+    return (object as? skip.lib.SwiftProjecting)?.Swift_projection(options: options)
 }
 
 /// Return the `BridgedTypes` enum case name for the given Kotlin/Java object's type.
