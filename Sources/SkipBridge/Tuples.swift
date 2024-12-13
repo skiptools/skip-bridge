@@ -33,10 +33,10 @@ public final class SwiftTuple {
             t1MethodID = Java_Tuple2_e1_methodID
         }
         let t0_java = try! JavaObjectPointer?.call(t0MethodID, on: tuple, options: options, args: [])
-        let t0_swift = (T0.self as! JConvertible.Type).fromJavaObject(t0_java, options: options)
+        let t0_swift: T0 = fromJavaObject(t0_java, options: options)
         let t1_java = try! JavaObjectPointer?.call(t1MethodID, on: tuple, options: options, args: [])
-        let t1_swift = (T1.self as! JConvertible.Type).fromJavaObject(t1_java, options: options)
-        return (t0_swift as! T0, t1_swift as! T1)
+        let t1_swift: T1 = fromJavaObject(t1_java, options: options)
+        return (t0_swift, t1_swift)
     }
 
     public static func javaObject<T0, T1, T2>(for tuple: (T0, T1, T2)?, options: JConvertibleOptions) -> JavaObjectPointer? {
@@ -70,12 +70,12 @@ public final class SwiftTuple {
             t2MethodID = Java_Tuple3_e2_methodID
         }
         let t0_java = try! JavaObjectPointer?.call(t0MethodID, on: tuple, options: options, args: [])
-        let t0_swift = (T0.self as! JConvertible.Type).fromJavaObject(t0_java, options: options)
+        let t0_swift: T0 = fromJavaObject(t0_java, options: options)
         let t1_java = try! JavaObjectPointer?.call(t1MethodID, on: tuple, options: options, args: [])
-        let t1_swift = (T1.self as! JConvertible.Type).fromJavaObject(t1_java, options: options)
+        let t1_swift: T1 = fromJavaObject(t1_java, options: options)
         let t2_java = try! JavaObjectPointer?.call(t2MethodID, on: tuple, options: options, args: [])
-        let t2_swift = (T2.self as! JConvertible.Type).fromJavaObject(t2_java, options: options)
-        return (t0_swift as! T0, t1_swift as! T1, t2_swift as! T2)
+        let t2_swift: T2 = fromJavaObject(t2_java, options: options)
+        return (t0_swift, t1_swift, t2_swift)
     }
 
     public static func javaObject<T0, T1, T2, T3>(for tuple: (T0, T1, T2, T3)?, options: JConvertibleOptions) -> JavaObjectPointer? {
@@ -94,14 +94,14 @@ public final class SwiftTuple {
             return nil
         }
         let t0_java = try! JavaObjectPointer?.call(Java_Tuple4_e0_methodID, on: tuple, options: options, args: [])
-        let t0_swift = (T0.self as! JConvertible.Type).fromJavaObject(t0_java, options: options)
+        let t0_swift: T0 = fromJavaObject(t0_java, options: options)
         let t1_java = try! JavaObjectPointer?.call(Java_Tuple4_e1_methodID, on: tuple, options: options, args: [])
-        let t1_swift = (T1.self as! JConvertible.Type).fromJavaObject(t1_java, options: options)
+        let t1_swift: T1 = fromJavaObject(t1_java, options: options)
         let t2_java = try! JavaObjectPointer?.call(Java_Tuple4_e2_methodID, on: tuple, options: options, args: [])
-        let t2_swift = (T2.self as! JConvertible.Type).fromJavaObject(t2_java, options: options)
+        let t2_swift: T2 = fromJavaObject(t2_java, options: options)
         let t3_java = try! JavaObjectPointer?.call(Java_Tuple4_e3_methodID, on: tuple, options: options, args: [])
-        let t3_swift = (T3.self as! JConvertible.Type).fromJavaObject(t3_java, options: options)
-        return (t0_swift as! T0, t1_swift as! T1, t2_swift as! T2, t3_swift as! T3)
+        let t3_swift: T3 = fromJavaObject(t3_java, options: options)
+        return (t0_swift, t1_swift, t2_swift, t3_swift)
     }
 
     public static func javaObject<T0, T1, T2, T3, T4>(for tuple: (T0, T1, T2, T3, T4)?, options: JConvertibleOptions) -> JavaObjectPointer? {
@@ -121,16 +121,24 @@ public final class SwiftTuple {
             return nil
         }
         let t0_java = try! JavaObjectPointer?.call(Java_Tuple5_e0_methodID, on: tuple, options: options, args: [])
-        let t0_swift = (T0.self as! JConvertible.Type).fromJavaObject(t0_java, options: options)
+        let t0_swift: T0 = fromJavaObject(t0_java, options: options)
         let t1_java = try! JavaObjectPointer?.call(Java_Tuple5_e1_methodID, on: tuple, options: options, args: [])
-        let t1_swift = (T1.self as! JConvertible.Type).fromJavaObject(t1_java, options: options)
+        let t1_swift: T1 = fromJavaObject(t1_java, options: options)
         let t2_java = try! JavaObjectPointer?.call(Java_Tuple5_e2_methodID, on: tuple, options: options, args: [])
-        let t2_swift = (T2.self as! JConvertible.Type).fromJavaObject(t2_java, options: options)
+        let t2_swift: T2 = fromJavaObject(t2_java, options: options)
         let t3_java = try! JavaObjectPointer?.call(Java_Tuple5_e3_methodID, on: tuple, options: options, args: [])
-        let t3_swift = (T3.self as! JConvertible.Type).fromJavaObject(t3_java, options: options)
+        let t3_swift: T3 = fromJavaObject(t3_java, options: options)
         let t4_java = try! JavaObjectPointer?.call(Java_Tuple5_e4_methodID, on: tuple, options: options, args: [])
-        let t4_swift = (T4.self as! JConvertible.Type).fromJavaObject(t4_java, options: options)
-        return (t0_swift as! T0, t1_swift as! T1, t2_swift as! T2, t3_swift as! T3, t4_swift as! T4)
+        let t4_swift: T4 = fromJavaObject(t4_java, options: options)
+        return (t0_swift, t1_swift, t2_swift, t3_swift, t4_swift)
+    }
+
+    private static func fromJavaObject<T>(_ ptr: JavaObjectPointer?, options: JConvertibleOptions) -> T {
+        if let convertible = T.self as? JConvertible.Type, !(T.self is AnyObject.Type) {
+            return convertible.fromJavaObject(ptr, options: options) as! T
+        } else {
+            return AnyBridging.fromJavaObject(ptr, options: options) as! T
+        }
     }
 }
 
