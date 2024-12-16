@@ -44,7 +44,7 @@ public enum BridgedTypes {
 
 public func bridgedTypeOf(_ object: Any) -> BridgedTypes {
     // Likely most common case is a custom-bridged object
-    guard !(object is SwiftProjectable) else {
+    guard !(object is SwiftProjecting) else {
         return .other
     }
 

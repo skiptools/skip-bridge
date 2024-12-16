@@ -270,6 +270,21 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertFalse(lhs < rhs)
     }
 
+    public func testSwiftSubclass() {
+        let sub = SwiftSubclass(string: "sub")
+        sub.intVar = 100
+        XCTAssertEqual(sub.stringVar, "sub")
+        XCTAssertEqual(sub.intVar, 100)
+
+        swiftBaseClassVar = sub
+        swiftBaseClassVar.intVar = 101
+
+        let sub2 = swiftBaseClassVar as? SwiftSubclass
+        XCTAssertNotNil(sub2)
+        XCTAssertEqual(sub2?.stringVar, "sub")
+        XCTAssertEqual(sub2?.intVar, 101)
+    }
+
     public func testSwiftProtocolMember() {
         let obj = SwiftClass()
         obj.optionalSwiftProtocolVar = nil

@@ -186,6 +186,10 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertFalse(testSupport_kotlinClassComparable(lhs: "bbb", rhs: "aaa"))
     }
 
+    public func testKotlinSubclass() {
+        XCTAssertNil(testSupport_kotlinSubclass())
+    }
+
     func testKotlinProtocolMember() {
         XCTAssertNil(testSupport_kotlinProtocolMember())
     }

@@ -53,6 +53,7 @@ public var swiftIntVar = 7
 // TODO: Unsigned values
 public var swiftStringVar = "s"
 public var swiftClassVar = SwiftHelperClass()
+public var swiftBaseClassVar = SwiftClass()
 public var swiftInnerClassVar = SwiftHelperClass.Inner()
 public var swiftKotlinClassVar = KotlinHelperClass()
 public var swiftAnyVar: Any = "a"
@@ -130,7 +131,16 @@ public class SwiftClass {
     }
 }
 
-public class SwiftHelperClass: SwiftProtocol, Comparable, Identifiable {
+public final class SwiftSubclass: SwiftClass {
+    public var stringVar: String
+
+    public init(string: String) {
+        self.stringVar = string
+        super.init()
+    }
+}
+
+public final class SwiftHelperClass: SwiftProtocol, Comparable, Identifiable {
     public var id: String {
         return stringVar
     }

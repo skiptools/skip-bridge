@@ -82,3 +82,38 @@ public final class SwiftValueTypeBox<T> {
         self.value = value
     }
 }
+
+/// Added to non-final base classes to help handle polymorphism in `JConvertible`.
+public protocol BridgedToKotlinBaseClass: AnyObject {
+}
+
+extension BridgedToKotlinBaseClass {
+    /// Return the appropriate constructor to use to create the Kotlin/Java peer of this instance.
+    public func Java_findConstructor(base baseClass: JClass, _ baseMethodID: JavaMethodID) -> (cls: JClass, ctor: JavaMethodID) {
+        let selfType = type(of: self)
+        if let subclass3 = selfType as? BridgedToKotlinSubclass3.Type {
+            return subclass3.Java_subclass3Constructor
+        } else if let subclass2 = selfType as? BridgedToKotlinSubclass2.Type {
+            return subclass2.Java_subclass2Constructor
+        } else if let subclass1 = selfType as? BridgedToKotlinSubclass1.Type {
+            return subclass1.Java_subclass1Constructor
+        } else {
+            return (baseClass, baseMethodID)
+        }
+    }
+}
+
+/// Added to first-level subclasses to help handle polymorphism in `BridgedToKotlin` instances.
+public protocol BridgedToKotlinSubclass1: AnyObject {
+    static var Java_subclass1Constructor: (JClass, JavaMethodID) { get }
+}
+
+/// Added to second-level subclasses to help handle polymorphism in `BridgedToKotlin` instances.
+public protocol BridgedToKotlinSubclass2: AnyObject {
+    static var Java_subclass2Constructor: (JClass, JavaMethodID) { get }
+}
+
+/// Added to third-level subclasses to help handle polymorphism in `BridgedToKotlin` instances.
+public protocol BridgedToKotlinSubclass3: AnyObject {
+    static var Java_subclass3Constructor: (JClass, JavaMethodID) { get }
+}
