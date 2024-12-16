@@ -55,6 +55,7 @@ public var kotlinIntVar = 7
 // TODO: Unsigned values
 public var kotlinStringVar = "s"
 public var kotlinClassVar = KotlinHelperClass()
+public var kotlinBaseClassVar = KotlinClass()
 public var kotlinInnerClassVar = KotlinHelperClass.Inner()
 public var kotlinSwiftClassVar = SwiftHelperClass()
 public var kotlinAnyVar: Any = "a"
@@ -132,7 +133,16 @@ public class KotlinClass {
     }
 }
 
-public class KotlinHelperClass: KotlinProtocol, Comparable, Identifiable {
+public final class KotlinSubclass: KotlinClass {
+    public var stringVar: String
+
+    public init(string: String) {
+        self.stringVar = string
+        super.init()
+    }
+}
+
+public final class KotlinHelperClass: KotlinProtocol, Comparable, Identifiable {
     public var id: String {
         return stringVar
     }

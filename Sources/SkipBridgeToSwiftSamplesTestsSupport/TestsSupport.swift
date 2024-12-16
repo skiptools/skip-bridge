@@ -322,6 +322,32 @@ public func testSupport_kotlinClassComparable(lhs: String, rhs: String) -> Bool 
     return lhsHelper < rhsHelper
 }
 
+public func testSupport_kotlinSubclass() -> String? {
+    let sub = KotlinSubclass(string: "sub")
+    sub.intVar = 100
+    guard sub.stringVar == "sub" else {
+        return "sub.stringVar == 'sub'"
+    }
+    guard sub.intVar == 100 else {
+        return "sub.intVar == 100"
+    }
+
+    kotlinBaseClassVar = sub
+    kotlinBaseClassVar.intVar = 101
+
+    let sub2 = kotlinBaseClassVar as? KotlinSubclass
+    guard let sub2 else {
+        return "sub2 != nil"
+    }
+    guard sub2.stringVar == "sub" else {
+        return "sub2.stringVar == 'sub'"
+    }
+    guard sub2.intVar == 101 else {
+        return "sub2.intVar == 101"
+    }
+    return nil
+}
+
 public func testSupport_kotlinProtocolMember() -> String? {
     let obj = KotlinClass()
     obj.optionalKotlinProtocolVar = nil
