@@ -78,6 +78,12 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(testSupport_kotlinAnyVar_kotlinClass(value: "ss"), "ss")
     }
 
+    func testAnyHashableVar() {
+        XCTAssertEqual(testSupport_kotlinAnyHashableVar(value: 1) as? Int, 1)
+        XCTAssertEqual(testSupport_kotlinAnyHashableVar(value: "a") as? String, "a")
+        XCTAssertEqual(testSupport_kotlinAnyHashableVar_kotlinClass(value: "ss"), "ss")
+    }
+
     func testAnyVarContainerValues() {
         let anyArray = testSupport_kotlinAnyVar(value: ["a", 2, 3.0]) as? [Any]
         guard let anyArray else {

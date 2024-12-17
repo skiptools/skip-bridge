@@ -57,6 +57,7 @@ public var swiftBaseClassVar = SwiftClass()
 public var swiftInnerClassVar = SwiftHelperClass.Inner()
 public var swiftKotlinClassVar = KotlinHelperClass()
 public var swiftAnyVar: Any = "a"
+public var swiftAnyHashableVar: AnyHashable = 1
 
 // MARK: Global optional vars
 
