@@ -169,6 +169,18 @@ public func testSupport_kotlinAnyVar_kotlinClass(value: String) -> String? {
     return (kotlinAnyVar as? KotlinHelperClass)?.stringVar
 }
 
+public func testSupport_kotlinAnyHashableVar(value: AnyHashable) -> AnyHashable {
+    kotlinAnyHashableVar = value
+    return kotlinAnyHashableVar
+}
+
+public func testSupport_kotlinAnyHashableVar_kotlinClass(value: String) -> String? {
+    let helper = KotlinHelperClass()
+    helper.stringVar = value
+    kotlinAnyHashableVar = helper
+    return (kotlinAnyHashableVar as? KotlinHelperClass)?.stringVar
+}
+
 public func testSupport_kotlinOptionalBoolVar(value: Bool?) -> Bool? {
     kotlinOptionalBoolVar = value
     return kotlinOptionalBoolVar

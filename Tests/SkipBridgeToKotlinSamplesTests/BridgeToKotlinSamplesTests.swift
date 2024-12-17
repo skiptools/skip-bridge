@@ -101,6 +101,16 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftAnyVar as? SwiftHelperClass, helper)
     }
 
+    func testAnyHashableVar() {
+        swiftAnyHashableVar = 1
+        XCTAssertEqual(swiftAnyHashableVar as? Int, 1)
+
+        let helper = SwiftHelperClass()
+        swiftAnyHashableVar = helper
+        XCTAssertTrue(swiftAnyHashableVar is SwiftHelperClass)
+        XCTAssertEqual(swiftAnyHashableVar as? SwiftHelperClass, helper)
+    }
+
     func testAnyVarContainerValues() {
         swiftAnyVar = ["a", 2, 3.0]
         guard let anyArray = swiftAnyVar as? [Any] else {
