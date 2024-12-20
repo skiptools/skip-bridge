@@ -150,6 +150,10 @@ public final class SwiftHelperClass: SwiftProtocol, Comparable, Identifiable {
     public init() {
     }
 
+    public init(string: String?) throws {
+        self.stringVar = string!
+    }
+
     public func stringValue() -> String {
         return stringVar
     }
