@@ -132,6 +132,12 @@ public class SwiftClass {
     }
 }
 
+extension SwiftClass {
+    public func swiftExtensionFunc(_ i: Int) -> Int {
+        return i
+    }
+}
+
 public final class SwiftSubclass: SwiftClass {
     public var stringVar: String
 

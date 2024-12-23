@@ -137,6 +137,12 @@ public class KotlinClass {
     }
 }
 
+extension KotlinClass {
+    public func kotlinExtensionFunc(_ i: Int) -> Int {
+        return i
+    }
+}
+
 public final class KotlinSubclass: KotlinClass {
     public var stringVar: String
 

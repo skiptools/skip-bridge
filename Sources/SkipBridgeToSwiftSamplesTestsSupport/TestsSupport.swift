@@ -191,7 +191,8 @@ public func testSupport_kotlinJavaTypeVar() -> String? {
     guard time > 0 else {
         return "time > 0"
     }
-    kotlinJavaTypeVar = try! AnyDynamicObject(className: "java.util.Date", 999)
+    let date = try! AnyDynamicObject(className: "java.util.Date", 999)
+    kotlinJavaTypeVar = date
     let time2: Int64 = kotlinJavaTypeVar.time
     guard time2 == 999 else {
         return "time2 == 999"
@@ -353,6 +354,11 @@ public func testSupport_kotlinClassComparable(lhs: String, rhs: String) -> Bool 
     let rhsHelper = KotlinHelperClass()
     rhsHelper.stringVar = rhs
     return lhsHelper < rhsHelper
+}
+
+public func testSupport_kotlinExtension(value: Int) -> Int {
+    let cls = KotlinClass()
+    return cls.kotlinExtensionFunc(value)
 }
 
 public func testSupport_kotlinSubclass() -> String? {
