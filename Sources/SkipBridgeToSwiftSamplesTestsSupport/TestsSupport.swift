@@ -5,6 +5,7 @@
 // as published by the Free Software Foundation https://fsf.org
 
 import Foundation
+import SkipBridge
 import SkipBridgeToSwiftSamples
 import SkipBridgeToSwiftSamplesHelpers
 
@@ -181,6 +182,27 @@ public func testSupport_kotlinAnyHashableVar_kotlinClass(value: String) -> Strin
     return (kotlinAnyHashableVar as? KotlinHelperClass)?.stringVar
 }
 
+public func testSupport_kotlinJavaTypeVar() -> String? {
+    #if os(Android) || ROBOLECTRIC
+    guard kotlinJavaTypeVar is AnyDynamicObject else {
+        return "kotlinJavaTypeVar is AnyDynamicObject"
+    }
+    let time: Int64 = kotlinJavaTypeVar.time
+    guard time > 0 else {
+        return "time > 0"
+    }
+    let date = try! AnyDynamicObject(className: "java.util.Date", 999)
+    kotlinJavaTypeVar = date
+    let time2: Int64 = kotlinJavaTypeVar.time
+    guard time2 == 999 else {
+        return "time2 == 999"
+    }
+    return nil
+    #else
+    return nil
+    #endif
+}
+
 public func testSupport_kotlinOptionalBoolVar(value: Bool?) -> Bool? {
     kotlinOptionalBoolVar = value
     return kotlinOptionalBoolVar
@@ -332,6 +354,11 @@ public func testSupport_kotlinClassComparable(lhs: String, rhs: String) -> Bool 
     let rhsHelper = KotlinHelperClass()
     rhsHelper.stringVar = rhs
     return lhsHelper < rhsHelper
+}
+
+public func testSupport_kotlinExtension(value: Int) -> Int {
+    let cls = KotlinClass()
+    return cls.kotlinExtensionFunc(value)
 }
 
 public func testSupport_kotlinSubclass() -> String? {

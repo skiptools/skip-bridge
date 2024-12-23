@@ -40,6 +40,11 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
         }
     }
 
+    /// Cast this instance to a generated `AnyDynamicObject` subclass type.
+    public func `as`<T: AnyDynamicObject>(_ type: T.Type) throws -> T {
+        return try T(for: object.ptr)
+    }
+
     public subscript(dynamicMember member: String) -> Bool {
         get {
             jniContext {

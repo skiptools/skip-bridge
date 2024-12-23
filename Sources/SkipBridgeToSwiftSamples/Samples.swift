@@ -60,6 +60,9 @@ public var kotlinInnerClassVar = KotlinHelperClass.Inner()
 public var kotlinSwiftClassVar = SwiftHelperClass()
 public var kotlinAnyVar: Any = "a"
 public var kotlinAnyHashableVar: AnyHashable = 1
+#if os(Android) || ROBOLECTRIC
+public var kotlinJavaTypeVar: java.util.Date = java.util.Date()
+#endif
 
 // MARK: Global optional vars
 
@@ -131,6 +134,12 @@ public class KotlinClass {
     public var swiftStructVar = SwiftStruct(string: "2")
 
     public init() {
+    }
+}
+
+extension KotlinClass {
+    public func kotlinExtensionFunc(_ i: Int) -> Int {
+        return i
     }
 }
 

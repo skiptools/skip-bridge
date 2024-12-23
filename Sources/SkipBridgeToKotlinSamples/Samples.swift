@@ -132,6 +132,12 @@ public class SwiftClass {
     }
 }
 
+extension SwiftClass {
+    public func swiftExtensionFunc(_ i: Int) -> Int {
+        return i
+    }
+}
+
 public final class SwiftSubclass: SwiftClass {
     public var stringVar: String
 
@@ -148,6 +154,10 @@ public final class SwiftHelperClass: SwiftProtocol, Comparable, Identifiable {
     public var stringVar = "s"
 
     public init() {
+    }
+
+    public init(string: String?) throws {
+        self.stringVar = string!
     }
 
     public func stringValue() -> String {
