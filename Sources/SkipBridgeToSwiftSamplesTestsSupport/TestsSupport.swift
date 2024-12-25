@@ -513,6 +513,19 @@ public func testSupport_kotlinEnum() -> String? {
     return nil
 }
 
+public func testSupport_kotlinActor() async -> String? {
+    let a = KotlinActor(99)
+    guard await a.intVar == 99 else {
+        return "a.intVar == 99"
+    }
+
+    await a.setIntVar(100)
+    guard await a.intVar == 100 else {
+        return "a.intVar == 100"
+    }
+    return nil
+}
+
 public func testSupport_kotlinClosure0Var() {
     kotlinClosure0Var()
     kotlinClosure0Var = { print("reassigned") }
@@ -570,6 +583,10 @@ public func testSupport_callKotlinThrowingFunction(shouldThrow: Bool) throws -> 
 
 public func testSupport_callKotlinThrowingVoidFunction(shouldThrow: Bool) throws {
     try kotlinThrowingVoidFunction(shouldThrow: shouldThrow)
+}
+
+public func testSupport_kotlinAsyncThrowsVar() async throws -> Int {
+    return try await kotlinAsyncThrowsVar
 }
 
 public func testSupport_callKotlinAsync0Function() async {

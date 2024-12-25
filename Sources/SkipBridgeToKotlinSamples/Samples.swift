@@ -217,6 +217,29 @@ public enum SwiftEnum: String, CaseIterable {
     }
 }
 
+public actor SwiftActor {
+    public nonisolated let nonisolatedLet = "nonisolated"
+
+    public var intVar: Int {
+        get {
+            return _intVar
+        }
+    }
+    private var _intVar: Int
+
+    public func setIntVar(_ i: Int) {
+        _intVar = i
+    }
+
+    public nonisolated func nonisolatedFunc(_ i: Int) -> Int {
+        return i
+    }
+
+    public init(_ value: Int) {
+        _intVar = value
+    }
+}
+
 // MARK: Closures
 
 public var swiftClosure0Var: () -> Void = { print("original") }
@@ -248,6 +271,13 @@ public func swiftThrowingVoidFunction(shouldThrow: Bool) throws {
 }
 
 // MARK: Async
+
+public var swiftAsyncThrowsVar: Int {
+    get async throws {
+        try? await Task.sleep(nanoseconds: 10_000_000)
+        return 1
+    }
+}
 
 public func swiftAsync0Function() async {
     try? await Task.sleep(nanoseconds: 10_000_000)

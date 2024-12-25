@@ -220,6 +220,11 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertNil(testSupport_kotlinEnum())
     }
 
+    public func testActor() async {
+        let value = await testSupport_kotlinActor()
+        XCTAssertNil(value)
+    }
+
     func testClosure0Var() {
         testSupport_kotlinClosure0Var()
     }
@@ -268,6 +273,11 @@ final class BridgeToSwiftTests: XCTestCase {
         } catch {
         }
         XCTAssertEqual(try testSupport_callKotlinThrowingFunction(shouldThrow: false), 1)
+    }
+
+    func testAsyncThrowsVar() async throws {
+        let value = try await testSupport_kotlinAsyncThrowsVar()
+        XCTAssertEqual(value, 1)
     }
 
     func testAsyncFunctions() async {

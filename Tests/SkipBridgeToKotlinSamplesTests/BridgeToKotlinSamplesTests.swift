@@ -383,6 +383,16 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(SwiftEnum.allCases.count, 2)
     }
 
+    public func testActor() async {
+        let a = SwiftActor(99)
+        let value1 = await a.intVar
+        XCTAssertEqual(value1, 99)
+
+        await a.setIntVar(100)
+        let value2 = await a.intVar
+        XCTAssertEqual(value2, 100)
+    }
+
     public func testClosure0Var() {
         swiftClosure0Var()
         swiftClosure0Var = { print("reassigned") }
@@ -468,6 +478,11 @@ final class BridgeToKotlinTests: XCTestCase {
         } catch {
         }
         XCTAssertEqual(try swiftThrowingFunction(shouldThrow: false), 1)
+    }
+
+    func testAsyncThrowsVar() async throws {
+        let value = try await swiftAsyncThrowsVar
+        XCTAssertEqual(value, 1)
     }
 
     func testAsyncFunction() async {
