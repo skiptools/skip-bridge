@@ -30,6 +30,11 @@ public func Swift_projection(of object: Any, options: Int) -> (() -> Any)? {
     return (object as? skip.lib.SwiftProjecting)?.Swift_projection(options: options)
 }
 
+/// Return the Java class name of the given object.
+public func javaClassNameOf(_ object: Any) -> String {
+    return object.javaClass.name
+}
+
 /// Return the `BridgedTypes` enum case name for the given Kotlin/Java object's type.
 public func bridgedTypeStringOf(_ object: Any) -> String {
     return bridgedTypeOf(object).name
