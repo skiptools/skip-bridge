@@ -83,6 +83,14 @@ public final class SwiftValueTypeBox<T> {
     }
 }
 
+/// The Java class name of the given object.
+public func Java_className(of object: JavaObjectPointer, options: JConvertibleOptions) -> String {
+    let object_java = object.toJavaParameter(options: options)
+    return try! Java_fileClass.callStatic(method: Java_javaClassNameOf_methodID, options: options, args: [object_java])
+}
+private let Java_javaClassNameOf_methodID = Java_fileClass.getStaticMethodID(name: "javaClassNameOf", sig: "(Ljava/lang/Object;)Ljava/lang/String;")!
+
+
 /// Added to non-final base classes to help handle polymorphism in `JConvertible`.
 public protocol BridgedToKotlinBaseClass: AnyObject {
 }
