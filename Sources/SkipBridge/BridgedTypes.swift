@@ -27,6 +27,7 @@ public enum BridgedTypes: String {
     case date
     case list
     case map
+    case result
     case set
     case uuid
     case uri
@@ -35,6 +36,7 @@ public enum BridgedTypes: String {
     case swiftData
     case swiftDate
     case swiftDictionary
+    case swiftResult
     case swiftSet
     case swiftUUID
     case swiftURL
@@ -84,6 +86,8 @@ public struct AnyBridging {
             return Array<Any>.fromJavaObject(ptr, options: options)
         case .map:
             return Dictionary<AnyHashable, Any>.fromJavaObject(ptr, options: options)
+        case .result:
+            return Result<Any, Error>.fromJavaObject(ptr, options: options)
         case .set:
             return Array<AnyHashable>.fromJavaObject(ptr, options: options)
         case .uuid:
@@ -98,8 +102,10 @@ public struct AnyBridging {
             return Date.fromJavaObject(ptr, options: options)
         case .swiftDictionary:
             return Dictionary<AnyHashable, Any>.fromJavaObject(ptr, options: options)
+        case .swiftResult:
+            return Result<Any, Error>.fromJavaObject(ptr, options: options)
         case .swiftSet:
-            return Array<AnyHashable>.fromJavaObject(ptr, options: options)
+            return Set<AnyHashable>.fromJavaObject(ptr, options: options)
         case .swiftUUID:
             return UUID.fromJavaObject(ptr, options: options)
         case .swiftURL:
@@ -350,6 +356,80 @@ private let Java_Set_size_methodID = Java_Set.getMethodID(name: "size", sig: "()
 private let Java_Set_iterator_methodID = Java_Set.getMethodID(name: "iterator", sig: "()Ljava/util/Iterator;")!
 private let Java_Iterator = try! JClass(name: "java/util/Iterator")
 private let Java_Iterator_next_methodID = Java_Iterator.getMethodID(name: "next", sig: "()Ljava/lang/Object;")!
+
+// MARK: Result
+
+extension Result: JObjectProtocol, JConvertible {
+    public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Dictionary<Key, Value> {
+        // let map = dict.kotlin(nocopy: true)
+        let map_java: JavaObjectPointer
+        if options.contains(.kotlincompat) {
+            map_java = obj!
+        } else {
+            map_java = try! JavaObjectPointer.call(Java_SkipDictionary_kotlin_methodID, on: obj!, options: options, args: [true.toJavaParameter(options: options)])
+        }
+        // let keySet = map.keySet()
+        let keySet_java = try! JavaObjectPointer.call(Java_Map_keySet_methodID, on: map_java, options: options, args: [])
+        let iterator_java = try! JavaObjectPointer.call(Java_Set_iterator_methodID, on: keySet_java, options: options, args: [])
+        let size = try! Int32.call(Java_Set_size_methodID, on: keySet_java, options: options, args: [])
+        var dict = Dictionary<Key, Value>()
+        for _ in 0..<size {
+            // let key = itr.next(); let value = map.get(key)
+            let key_java = try! JavaObjectPointer?.call(Java_Iterator_next_methodID, on: iterator_java, options: options, args: [])
+            let value_java = try! JavaObjectPointer?.call(Java_Map_get_methodID, on: map_java, options: options, args: [key_java.toJavaParameter(options: options)])
+
+            // Convert non-polymorphic JConvertibles directly, else fall back to AnyBridging
+            let key: Key
+            let value: Value
+            if let convertibleKey = Key.self as? JConvertible.Type, !(Key.self is AnyObject.Type) {
+                key = convertibleKey.fromJavaObject(key_java, options: options) as! Key
+            } else {
+                key = AnyBridging.fromJavaObject(key_java, options: options) as! Key
+            }
+            if let convertibleValue = Value.self as? JConvertible.Type, !(Value.self is AnyObject.Type) {
+                value = convertibleValue.fromJavaObject(value_java, options: options) as! Value
+            } else {
+                value = AnyBridging.fromJavaObject(value_java, options: options) as! Value
+            }
+            dict[key] = value
+            if let key_java {
+                jni.deleteLocalRef(key_java)
+            }
+            if let value_java {
+                jni.deleteLocalRef(value_java)
+            }
+        }
+        return dict
+    }
+
+    public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
+        let result_java: JavaObjectPointer
+        switch self {
+        case .success(let value):
+            let value_java = (value as! JConvertible).toJavaParameter(options: options)
+            result_java = try! Java_Result_Companion_instance.call(method: Java_Result_Companion_success_methodID, options: options, args: [value_java])
+        case .failure(let error):
+            let error_java: JavaParameter
+            if let convertible = error as? JConvertible {
+                error_java = convertible.toJavaParameter(options: options)
+            } else {
+                
+            }
+            result_java = try! Java_Result_Companion_instance.call(method: Java_Result_Companion_failure_methodID, options: options, args: [error_java])
+        }
+        guard !options.contains(.kotlincompat) else {
+            return result_java
+        }
+        
+    }
+}
+
+private let Java_Result = try! JClass(name: "kotlin/Result")
+private let Java_Result_Companion = try! JClass(name: "kotlin/Result$Companion")
+private let Java_Result_Companion_instance = JObject(Java_Result.getStatic(field: Java_Result.getStaticFieldID(name: "Companion", sig: "Lkotlin/Result$Companion;")!, options: []))
+private let Java_Result_Companion_success_methodID = Java_Result_Companion.getMethodID(name: "success", sig: "(Ljava/lang/Object;)Lkotlin/Result;")!
+private let Java_Result_Companion_failure_methodID = Java_Result_Companion.getMethodID(name: "failure", sig: "(Ljava/lang/Throwable;)Lkotlin/Result;")!
+private let Java_SkipResult = try! JClass(name: "skip/lib/Result")
 
 // MARK: Set
 
