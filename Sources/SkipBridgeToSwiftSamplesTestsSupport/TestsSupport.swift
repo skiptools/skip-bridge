@@ -513,6 +513,41 @@ public func testSupport_kotlinEnum() -> String? {
     return nil
 }
 
+public func testSupport_kotlinAssociatedValuesEnum() -> String? {
+    guard KotlinAssociatedValuesEnum.caseNames == "a,b" else {
+        return "KotlinAssociatedValuesEnum.caseNames == 'a,b'"
+    }
+
+    let a: KotlinAssociatedValuesEnum = .a(i: 99, "s")
+    guard a.intValue == 99 else {
+        return "a.intValue == 99"
+    }
+    guard a.stringValue() == "s" else {
+        return "a.stringValue() == 's'"
+    }
+
+    let b: KotlinAssociatedValuesEnum = .b
+    guard b.intValue == nil else {
+        return "b.intValue == nil"
+    }
+    guard b.stringValue() == ".b" else {
+        return "b.stringValue() == '.b'"
+    }
+
+    switch a {
+    case .a(let i, let s):
+        guard i == 99 else {
+            return "i == 99"
+        }
+        guard s == "s" else {
+            return "s == 's'"
+        }
+    case .b:
+        return ".b"
+    }
+    return nil
+}
+
 public func testSupport_kotlinActor() async -> String? {
     let a = KotlinActor(99)
     guard await a.intVar == 99 else {

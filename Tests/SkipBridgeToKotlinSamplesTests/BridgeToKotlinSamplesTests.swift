@@ -383,6 +383,25 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(SwiftEnum.allCases.count, 2)
     }
 
+    public func testAssociatedValuesEnum() {
+        XCTAssertEqual(SwiftAssociatedValuesEnum.caseNames, "a,b")
+        let a: SwiftAssociatedValuesEnum = .a(i: 99, "s")
+        XCTAssertEqual(a.intValue, 99)
+        XCTAssertEqual(a.stringValue(), "s")
+
+        let b: SwiftAssociatedValuesEnum = .b
+        XCTAssertNil(b.intValue)
+        XCTAssertEqual(b.stringValue(), ".b")
+
+        switch a {
+        case .a(let i, let s):
+            XCTAssertEqual(i, 99)
+            XCTAssertEqual(s, "s")
+        case .b:
+            XCTFail()
+        }
+    }
+
     public func testActor() async {
         let a = SwiftActor(99)
         let value1 = await a.intVar
