@@ -220,6 +220,10 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertNil(testSupport_kotlinEnum())
     }
 
+    public func testAssociatedValuesEnum() {
+        XCTAssertNil(testSupport_kotlinAssociatedValuesEnum())
+    }
+
     public func testActor() async {
         let value = await testSupport_kotlinActor()
         XCTAssertNil(value)

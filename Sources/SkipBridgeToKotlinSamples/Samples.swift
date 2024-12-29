@@ -217,6 +217,33 @@ public enum SwiftEnum: String, CaseIterable {
     }
 }
 
+public enum SwiftAssociatedValuesEnum {
+    case a(i: Int, String)
+    case b
+
+    public static var caseNames: String {
+        return "a,b"
+    }
+
+    public var intValue: Int? {
+        switch self {
+        case .a(let i, _):
+            return i
+        case .b:
+            return nil
+        }
+    }
+
+    public func stringValue() -> String {
+        switch self {
+        case .a(_, let s):
+            return s
+        case .b:
+            return ".b"
+        }
+    }
+}
+
 public actor SwiftActor {
     public nonisolated let nonisolatedLet = "nonisolated"
 
