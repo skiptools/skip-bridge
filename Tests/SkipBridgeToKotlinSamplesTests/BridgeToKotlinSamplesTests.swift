@@ -490,13 +490,45 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftIntStringTuple.1, "a")
     }
 
-    func testThrowsFunctions() throws {
+    func testThrowingFunctions() throws {
         do {
             try swiftThrowingVoidFunction(shouldThrow: true)
             XCTFail("Should have thrown")
         } catch {
         }
         XCTAssertEqual(try swiftThrowingFunction(shouldThrow: false), 1)
+    }
+
+    public func testThrowingBridgedErrorFunction() {
+        do {
+            try swiftThrowingBridgedErrorFunction(shouldThrow: false)
+        } catch {
+            XCTFail("Should have thrown")
+        }
+        do {
+            try swiftThrowingBridgedErrorFunction(shouldThrow: true)
+            XCTFail()
+        } catch is SwiftError {
+            // Expected
+        } catch {
+            XCTFail("Wrong error type: \(error)")
+        }
+    }
+
+    public func testThrowingBridgedEnumErrorFunction() {
+        do {
+            try swiftThrowingBridgedEnumErrorFunction(throw: nil)
+        } catch {
+            XCTFail("Should have thrown")
+        }
+        do {
+            try swiftThrowingBridgedEnumErrorFunction(throw: 99)
+            XCTFail()
+        } catch SwiftEnumError.intError(let i) {
+            XCTAssertEqual(i, 99)
+        } catch {
+            XCTFail("Wrong error type: \(error)")
+        }
     }
 
     func testAsyncThrowsVar() async throws {

@@ -99,7 +99,7 @@ public final class SwiftClosure0 {
         }
         let swiftPeer = SwiftClosure0(closure: closure, options: options)
         let swiftPeerPtr = SwiftObjectPointer.pointer(to: swiftPeer, retain: true)
-        return try! Java_SwiftBackedFunction0_class.create(ctor: Java_SwiftBackedFunction0_constructor_methodID, args: [swiftPeerPtr.toJavaParameter(options: options)])
+        return try! Java_SwiftBackedFunction0_class.create(ctor: Java_SwiftBackedFunction0_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
     }
 
     public static func closure<R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (() -> R)? {
@@ -148,7 +148,7 @@ public final class SwiftClosure1 {
         }
         let swiftPeer = SwiftClosure1(closure: closure, options: options)
         let swiftPeerPtr = SwiftObjectPointer.pointer(to: swiftPeer, retain: true)
-        return try! Java_SwiftBackedFunction1_class.create(ctor: Java_SwiftBackedFunction1_constructor_methodID, args: [swiftPeerPtr.toJavaParameter(options: options)])
+        return try! Java_SwiftBackedFunction1_class.create(ctor: Java_SwiftBackedFunction1_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
     }
 
     public static func closure<P0, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0) -> R)? {
@@ -199,7 +199,7 @@ public final class SwiftClosure2 {
         }
         let swiftPeer = SwiftClosure2(closure: closure, options: options)
         let swiftPeerPtr = SwiftObjectPointer.pointer(to: swiftPeer, retain: true)
-        return try! Java_SwiftBackedFunction2_class.create(ctor: Java_SwiftBackedFunction2_constructor_methodID, args: [swiftPeerPtr.toJavaParameter(options: options)])
+        return try! Java_SwiftBackedFunction2_class.create(ctor: Java_SwiftBackedFunction2_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
     }
 
     public static func closure<P0, P1, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1) -> R)? {
@@ -253,7 +253,7 @@ public final class SwiftClosure3 {
         }
         let swiftPeer = SwiftClosure3(closure: closure, options: options)
         let swiftPeerPtr = SwiftObjectPointer.pointer(to: swiftPeer, retain: true)
-        return try! Java_SwiftBackedFunction3_class.create(ctor: Java_SwiftBackedFunction3_constructor_methodID, args: [swiftPeerPtr.toJavaParameter(options: options)])
+        return try! Java_SwiftBackedFunction3_class.create(ctor: Java_SwiftBackedFunction3_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
     }
 
     public static func closure<P0, P1, P2, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1, P2) -> R)? {
@@ -310,7 +310,7 @@ public final class SwiftClosure4 {
         }
         let swiftPeer = SwiftClosure4(closure: closure, options: options)
         let swiftPeerPtr = SwiftObjectPointer.pointer(to: swiftPeer, retain: true)
-        return try! Java_SwiftBackedFunction4_class.create(ctor: Java_SwiftBackedFunction4_constructor_methodID, args: [swiftPeerPtr.toJavaParameter(options: options)])
+        return try! Java_SwiftBackedFunction4_class.create(ctor: Java_SwiftBackedFunction4_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
     }
 
     public static func closure<P0, P1, P2, P3, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1, P2, P3) -> R)? {
@@ -370,7 +370,7 @@ public final class SwiftClosure5 {
         }
         let swiftPeer = SwiftClosure5(closure: closure, options: options)
         let swiftPeerPtr = SwiftObjectPointer.pointer(to: swiftPeer, retain: true)
-        return try! Java_SwiftBackedFunction5_class.create(ctor: Java_SwiftBackedFunction5_constructor_methodID, args: [swiftPeerPtr.toJavaParameter(options: options)])
+        return try! Java_SwiftBackedFunction5_class.create(ctor: Java_SwiftBackedFunction5_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
     }
 
     public static func closure<P0, P1, P2, P3, P4, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1, P2, P3, P4) -> R)? {

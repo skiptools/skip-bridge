@@ -177,7 +177,7 @@ extension Array: JObjectProtocol, JConvertible {
 
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
         // let list = ArrayList(count)
-        let list_java = try! Java_ArrayList.create(ctor: Java_ArrayList_constructor_methodID, args: [Int32(self.count).toJavaParameter(options: options)])
+        let list_java = try! Java_ArrayList.create(ctor: Java_ArrayList_constructor_methodID, options: options, args: [Int32(self.count).toJavaParameter(options: options)])
         for element in self {
             // list.add(element)
             let element_java = (element as! JConvertible).toJavaObject(options: options)
@@ -190,7 +190,7 @@ extension Array: JObjectProtocol, JConvertible {
             return list_java
         } else {
             // return Array(list, nocopy: true, shared: false)
-            let arr_java = try! Java_SkipArray.create(ctor: Java_SkipArray_constructor_methodID, args: [list_java.toJavaParameter(options: options), true.toJavaParameter(options: options), false.toJavaParameter(options: options)])
+            let arr_java = try! Java_SkipArray.create(ctor: Java_SkipArray_constructor_methodID, options: options, args: [list_java.toJavaParameter(options: options), true.toJavaParameter(options: options), false.toJavaParameter(options: options)])
             return arr_java
         }
     }
@@ -230,7 +230,7 @@ extension Data: JObjectProtocol, JConvertible {
             if options.contains(.kotlincompat) {
                 return kotlinByteArray
             } else {
-                return try! Java_SkipData.create(ctor: Java_SkipData_constructor_methodID, args: [kotlinByteArray.toJavaParameter(options: options)])
+                return try! Java_SkipData.create(ctor: Java_SkipData_constructor_methodID, options: options, args: [kotlinByteArray.toJavaParameter(options: options)])
             }
         }
     }
@@ -256,11 +256,11 @@ extension Date: JObjectProtocol, JConvertible {
 
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
         let millis = Int64(timeIntervalSince1970 * 1000.0)
-        let utilDate = try! Java_Date.create(ctor: Java_Date_constructor_methodID, args: [millis.toJavaParameter(options: options)])
+        let utilDate = try! Java_Date.create(ctor: Java_Date_constructor_methodID, options: options, args: [millis.toJavaParameter(options: options)])
         if options.contains(.kotlincompat) {
             return utilDate
         } else {
-            return try! Java_SkipDate.create(ctor: Java_SkipDate_constructor_methodID, args: [utilDate.toJavaParameter(options: options)])
+            return try! Java_SkipDate.create(ctor: Java_SkipDate_constructor_methodID, options: options, args: [utilDate.toJavaParameter(options: options)])
         }
     }
 }
@@ -319,7 +319,7 @@ extension Dictionary: JObjectProtocol, JConvertible {
 
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
         // let map = LinkedHashMap(count)
-        let map_java = try! Java_LinkedHashMap.create(ctor: Java_LinkedHashMap_constructor_methodID, args: [Int32(self.count).toJavaParameter(options: options)])
+        let map_java = try! Java_LinkedHashMap.create(ctor: Java_LinkedHashMap_constructor_methodID, options: options, args: [Int32(self.count).toJavaParameter(options: options)])
         for (key, value) in self {
             // map.put(key, value)
             let key_java = (key as! JConvertible).toJavaObject(options: options)
@@ -336,7 +336,7 @@ extension Dictionary: JObjectProtocol, JConvertible {
             return map_java
         } else {
             // return Dictionary(map, nocopy: true, shared: false)
-            let dict_java = try! Java_SkipDictionary.create(ctor: Java_SkipDictionary_constructor_methodID, args: [map_java.toJavaParameter(options: options), true.toJavaParameter(options: options), false.toJavaParameter(options: options)])
+            let dict_java = try! Java_SkipDictionary.create(ctor: Java_SkipDictionary_constructor_methodID, options: options, args: [map_java.toJavaParameter(options: options), true.toJavaParameter(options: options), false.toJavaParameter(options: options)])
             return dict_java
         }
     }
@@ -360,46 +360,28 @@ private let Java_Iterator_next_methodID = Java_Iterator.getMethodID(name: "next"
 // MARK: Result
 
 extension Result: JObjectProtocol, JConvertible {
-    public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Dictionary<Key, Value> {
-        // let map = dict.kotlin(nocopy: true)
-        let map_java: JavaObjectPointer
+    public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Result<Success, Failure> {
+        // let result = res.kotlin(nocopy: true)
+        let result_java: JavaObjectPointer
         if options.contains(.kotlincompat) {
-            map_java = obj!
+            result_java = obj!
         } else {
-            map_java = try! JavaObjectPointer.call(Java_SkipDictionary_kotlin_methodID, on: obj!, options: options, args: [true.toJavaParameter(options: options)])
+            result_java = try! JavaObjectPointer.call(Java_SkipResult_kotlin_methodID, on: obj!, options: options, args: [true.toJavaParameter(options: options)])
         }
-        // let keySet = map.keySet()
-        let keySet_java = try! JavaObjectPointer.call(Java_Map_keySet_methodID, on: map_java, options: options, args: [])
-        let iterator_java = try! JavaObjectPointer.call(Java_Set_iterator_methodID, on: keySet_java, options: options, args: [])
-        let size = try! Int32.call(Java_Set_size_methodID, on: keySet_java, options: options, args: [])
-        var dict = Dictionary<Key, Value>()
-        for _ in 0..<size {
-            // let key = itr.next(); let value = map.get(key)
-            let key_java = try! JavaObjectPointer?.call(Java_Iterator_next_methodID, on: iterator_java, options: options, args: [])
-            let value_java = try! JavaObjectPointer?.call(Java_Map_get_methodID, on: map_java, options: options, args: [key_java.toJavaParameter(options: options)])
-
-            // Convert non-polymorphic JConvertibles directly, else fall back to AnyBridging
-            let key: Key
-            let value: Value
-            if let convertibleKey = Key.self as? JConvertible.Type, !(Key.self is AnyObject.Type) {
-                key = convertibleKey.fromJavaObject(key_java, options: options) as! Key
+        let throwable_java: JavaObjectPointer? = try! result_java.call(method: Java_Result_exceptionOrNull_methodID, options: options, args: [])
+        if let throwable_java {
+            let error = JThrowable.toError(throwable_java, options: options) as! Failure
+            return .failure(error)
+        } else {
+            let success_java: JavaObjectPointer? = try! result_java.call(method: Java_Result_getOrNull_methodID, options: options, args: [])
+            let success: Success
+            if let convertibleSuccess = Success.self as? JConvertible.Type, !(Success.self is AnyObject.Type) {
+                success = convertibleSuccess.fromJavaObject(success_java, options: options) as! Success
             } else {
-                key = AnyBridging.fromJavaObject(key_java, options: options) as! Key
+                success = AnyBridging.fromJavaObject(success_java, options: options) as! Success
             }
-            if let convertibleValue = Value.self as? JConvertible.Type, !(Value.self is AnyObject.Type) {
-                value = convertibleValue.fromJavaObject(value_java, options: options) as! Value
-            } else {
-                value = AnyBridging.fromJavaObject(value_java, options: options) as! Value
-            }
-            dict[key] = value
-            if let key_java {
-                jni.deleteLocalRef(key_java)
-            }
-            if let value_java {
-                jni.deleteLocalRef(value_java)
-            }
+            return .success(success)
         }
-        return dict
     }
 
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
@@ -409,18 +391,13 @@ extension Result: JObjectProtocol, JConvertible {
             let value_java = (value as! JConvertible).toJavaParameter(options: options)
             result_java = try! Java_Result_Companion_instance.call(method: Java_Result_Companion_success_methodID, options: options, args: [value_java])
         case .failure(let error):
-            let error_java: JavaParameter
-            if let convertible = error as? JConvertible {
-                error_java = convertible.toJavaParameter(options: options)
-            } else {
-                
-            }
+            let error_java = JThrowable.toThrowable(error, options: options).toJavaParameter(options: options)
             result_java = try! Java_Result_Companion_instance.call(method: Java_Result_Companion_failure_methodID, options: options, args: [error_java])
         }
         guard !options.contains(.kotlincompat) else {
             return result_java
         }
-        
+        return try! Java_SkipResult.create(ctor: Java_SkipResult_constructor_methodID, options: options, args: [result_java.toJavaParameter(options: options)])
     }
 }
 
@@ -429,7 +406,11 @@ private let Java_Result_Companion = try! JClass(name: "kotlin/Result$Companion")
 private let Java_Result_Companion_instance = JObject(Java_Result.getStatic(field: Java_Result.getStaticFieldID(name: "Companion", sig: "Lkotlin/Result$Companion;")!, options: []))
 private let Java_Result_Companion_success_methodID = Java_Result_Companion.getMethodID(name: "success", sig: "(Ljava/lang/Object;)Lkotlin/Result;")!
 private let Java_Result_Companion_failure_methodID = Java_Result_Companion.getMethodID(name: "failure", sig: "(Ljava/lang/Throwable;)Lkotlin/Result;")!
+private let Java_Result_exceptionOrNull_methodID = Java_Result.getMethodID(name: "exceptionOrNull", sig: "()Ljava/lang/Throwable;")!
+private let Java_Result_getOrNull_methodID = Java_Result.getMethodID(name: "getOrNull", sig: "()Ljava/lang/Object;")!
 private let Java_SkipResult = try! JClass(name: "skip/lib/Result")
+private let Java_SkipResult_constructor_methodID = Java_SkipResult.getMethodID(name: "<init>", sig: "(Lkotlin/Result;)V")!
+private let Java_SkipResult_kotlin_methodID = Java_SkipResult.getMethodID(name: "kotlin", sig: "(Z)Lkotlin/Result;")!
 
 // MARK: Set
 
@@ -466,7 +447,7 @@ extension Set: JObjectProtocol, JConvertible {
 
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
         // let set = LinkedHashSet()
-        let hashset_java = try! Java_LinkedHashSet.create(ctor: Java_LinkedHashSet_constructor_methodID, args: [])
+        let hashset_java = try! Java_LinkedHashSet.create(ctor: Java_LinkedHashSet_constructor_methodID, options: options, args: [])
         for element in self {
             // set.add(element)
             let element_java = (element as! JConvertible).toJavaObject(options: options)
@@ -479,7 +460,7 @@ extension Set: JObjectProtocol, JConvertible {
             return hashset_java
         } else {
             // return Set(set, nocopy: true, shared: false)
-            let set_java = try! Java_SkipSet.create(ctor: Java_SkipSet_constructor_methodID, args: [hashset_java.toJavaParameter(options: options), true.toJavaParameter(options: options), false.toJavaParameter(options: options)])
+            let set_java = try! Java_SkipSet.create(ctor: Java_SkipSet_constructor_methodID, options: options, args: [hashset_java.toJavaParameter(options: options), true.toJavaParameter(options: options), false.toJavaParameter(options: options)])
             return set_java
         }
     }
@@ -510,7 +491,7 @@ extension UUID: JObjectProtocol, JConvertible {
         if options.contains(.kotlincompat) {
             return try! Java_UUID.callStatic(method: Java_UUID_fromString_methodID, options: options, args: [uuidString.toJavaParameter(options: options)])
         } else {
-            return try! Java_SkipUUID.create(ctor: Java_SkipUUID_constructor_methodID, args: [uuidString.toJavaParameter(options: options)])
+            return try! Java_SkipUUID.create(ctor: Java_SkipUUID_constructor_methodID, options: options, args: [uuidString.toJavaParameter(options: options)])
         }
     }
 }
@@ -538,9 +519,9 @@ extension URL: JObjectProtocol, JConvertible {
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
         let absoluteString = self.absoluteString
         if options.contains(.kotlincompat) {
-            return try! Java_URI.create(ctor: Java_URI_constructor_methodID, args: [absoluteString.toJavaParameter(options: options)])
+            return try! Java_URI.create(ctor: Java_URI_constructor_methodID, options: options, args: [absoluteString.toJavaParameter(options: options)])
         } else {
-            return try! Java_SkipURL.create(ctor: Java_SkipURL_constructor_methodID, args: [absoluteString.toJavaParameter(options: options), (nil as JavaObjectPointer?).toJavaParameter(options: options)])
+            return try! Java_SkipURL.create(ctor: Java_SkipURL_constructor_methodID, options: options, args: [absoluteString.toJavaParameter(options: options), (nil as JavaObjectPointer?).toJavaParameter(options: options)])
         }
     }
 }

@@ -19,7 +19,7 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
     public init(className: String, arguments: [Any?]) throws {
         try jniContext {
             let arguments: [Any?]? = arguments.isEmpty ? nil : arguments
-            let ptr = try Java_reflectorClass.create(ctor: Java_reflectorClassNameConstructor, args: [className.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+            let ptr = try Java_reflectorClass.create(ctor: Java_reflectorClassNameConstructor, options: [], args: [className.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
             self.object = JObject(ptr)
         }
     }
@@ -27,7 +27,7 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
     /// Supply the class name of the statics to access.
     public init(forStaticsOfClassName className: String) throws {
         try jniContext {
-            let ptr = try Java_reflectorClass.create(ctor: Java_reflectorStaticsOfClassNameConstructor, args: [className.toJavaParameter(options: [])])
+            let ptr = try Java_reflectorClass.create(ctor: Java_reflectorStaticsOfClassNameConstructor, options: [], args: [className.toJavaParameter(options: [])])
             self.object = JObject(ptr)
         }
     }
@@ -35,7 +35,7 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
     /// Interact wih the given Kotlin object in Swift.
     public required init(for object: JavaObjectPointer) throws {
         try jniContext {
-            let reflectorPtr = try Java_reflectorClass.create(ctor: Java_reflectorConstructor, args: [object.toJavaParameter(options: [])])
+            let reflectorPtr = try Java_reflectorClass.create(ctor: Java_reflectorConstructor, options: [], args: [object.toJavaParameter(options: [])])
             self.object = JObject(reflectorPtr)
         }
     }

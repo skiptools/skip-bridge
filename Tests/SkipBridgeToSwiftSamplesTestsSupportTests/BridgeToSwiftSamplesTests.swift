@@ -279,6 +279,14 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(try testSupport_callKotlinThrowingFunction(shouldThrow: false), 1)
     }
 
+    func testThrowingBridgedFunction() {
+        XCTAssertTrue(testSupport_callKotlinThrowingBridgedErrorFunction())
+    }
+
+    func testThrowingBridgedEnumFunction() {
+        XCTAssertTrue(testSupport_callKotlinThrowingBridgedEnumErrorFunction())
+    }
+
     func testAsyncThrowsVar() async throws {
         let value = try await testSupport_kotlinAsyncThrowsVar()
         XCTAssertEqual(value, 1)

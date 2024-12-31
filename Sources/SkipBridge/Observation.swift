@@ -109,7 +109,7 @@ private final class BridgeObservationSupport: @unchecked Sendable {
             guard let cls = Self.Java_stateClass, let initMethod = Self.Java_state_init_methodID else {
                 return nil
             }
-            let ptr: JavaObjectPointer = try! cls.create(ctor: initMethod, args: [])
+            let ptr: JavaObjectPointer = try! cls.create(ctor: initMethod, options: [], args: [])
             return JObject(ptr)
         }
     }

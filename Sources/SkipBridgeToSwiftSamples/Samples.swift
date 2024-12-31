@@ -269,6 +269,14 @@ public actor KotlinActor {
     }
 }
 
+public struct KotlinError: Error {
+}
+
+public enum KotlinEnumError: Error {
+    case intError(Int)
+    case stringError(String)
+}
+
 // MARK: Closures
 
 public var kotlinClosure0Var: () -> Void = { print("original") }
@@ -296,6 +304,18 @@ public func kotlinThrowingFunction(shouldThrow: Bool) throws -> Int {
 public func kotlinThrowingVoidFunction(shouldThrow: Bool) throws {
     if shouldThrow {
         throw KotlinSampleError()
+    }
+}
+
+public func kotlinThrowingBridgedErrorFunction(shouldThrow: Bool) throws {
+    if shouldThrow {
+        throw KotlinError()
+    }
+}
+
+public func kotlinThrowingBridgedEnumErrorFunction(throw value: Int?) throws {
+    if let value {
+        throw KotlinEnumError.intError(value)
     }
 }
 

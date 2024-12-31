@@ -13,9 +13,9 @@ public final class SwiftTuple {
         let t0_java = (tuple.0 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
         let t1_java = (tuple.1 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
         if options.contains(.kotlincompat) {
-            return try! Java_Pair.create(ctor: Java_Pair_constructor_methodID, args: [t0_java, t1_java])
+            return try! Java_Pair.create(ctor: Java_Pair_constructor_methodID, options: options, args: [t0_java, t1_java])
         } else {
-            return try! Java_Tuple2.create(ctor: Java_Tuple2_constructor_methodID, args: [t0_java, t1_java])
+            return try! Java_Tuple2.create(ctor: Java_Tuple2_constructor_methodID, options: options, args: [t0_java, t1_java])
         }
     }
 
@@ -47,9 +47,9 @@ public final class SwiftTuple {
         let t1_java = (tuple.1 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
         let t2_java = (tuple.2 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
         if options.contains(.kotlincompat) {
-            return try! Java_Triple.create(ctor: Java_Triple_constructor_methodID, args: [t0_java, t1_java, t2_java])
+            return try! Java_Triple.create(ctor: Java_Triple_constructor_methodID, options: options, args: [t0_java, t1_java, t2_java])
         } else {
-            return try! Java_Tuple3.create(ctor: Java_Tuple3_constructor_methodID, args: [t0_java, t1_java, t2_java])
+            return try! Java_Tuple3.create(ctor: Java_Tuple3_constructor_methodID, options: options, args: [t0_java, t1_java, t2_java])
         }
     }
 
@@ -86,7 +86,7 @@ public final class SwiftTuple {
         let t1_java = (tuple.1 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
         let t2_java = (tuple.2 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
         let t3_java = (tuple.3 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
-        return try! Java_Tuple4.create(ctor: Java_Tuple4_constructor_methodID, args: [t0_java, t1_java, t2_java, t3_java])
+        return try! Java_Tuple4.create(ctor: Java_Tuple4_constructor_methodID, options: options, args: [t0_java, t1_java, t2_java, t3_java])
     }
 
     public static func tuple<T0, T1, T2, T3>(forJavaObject tuple: JavaObjectPointer?, options: JConvertibleOptions) -> (T0, T1, T2, T3)? {
@@ -113,7 +113,7 @@ public final class SwiftTuple {
         let t2_java = (tuple.2 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
         let t3_java = (tuple.3 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
         let t4_java = (tuple.4 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
-        return try! Java_Tuple4.create(ctor: Java_Tuple5_constructor_methodID, args: [t0_java, t1_java, t2_java, t3_java, t4_java])
+        return try! Java_Tuple4.create(ctor: Java_Tuple5_constructor_methodID, options: options, args: [t0_java, t1_java, t2_java, t3_java, t4_java])
     }
 
     public static func tuple<T0, T1, T2, T3, T4>(forJavaObject tuple: JavaObjectPointer?, options: JConvertibleOptions) -> (T0, T1, T2, T3, T4)? {

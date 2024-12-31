@@ -620,6 +620,38 @@ public func testSupport_callKotlinThrowingVoidFunction(shouldThrow: Bool) throws
     try kotlinThrowingVoidFunction(shouldThrow: shouldThrow)
 }
 
+public func testSupport_callKotlinThrowingBridgedErrorFunction() -> Bool {
+    do {
+        try kotlinThrowingBridgedErrorFunction(shouldThrow: false)
+    } catch {
+        return false
+    }
+    do {
+        try kotlinThrowingBridgedErrorFunction(shouldThrow: true)
+        return false
+    } catch is KotlinError {
+        return true
+    } catch {
+        return false
+    }
+}
+
+public func testSupport_callKotlinThrowingBridgedEnumErrorFunction() -> Bool {
+    do {
+        try kotlinThrowingBridgedEnumErrorFunction(throw: nil)
+    } catch {
+        return false
+    }
+    do {
+        try kotlinThrowingBridgedEnumErrorFunction(throw: 99)
+        return false
+    } catch KotlinEnumError.intError(let i) {
+        return i == 99
+    } catch {
+        return false
+    }
+}
+
 public func testSupport_kotlinAsyncThrowsVar() async throws -> Int {
     return try await kotlinAsyncThrowsVar
 }

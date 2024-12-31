@@ -267,6 +267,14 @@ public actor SwiftActor {
     }
 }
 
+public struct SwiftError: Error {
+}
+
+public enum SwiftEnumError: Error {
+    case intError(Int)
+    case stringError(String)
+}
+
 // MARK: Closures
 
 public var swiftClosure0Var: () -> Void = { print("original") }
@@ -294,6 +302,18 @@ public func swiftThrowingFunction(shouldThrow: Bool) throws -> Int {
 public func swiftThrowingVoidFunction(shouldThrow: Bool) throws {
     if shouldThrow {
         throw SwiftSampleError()
+    }
+}
+
+public func swiftThrowingBridgedErrorFunction(shouldThrow: Bool) throws {
+    if shouldThrow {
+        throw SwiftError()
+    }
+}
+
+public func swiftThrowingBridgedEnumErrorFunction(throw value: Int?) throws {
+    if let value {
+        throw SwiftEnumError.intError(value)
     }
 }
 
