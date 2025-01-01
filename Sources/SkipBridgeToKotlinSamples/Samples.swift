@@ -268,6 +268,8 @@ public actor SwiftActor {
 }
 
 public struct SwiftError: Error {
+    public init() {
+    }
 }
 
 public enum SwiftEnumError: Error {
@@ -288,6 +290,7 @@ public var swiftIntArrayVar = [1, 2, 3]
 public var swiftStringSetVar: Set<String> = ["a", "b", "c"]
 public var swiftIntStringDictionaryVar = [1: "a", 2: "b", 3: "c"]
 public var swiftIntStringTuple = (1, "s")
+public var swiftIntErrorResult: Result<Int, SwiftError> = .success(1)
 
 // MARK: Functions
 

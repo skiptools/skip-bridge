@@ -270,6 +270,8 @@ public actor KotlinActor {
 }
 
 public struct KotlinError: Error {
+    public init() {
+    }
 }
 
 public enum KotlinEnumError: Error {
@@ -290,6 +292,7 @@ public var kotlinIntArrayVar = [1, 2, 3]
 public var kotlinStringSetVar: Set<String> = ["a", "b", "c"]
 public var kotlinIntStringDictionaryVar = [1: "a", 2: "b", 3: "c"]
 public var kotlinIntStringTupleVar = (1, "s")
+public var kotlinIntErrorResult: Result<Int, KotlinError> = .success(1)
 
 // MARK: Functions
 

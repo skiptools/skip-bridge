@@ -362,55 +362,54 @@ private let Java_Iterator_next_methodID = Java_Iterator.getMethodID(name: "next"
 extension Result: JObjectProtocol, JConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Result<Success, Failure> {
         // let result = res.kotlin(nocopy: true)
-        let result_java: JavaObjectPointer
+        let pair_java: JavaObjectPointer
         if options.contains(.kotlincompat) {
-            result_java = obj!
+            pair_java = obj!
         } else {
-            result_java = try! JavaObjectPointer.call(Java_SkipResult_kotlin_methodID, on: obj!, options: options, args: [true.toJavaParameter(options: options)])
+            pair_java = try! JavaObjectPointer.call(Java_SkipResult_kotlin_methodID, on: obj!, options: options, args: [true.toJavaParameter(options: options)])
         }
-        let throwable_java: JavaObjectPointer? = try! result_java.call(method: Java_Result_exceptionOrNull_methodID, options: options, args: [])
+        let throwable_java: JavaObjectPointer? = try! pair_java.call(method: Java_Pair_second_methodID, options: options, args: [])
         if let throwable_java {
             let error = JThrowable.toError(throwable_java, options: options) as! Failure
             return .failure(error)
         } else {
-            let success_java: JavaObjectPointer? = try! result_java.call(method: Java_Result_getOrNull_methodID, options: options, args: [])
+            let value_java: JavaObjectPointer? = try! pair_java.call(method: Java_Pair_first_methodID, options: options, args: [])
             let success: Success
-            if let convertibleSuccess = Success.self as? JConvertible.Type, !(Success.self is AnyObject.Type) {
-                success = convertibleSuccess.fromJavaObject(success_java, options: options) as! Success
+            if let convertibleResult = Success.self as? JConvertible.Type, !(Success.self is AnyObject.Type) {
+                success = convertibleResult.fromJavaObject(value_java, options: options) as! Success
             } else {
-                success = AnyBridging.fromJavaObject(success_java, options: options) as! Success
+                success = AnyBridging.fromJavaObject(value_java, options: options) as! Success
             }
             return .success(success)
         }
     }
 
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
-        let result_java: JavaObjectPointer
+        let pair_java: JavaObjectPointer
         switch self {
         case .success(let value):
-            let value_java = (value as! JConvertible).toJavaParameter(options: options)
-            result_java = try! Java_Result_Companion_instance.call(method: Java_Result_Companion_success_methodID, options: options, args: [value_java])
+            let value_java = (value as! JConvertible).toJavaObject(options: options)
+            pair_java = try! Java_Pair.create(ctor: Java_Pair_constructor_methodID, options: options, args: [value_java.toJavaParameter(options: options), (nil as JavaObjectPointer?).toJavaParameter(options: options)])
         case .failure(let error):
-            let error_java = JThrowable.toThrowable(error, options: options).toJavaParameter(options: options)
-            result_java = try! Java_Result_Companion_instance.call(method: Java_Result_Companion_failure_methodID, options: options, args: [error_java])
+            let value_java = JThrowable.toThrowable(error, options: options)
+            pair_java = try! Java_Pair.create(ctor: Java_Pair_constructor_methodID, options: options, args: [(nil as JavaObjectPointer?).toJavaParameter(options: options), value_java.toJavaParameter(options: options)])
         }
         guard !options.contains(.kotlincompat) else {
-            return result_java
+            return pair_java
         }
-        return try! Java_SkipResult.create(ctor: Java_SkipResult_constructor_methodID, options: options, args: [result_java.toJavaParameter(options: options)])
+        let skipResult_java: JavaObjectPointer = try! Java_SkipResult_fileClass.callStatic(method: Java_SkipResult_constructor_methodID, options: options, args: [pair_java.toJavaParameter(options: options)])
+        return skipResult_java
     }
 }
 
-private let Java_Result = try! JClass(name: "kotlin/Result")
-private let Java_Result_Companion = try! JClass(name: "kotlin/Result$Companion")
-private let Java_Result_Companion_instance = JObject(Java_Result.getStatic(field: Java_Result.getStaticFieldID(name: "Companion", sig: "Lkotlin/Result$Companion;")!, options: []))
-private let Java_Result_Companion_success_methodID = Java_Result_Companion.getMethodID(name: "success", sig: "(Ljava/lang/Object;)Lkotlin/Result;")!
-private let Java_Result_Companion_failure_methodID = Java_Result_Companion.getMethodID(name: "failure", sig: "(Ljava/lang/Throwable;)Lkotlin/Result;")!
-private let Java_Result_exceptionOrNull_methodID = Java_Result.getMethodID(name: "exceptionOrNull", sig: "()Ljava/lang/Throwable;")!
-private let Java_Result_getOrNull_methodID = Java_Result.getMethodID(name: "getOrNull", sig: "()Ljava/lang/Object;")!
 private let Java_SkipResult = try! JClass(name: "skip/lib/Result")
-private let Java_SkipResult_constructor_methodID = Java_SkipResult.getMethodID(name: "<init>", sig: "(Lkotlin/Result;)V")!
-private let Java_SkipResult_kotlin_methodID = Java_SkipResult.getMethodID(name: "kotlin", sig: "(Z)Lkotlin/Result;")!
+private let Java_SkipResult_fileClass = try! JClass(name: "skip/lib/ResultKt")
+private let Java_SkipResult_constructor_methodID = Java_SkipResult_fileClass.getStaticMethodID(name: "Result", sig: "(Lkotlin/Pair;)Lskip/lib/Result;")!
+private let Java_SkipResult_kotlin_methodID = Java_SkipResult.getMethodID(name: "kotlin", sig: "(Z)Lkotlin/Pair;")!
+private let Java_Pair = try! JClass(name: "kotlin/Pair")
+private let Java_Pair_constructor_methodID = Java_Pair.getMethodID(name: "<init>", sig: "(Ljava/lang/Object;Ljava/lang/Object;)V")!
+private let Java_Pair_first_methodID = Java_Pair.getMethodID(name: "getFirst", sig: "()Ljava/lang/Object;")!
+private let Java_Pair_second_methodID = Java_Pair.getMethodID(name: "getSecond", sig: "()Ljava/lang/Object;")!
 
 // MARK: Set
 

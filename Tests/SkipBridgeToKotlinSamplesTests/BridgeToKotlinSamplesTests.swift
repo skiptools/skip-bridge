@@ -490,6 +490,25 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftIntStringTuple.1, "a")
     }
 
+    func testResults() {
+        swiftIntErrorResult = .success(99)
+        switch swiftIntErrorResult {
+        case .success(let ret):
+            XCTAssertEqual(ret, 99)
+        case .failure:
+            XCTFail("Expected success")
+        }
+
+        swiftIntErrorResult = .failure(SwiftError())
+        switch swiftIntErrorResult {
+        case .success:
+            XCTFail("Expected failure")
+        case .failure:
+            // Expected
+            break
+        }
+    }
+
     func testThrowingFunctions() throws {
         do {
             try swiftThrowingVoidFunction(shouldThrow: true)
