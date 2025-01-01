@@ -270,6 +270,13 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(roundtripped.1, "a")
     }
 
+    func testResult() {
+        let roundtrippedSuccess = testSupport_kotlinIntErrorResultVar(value: 99)
+        XCTAssertEqual(roundtrippedSuccess, 99)
+        let roundtrippedError = testSupport_kotlinIntErrorResultVar(value: nil)
+        XCTAssertNil(roundtrippedError)
+    }
+
     func testThrowingFunctions() throws {
         do {
             try testSupport_callKotlinThrowingVoidFunction(shouldThrow: true)
@@ -277,6 +284,14 @@ final class BridgeToSwiftTests: XCTestCase {
         } catch {
         }
         XCTAssertEqual(try testSupport_callKotlinThrowingFunction(shouldThrow: false), 1)
+    }
+
+    func testThrowingBridgedFunction() {
+        XCTAssertTrue(testSupport_callKotlinThrowingBridgedErrorFunction())
+    }
+
+    func testThrowingBridgedEnumFunction() {
+        XCTAssertTrue(testSupport_callKotlinThrowingBridgedEnumErrorFunction())
     }
 
     func testAsyncThrowsVar() async throws {

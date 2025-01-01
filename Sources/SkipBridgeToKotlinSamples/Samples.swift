@@ -267,6 +267,16 @@ public actor SwiftActor {
     }
 }
 
+public struct SwiftError: Error {
+    public init() {
+    }
+}
+
+public enum SwiftEnumError: Error {
+    case intError(Int)
+    case stringError(String)
+}
+
 // MARK: Closures
 
 public var swiftClosure0Var: () -> Void = { print("original") }
@@ -280,6 +290,7 @@ public var swiftIntArrayVar = [1, 2, 3]
 public var swiftStringSetVar: Set<String> = ["a", "b", "c"]
 public var swiftIntStringDictionaryVar = [1: "a", 2: "b", 3: "c"]
 public var swiftIntStringTuple = (1, "s")
+public var swiftIntErrorResult: Result<Int, SwiftError> = .success(1)
 
 // MARK: Functions
 
@@ -294,6 +305,18 @@ public func swiftThrowingFunction(shouldThrow: Bool) throws -> Int {
 public func swiftThrowingVoidFunction(shouldThrow: Bool) throws {
     if shouldThrow {
         throw SwiftSampleError()
+    }
+}
+
+public func swiftThrowingBridgedErrorFunction(shouldThrow: Bool) throws {
+    if shouldThrow {
+        throw SwiftError()
+    }
+}
+
+public func swiftThrowingBridgedEnumErrorFunction(throw value: Int?) throws {
+    if let value {
+        throw SwiftEnumError.intError(value)
     }
 }
 

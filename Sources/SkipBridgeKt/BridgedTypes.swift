@@ -27,6 +27,7 @@ public enum BridgedTypes {
     case date
     case list
     case map
+    case result
     case set
     case uuid
     case uri
@@ -35,6 +36,7 @@ public enum BridgedTypes {
     case swiftData
     case swiftDate
     case swiftDictionary
+    case swiftResult
     case swiftSet
     case swiftUUID
     case swiftURL
@@ -76,6 +78,8 @@ public func bridgedTypeOf(_ object: Any) -> BridgedTypes {
         return .list
     } else if object is kotlin.collections.Map<Any, Any> {
         return .map
+    } else if object is kotlin.Result<Any> {
+        return .result
     } else if object is kotlin.collections.Set<Any> {
         return .set
     } else if object is java.util.UUID {
@@ -95,6 +99,8 @@ public func bridgedTypeOf(_ object: Any) -> BridgedTypes {
         return .swiftDate
     case "skip.lib.Dictionary":
         return .swiftDictionary
+    case "skip.lib.Result":
+        return .swiftResult
     case "skip.lib.Set":
         return .swiftSet
     default:

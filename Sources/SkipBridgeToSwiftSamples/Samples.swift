@@ -269,6 +269,16 @@ public actor KotlinActor {
     }
 }
 
+public struct KotlinError: Error {
+    public init() {
+    }
+}
+
+public enum KotlinEnumError: Error {
+    case intError(Int)
+    case stringError(String)
+}
+
 // MARK: Closures
 
 public var kotlinClosure0Var: () -> Void = { print("original") }
@@ -282,6 +292,7 @@ public var kotlinIntArrayVar = [1, 2, 3]
 public var kotlinStringSetVar: Set<String> = ["a", "b", "c"]
 public var kotlinIntStringDictionaryVar = [1: "a", 2: "b", 3: "c"]
 public var kotlinIntStringTupleVar = (1, "s")
+public var kotlinIntErrorResult: Result<Int, KotlinError> = .success(1)
 
 // MARK: Functions
 
@@ -296,6 +307,18 @@ public func kotlinThrowingFunction(shouldThrow: Bool) throws -> Int {
 public func kotlinThrowingVoidFunction(shouldThrow: Bool) throws {
     if shouldThrow {
         throw KotlinSampleError()
+    }
+}
+
+public func kotlinThrowingBridgedErrorFunction(shouldThrow: Bool) throws {
+    if shouldThrow {
+        throw KotlinError()
+    }
+}
+
+public func kotlinThrowingBridgedEnumErrorFunction(throw value: Int?) throws {
+    if let value {
+        throw KotlinEnumError.intError(value)
     }
 }
 

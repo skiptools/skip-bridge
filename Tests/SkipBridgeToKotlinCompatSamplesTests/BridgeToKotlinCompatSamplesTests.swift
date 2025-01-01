@@ -45,4 +45,21 @@ final class BridgeToKotlinCompatTests: XCTestCase {
         XCTAssertEqual(url, compat.attempts?.second)
         #endif
     }
+
+    func testCompatResultPair() {
+        #if SKIP
+        let uuid = java.util.UUID.randomUUID()
+        let compat = Compat(id: uuid)
+
+        let successResult: Pair<String?, Error?> = Pair("success", nil)
+        compat.result = successResult
+        XCTAssertEqual("success", compat.result?.first)
+
+        let failureResult: Pair<String?, Error?> = Pair(nil, ErrorException())
+        compat.result = failureResult
+        XCTAssertNil(compat.result?.first)
+        XCTAssertNotNil(compat.result?.second)
+        #endif
+
+    }
 }

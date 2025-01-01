@@ -612,12 +612,58 @@ public func testSupport_kotlinIntStringTupleVar(value: (Int, String)) -> (Int, S
     return kotlinIntStringTupleVar
 }
 
+public func testSupport_kotlinIntErrorResultVar(value: Int?) -> Int? {
+    if let value {
+        kotlinIntErrorResult = .success(value)
+    } else {
+        kotlinIntErrorResult = .failure(KotlinError())
+    }
+    switch kotlinIntErrorResult {
+    case .success(let ret):
+        return ret
+    case .failure:
+        return nil
+    }
+}
+
 public func testSupport_callKotlinThrowingFunction(shouldThrow: Bool) throws -> Int {
     return try kotlinThrowingFunction(shouldThrow: shouldThrow)
 }
 
 public func testSupport_callKotlinThrowingVoidFunction(shouldThrow: Bool) throws {
     try kotlinThrowingVoidFunction(shouldThrow: shouldThrow)
+}
+
+public func testSupport_callKotlinThrowingBridgedErrorFunction() -> Bool {
+    do {
+        try kotlinThrowingBridgedErrorFunction(shouldThrow: false)
+    } catch {
+        return false
+    }
+    do {
+        try kotlinThrowingBridgedErrorFunction(shouldThrow: true)
+        return false
+    } catch is KotlinError {
+        return true
+    } catch {
+        return false
+    }
+}
+
+public func testSupport_callKotlinThrowingBridgedEnumErrorFunction() -> Bool {
+    do {
+        try kotlinThrowingBridgedEnumErrorFunction(throw: nil)
+    } catch {
+        return false
+    }
+    do {
+        try kotlinThrowingBridgedEnumErrorFunction(throw: 99)
+        return false
+    } catch KotlinEnumError.intError(let i) {
+        return i == 99
+    } catch {
+        return false
+    }
 }
 
 public func testSupport_kotlinAsyncThrowsVar() async throws -> Int {
