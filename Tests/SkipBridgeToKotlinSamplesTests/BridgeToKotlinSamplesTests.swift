@@ -412,6 +412,58 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(value2, 100)
     }
 
+    public func testGenericClass() {
+        let c = SwiftClass()
+        let g = c.swiftGenericClassVar
+        XCTAssertEqual(100, g.value)
+        XCTAssertEqual(99, g.identity(value: 99, 1))
+
+        g.value = 101
+        XCTAssertEqual(101, g.value)
+    }
+
+    public func testGenericStruct() {
+        let c = SwiftClass()
+        var g = c.swiftGenericStructVar
+        XCTAssertEqual("a", g.value)
+        XCTAssertEqual("a", g.identity(value: "a", 1))
+
+        g.value = "b"
+        XCTAssertEqual("b", g.value)
+        XCTAssertEqual("a", c.swiftGenericStructVar.value)
+
+        c.swiftGenericStructVar.value = "c"
+        XCTAssertEqual("b", g.value)
+        XCTAssertEqual("c", c.swiftGenericStructVar.value)
+
+        c.swiftGenericStructVar.update(value: "d")
+        XCTAssertEqual("d", c.swiftGenericStructVar.value)
+    }
+
+    public func testGenericEnum() {
+        let c = SwiftClass()
+        switch c.swiftGenericEnumVar {
+        case .a(let value, let s):
+            XCTAssertEqual(value, 9)
+            XCTAssertEqual(s, "a")
+        case .b:
+            XCTFail(".b")
+        }
+        XCTAssertEqual(c.swiftGenericEnumVar.value, 9)
+        XCTAssertEqual(c.swiftGenericEnumVar.stringValue(), "a")
+
+        c.updateSwiftGenericEnum()
+        let e = c.swiftGenericEnumVar
+        switch e {
+        case .a:
+            XCTFail(".b")
+        case .b:
+            break
+        }
+        XCTAssertNil(e.value)
+        XCTAssertEqual(e.stringValue(), ".b")
+    }
+
     public func testClosure0Var() {
         swiftClosure0Var()
         swiftClosure0Var = { print("reassigned") }
