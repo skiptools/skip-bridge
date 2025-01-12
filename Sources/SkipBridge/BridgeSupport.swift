@@ -83,6 +83,11 @@ public final class SwiftValueTypeBox<T> {
     }
 }
 
+/// Generic type that can generate a type-erased wrapper around itself.
+public protocol TypeErasedConvertible {
+    func toTypeErased() -> AnyObject
+}
+
 /// The Java class name of the given object.
 public func Java_className(of object: JavaObjectPointer, options: JConvertibleOptions) -> String {
     let object_java = object.toJavaParameter(options: options)
@@ -90,6 +95,9 @@ public func Java_className(of object: JavaObjectPointer, options: JConvertibleOp
 }
 private let Java_javaClassNameOf_methodID = Java_fileClass.getStaticMethodID(name: "javaClassNameOf", sig: "(Ljava/lang/Object;)Ljava/lang/String;")!
 
+/// Added to final bridged classes.
+public protocol BridgedFinalClass: AnyObject {
+}
 
 /// Added to non-final base classes to help handle polymorphism in `JConvertible`.
 public protocol BridgedToKotlinBaseClass: AnyObject {

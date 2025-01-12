@@ -46,6 +46,19 @@ public enum BridgedTypes: String {
 
 /// Utilities to convert unknown bridged objects.
 public struct AnyBridging {
+    /// Convert a Kotlin/Java instance of a known base type to its Swift projection.
+    public static func fromJavaObject<T>(_ ptr: JavaObjectPointer?, toBaseType: T.Type, options: JConvertibleOptions) -> T? {
+        guard let ptr else {
+            return nil
+        }
+        // Convert non-polymorphic JConvertibles directly, else fall back to AnyBridging
+        if let convertibleType = T.self as? JConvertible.Type, !(T.self is AnyObject.Type) || (T.self is BridgedFinalClass.Type) {
+            return convertibleType.fromJavaObject(ptr, options: options) as? T
+        } else {
+            return AnyBridging.fromJavaObject(ptr, options: options) as? T
+        }
+    }
+
     /// Convert an unknown Kotlin/Java instance to its Swift projection.
     public static func fromJavaObject(_ ptr: JavaObjectPointer?, options: JConvertibleOptions, fallback: (() -> Any)? = nil) -> Any? {
         guard let ptr else {
@@ -160,13 +173,7 @@ extension Array: JObjectProtocol, JConvertible {
         for i in 0..<count {
             // arr.append(list.get(i))
             let element_java = try! JavaObjectPointer?.call(Java_List_get_methodID, on: list_java, options: options, args: [i.toJavaParameter(options: options)])
-            // Convert non-polymorphic JConvertibles directly, else fall back to AnyBridging
-            let element: Element
-            if let convertibleElement = Element.self as? JConvertible.Type, !(Element.self is AnyObject.Type) {
-                element = convertibleElement.fromJavaObject(element_java, options: options) as! Element
-            } else {
-                element = AnyBridging.fromJavaObject(element_java, options: options) as! Element
-            }
+            let element = AnyBridging.fromJavaObject(element_java, toBaseType: Element.self, options: options)!
             arr.append(element)
             if let element_java {
                 jni.deleteLocalRef(element_java)
@@ -292,20 +299,8 @@ extension Dictionary: JObjectProtocol, JConvertible {
             // let key = itr.next(); let value = map.get(key)
             let key_java = try! JavaObjectPointer?.call(Java_Iterator_next_methodID, on: iterator_java, options: options, args: [])
             let value_java = try! JavaObjectPointer?.call(Java_Map_get_methodID, on: map_java, options: options, args: [key_java.toJavaParameter(options: options)])
-
-            // Convert non-polymorphic JConvertibles directly, else fall back to AnyBridging
-            let key: Key
-            let value: Value
-            if let convertibleKey = Key.self as? JConvertible.Type, !(Key.self is AnyObject.Type) {
-                key = convertibleKey.fromJavaObject(key_java, options: options) as! Key
-            } else {
-                key = AnyBridging.fromJavaObject(key_java, options: options) as! Key
-            }
-            if let convertibleValue = Value.self as? JConvertible.Type, !(Value.self is AnyObject.Type) {
-                value = convertibleValue.fromJavaObject(value_java, options: options) as! Value
-            } else {
-                value = AnyBridging.fromJavaObject(value_java, options: options) as! Value
-            }
+            let key = AnyBridging.fromJavaObject(key_java, toBaseType: Key.self, options: options)!
+            let value = AnyBridging.fromJavaObject(value_java, toBaseType: Value.self, options: options)!
             dict[key] = value
             if let key_java {
                 jni.deleteLocalRef(key_java)
@@ -373,13 +368,8 @@ extension Result: JObjectProtocol, JConvertible {
             let error = JThrowable.toError(throwable_java, options: options) as! Failure
             return .failure(error)
         } else {
-            let value_java: JavaObjectPointer? = try! pair_java.call(method: Java_Pair_first_methodID, options: options, args: [])
-            let success: Success
-            if let convertibleResult = Success.self as? JConvertible.Type, !(Success.self is AnyObject.Type) {
-                success = convertibleResult.fromJavaObject(value_java, options: options) as! Success
-            } else {
-                success = AnyBridging.fromJavaObject(value_java, options: options) as! Success
-            }
+            let success_java: JavaObjectPointer? = try! pair_java.call(method: Java_Pair_first_methodID, options: options, args: [])
+            let success = AnyBridging.fromJavaObject(success_java, toBaseType: Success.self, options: options)!
             return .success(success)
         }
     }
@@ -428,13 +418,7 @@ extension Set: JObjectProtocol, JConvertible {
         for _ in 0..<size {
             // set.insert(itr.next())
             let element_java = try! JavaObjectPointer?.call(Java_Iterator_next_methodID, on: iterator_java, options: options, args: [])
-            // Convert non-polymorphic JConvertibles directly, else fall back to AnyBridging
-            let element: Element
-            if let convertibleElement = Element.self as? JConvertible.Type, !(Element.self is AnyObject.Type) {
-                element = convertibleElement.fromJavaObject(element_java, options: options) as! Element
-            } else {
-                element = AnyBridging.fromJavaObject(element_java, options: options) as! Element
-            }
+            let element = AnyBridging.fromJavaObject(element_java, toBaseType: Element.self, options: options)!
             set.insert(element)
             if let element_java {
                 jni.deleteLocalRef(element_java)
