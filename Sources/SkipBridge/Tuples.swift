@@ -134,11 +134,7 @@ public final class SwiftTuple {
     }
 
     private static func fromJavaObject<T>(_ ptr: JavaObjectPointer?, options: JConvertibleOptions) -> T {
-        if let convertible = T.self as? JConvertible.Type, !(T.self is AnyObject.Type) {
-            return convertible.fromJavaObject(ptr, options: options) as! T
-        } else {
-            return AnyBridging.fromJavaObject(ptr, options: options) as! T
-        }
+        return AnyBridging.fromJavaObject(ptr, toBaseType: T.self, options: options)!
     }
 }
 
