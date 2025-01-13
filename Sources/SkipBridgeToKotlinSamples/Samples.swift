@@ -128,6 +128,14 @@ public class SwiftClass {
     public var swiftStructVar = SwiftStruct(string: "1")
     public var kotlinStructVar = KotlinStruct(string: "2")
 
+    public let swiftGenericClassVar = SwiftGenericClass(value: 100)
+    public var swiftGenericStructVar = SwiftGenericStruct(value: "a")
+    public var swiftGenericEnumVar = SwiftGenericEnum.a(9, s: "a")
+
+    public func updateSwiftGenericEnum() {
+        swiftGenericEnumVar = .b
+    }
+
     public init() {
     }
 }
@@ -141,7 +149,7 @@ public final class SwiftSubclass: SwiftClass {
     }
 }
 
-public final class SwiftHelperClass: SwiftProtocol, Comparable, Identifiable {
+public final class SwiftHelperClass: SwiftProtocol, SwiftGenericProtocol, Comparable, Identifiable {
     public var id: String {
         return stringVar
     }
@@ -152,6 +160,10 @@ public final class SwiftHelperClass: SwiftProtocol, Comparable, Identifiable {
 
     public func stringValue() -> String {
         return stringVar
+    }
+
+    public func genericProtocolFunc(p: Int) -> Int {
+        return p + 1
     }
 
     public static func ==(lhs: SwiftHelperClass, rhs: SwiftHelperClass) -> Bool {
@@ -176,6 +188,11 @@ public final class SwiftHelperClass: SwiftProtocol, Comparable, Identifiable {
 
 public protocol SwiftProtocol: Hashable {
     func stringValue() -> String
+}
+
+public protocol SwiftGenericProtocol {
+    associatedtype T
+    func genericProtocolFunc(p: T) -> T
 }
 
 public struct SwiftStruct {
@@ -229,6 +246,58 @@ public enum SwiftAssociatedValuesEnum {
         switch self {
         case .a(let i, _):
             return i
+        case .b:
+            return nil
+        }
+    }
+
+    public func stringValue() -> String {
+        switch self {
+        case .a(_, let s):
+            return s
+        case .b:
+            return ".b"
+        }
+    }
+}
+
+public class SwiftGenericClass<T> {
+    public var value: T
+
+    // SKIP @nobridge
+    public init(value: T) {
+        self.value = value
+    }
+
+    public func identity(value: T, _ i: Int) -> T {
+        return value
+    }
+}
+
+public struct SwiftGenericStruct<T> {
+    public var value: T
+
+    // SKIP @nobridge
+    public init(value: T) {
+        self.value = value
+    }
+
+    public func identity(value: T, _ i: Int) -> T {
+        return value
+    }
+    public mutating func update(value: T) {
+        self.value = value
+    }
+}
+
+public enum SwiftGenericEnum<T> {
+    case a(T, s: String)
+    case b
+
+    public var value: T? {
+        switch self {
+        case .a(let value, _):
+            return value
         case .b:
             return nil
         }

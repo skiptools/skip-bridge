@@ -561,6 +561,119 @@ public func testSupport_kotlinActor() async -> String? {
     return nil
 }
 
+public func testSupport_genericClass() -> String? {
+    let c = KotlinClass()
+    let g = c.kotlinGenericClassVar
+    guard g.value == 100 else {
+        return "g.value == 100"
+    }
+    guard g.identity(value: 99, 1) == 99 else {
+        return "g.identity == 99"
+    }
+
+    g.value = 101
+    guard g.value == 101 else {
+        return "g.value == 101"
+    }
+
+    let g2 = KotlinGenericClass(value: 1)
+    c.kotlinGenericClassVar = g2
+    guard c.kotlinGenericClassVar.value == 1 else {
+        return "c.kotlinGenericClassVar.value == 1"
+    }
+    return nil
+}
+
+public func testSupport_genericStruct() -> String? {
+    let c = KotlinClass()
+    var g = c.kotlinGenericStructVar
+    guard g.value == "a" else {
+        return "g.value == 'a'"
+    }
+    guard g.identity(value: "a", 1) == "a" else {
+        return "g.identity == 'a'"
+    }
+
+    g.value = "b"
+    guard g.value == "b" else {
+        return "g.value == 'b'"
+    }
+    guard c.kotlinGenericStructVar.value == "a" else {
+        return "c.kotlinGenericStructVar.value == 'a'"
+    }
+
+    c.kotlinGenericStructVar.value = "c"
+    guard g.value == "b" else {
+        return "g.value == 'b'"
+    }
+    guard c.kotlinGenericStructVar.value == "c" else {
+        return "c.kotlinGenericStructVar.value == 'c'"
+    }
+
+    c.kotlinGenericStructVar.update(value: "d")
+    guard c.kotlinGenericStructVar.value == "d" else {
+        return "c.kotlinGenericStructVar.value == 'd'"
+    }
+
+    let g2 = KotlinGenericStruct(value: "z")
+    c.kotlinGenericStructVar = g2
+    guard c.kotlinGenericStructVar.value == "z" else {
+        return "c.kotlinGenericStructVar.value == 'z'"
+    }
+    return nil
+}
+
+public func testSupport_genericEnum() -> String? {
+    let c = KotlinClass()
+    switch c.kotlinGenericEnumVar {
+    case .a(let value, let s):
+        guard value == 9 else {
+            return "value == 9"
+        }
+        guard s == "a" else {
+            return "s == 'a'"
+        }
+    case .b:
+        return "Expected .b"
+    }
+
+    guard c.kotlinGenericEnumVar.value == 9 else {
+        return "c.kotlinGenericEnumVar.value == 9"
+    }
+    guard c.kotlinGenericEnumVar.stringValue() == "a" else {
+        return "c.kotlinGenericEnumVar.stringValue() == 'a'"
+    }
+
+    c.kotlinGenericEnumVar = .a(10, s: "b")
+    switch c.kotlinGenericEnumVar {
+    case .a(let value, let s):
+        guard value == 10 else {
+            return "value == 10"
+        }
+        guard s == "b" else {
+            return "s == 'b'"
+        }
+    case .b:
+        return "Expected .b"
+    }
+
+    c.kotlinGenericEnumVar = .b
+    let e = c.kotlinGenericEnumVar
+    switch e {
+    case .a:
+        return "Expected .b"
+    case .b:
+        break
+    }
+    guard e.value == nil else {
+        return "e.value == nil"
+    }
+    guard e.stringValue() == ".b" else {
+        return "e.stringValue() == '.b'"
+    }
+    return nil
+}
+
 public func testSupport_kotlinClosure0Var() {
     kotlinClosure0Var()
     kotlinClosure0Var = { print("reassigned") }
