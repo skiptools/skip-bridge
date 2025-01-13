@@ -130,6 +130,10 @@ public class KotlinClass {
     public var kotlinStructVar = KotlinStruct(string: "1")
     public var swiftStructVar = SwiftStruct(string: "2")
 
+    public var kotlinGenericClassVar = KotlinGenericClass(value: 100)
+    public var kotlinGenericStructVar = KotlinGenericStruct(value: "a")
+    public var kotlinGenericEnumVar = KotlinGenericEnum.a(9, s: "a")
+
     public init() {
     }
 }
@@ -143,7 +147,7 @@ public final class KotlinSubclass: KotlinClass {
     }
 }
 
-public final class KotlinHelperClass: KotlinProtocol, Comparable, Identifiable {
+public final class KotlinHelperClass: KotlinProtocol, KotlinGenericProtocol, Comparable, Identifiable {
     public var id: String {
         return stringVar
     }
@@ -154,6 +158,10 @@ public final class KotlinHelperClass: KotlinProtocol, Comparable, Identifiable {
 
     public func stringValue() -> String {
         return stringVar
+    }
+
+    public func genericProtocolFunc(p: Int) -> Int {
+        return p + 1
     }
 
     public static func ==(lhs: KotlinHelperClass, rhs: KotlinHelperClass) -> Bool {
@@ -178,6 +186,11 @@ public final class KotlinHelperClass: KotlinProtocol, Comparable, Identifiable {
 
 public protocol KotlinProtocol: Hashable {
     func stringValue() -> String
+}
+
+public protocol KotlinGenericProtocol {
+    associatedtype T
+    func genericProtocolFunc(p: T) -> T
 }
 
 public struct KotlinStruct {
@@ -231,6 +244,56 @@ public enum KotlinAssociatedValuesEnum {
         switch self {
         case .a(let i, _):
             return i
+        case .b:
+            return nil
+        }
+    }
+
+    public func stringValue() -> String {
+        switch self {
+        case .a(_, let s):
+            return s
+        case .b:
+            return ".b"
+        }
+    }
+}
+
+public class KotlinGenericClass<T> {
+    public var value: T
+
+    public init(value: T) {
+        self.value = value
+    }
+
+    public func identity(value: T, _ i: Int) -> T {
+        return value
+    }
+}
+
+public struct KotlinGenericStruct<T> {
+    public var value: T
+
+    public init(value: T) {
+        self.value = value
+    }
+
+    public func identity(value: T, _ i: Int) -> T {
+        return value
+    }
+    public mutating func update(value: T) {
+        self.value = value
+    }
+}
+
+public enum KotlinGenericEnum<T> {
+    case a(T, s: String)
+    case b
+
+    public var value: T? {
+        switch self {
+        case .a(let value, _):
+            return value
         case .b:
             return nil
         }
