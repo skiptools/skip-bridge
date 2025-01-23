@@ -140,6 +140,7 @@ public class SwiftClass {
     }
 }
 
+
 public final class SwiftSubclass: SwiftClass {
     public var stringVar: String
 
