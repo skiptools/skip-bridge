@@ -74,8 +74,10 @@ build:
     # For test cases, we compile locally with `swift build` against the derived Swift project
     - block: 'tasks.withType<Test>'
       contents:
-        - 'jvmArgs("-verbose:jni")'
-        - 'jvmArgs("-Xcheck:jni")'
+        # disabled verbose:jni and check:jni parameters because they can spam the log
+        # then can be re-enabled if JNI-related issues are suspected
+        #- 'jvmArgs("-verbose:jni")'
+        #- 'jvmArgs("-Xcheck:jni")'
         # only perform a single build for the entire multi-module project
         - block: 'if ((System.getenv("SKIP_BRIDGE_ROBOLECTRIC_BUILD_DISABLED") != "1") && (isRootBridgeModule() == true))'
           contents:
