@@ -1,3 +1,9 @@
+## 0.6.2
+
+Released 2025-01-23
+
+  - Add TARGET_OS_ANDROID envrionment and compiler directive to Android build (#50)
+
 ## 0.2.1
 
 Released 2024-12-12
