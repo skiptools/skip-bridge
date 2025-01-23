@@ -1136,7 +1136,7 @@ public struct JVMOptions {
     public var verboseGarbageCollection = false
     public var verboseClassLoading = false
     public var verboseJNI = false
-    public var checkJNI = true
+    public var checkJNI = false
     public var classPath: [String] = []
     public var libraryPath: [String] = []
     public var extDirs: [String] = []
