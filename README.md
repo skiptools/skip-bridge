@@ -1,6 +1,6 @@
-## SkipBridge
+# SkipBridge
 
-SkipBridge provides bridging between Swift and Java.
+Bridging between Swift and Kotlin/Java for [Skip](https://skip.tools) apps.
 
-Documentation can be found at https://skip.tools/docs/native/#bridging.
+Documentation can be found at https://skip.tools/docs/native/.
 
