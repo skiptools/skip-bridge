@@ -65,17 +65,11 @@ private final class BridgeObservationSupport: @unchecked Sendable {
     }
 
     public func access<Subject, Member>(_ subject: Subject, keyPath: KeyPath<Subject, Member>) {
-        guard subject is BridgedToKotlin else {
-            return
-        }
         let index = Java_init(forKeyPath: keyPath)
         Java_access(index)
     }
 
     public func willSet<Subject, Member>(_ subject: Subject, keyPath: KeyPath<Subject, Member>) {
-        guard subject is BridgedToKotlin else {
-            return
-        }
         let index = Java_init(forKeyPath: keyPath)
         Java_update(index)
     }

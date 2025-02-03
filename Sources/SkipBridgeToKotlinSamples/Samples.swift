@@ -167,6 +167,10 @@ public final class SwiftHelperClass: SwiftProtocol, SwiftGenericProtocol, Compar
         return p + 1
     }
 
+    @MainActor public func mainActorFunc(p: Int) -> Int {
+        return p
+    }
+
     public static func ==(lhs: SwiftHelperClass, rhs: SwiftHelperClass) -> Bool {
         return lhs.stringVar == rhs.stringVar
     }
@@ -264,6 +268,7 @@ public enum SwiftAssociatedValuesEnum {
 
 public class SwiftGenericClass<T> {
     public var value: T
+    @MainActor public var mainActorValue: T? = nil
 
     // SKIP @nobridge
     public init(value: T) {
