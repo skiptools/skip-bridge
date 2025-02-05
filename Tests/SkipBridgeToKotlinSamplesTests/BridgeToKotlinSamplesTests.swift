@@ -320,7 +320,14 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertTrue(obj.optionalKotlinProtocolVar is KotlinHelperClass)
         XCTAssertEqual(obj.optionalKotlinProtocolVar?.hashValue, helper.hashValue)
     }
-    
+
+    public func testSwiftProtocolExtension() {
+        let helper = SwiftHelperClass()
+        helper.stringVar = "foo"
+        XCTAssertEqual(helper.stringVar, "foo")
+        XCTAssertEqual(helper.protocolExtensionVar, 0)
+    }
+
     public func testStruct() {
         let s1 = SwiftStruct(string: "2")
         XCTAssertEqual(s1.intVar, 2)

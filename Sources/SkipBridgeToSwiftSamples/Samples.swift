@@ -193,6 +193,16 @@ public protocol KotlinGenericProtocol {
     func genericProtocolFunc(p: T) -> T
 }
 
+extension KotlinProtocol {
+    public func stringValue() -> String {
+        return "<default>"
+    }
+
+    public var protocolExtensionVar: Int {
+        return 0
+    }
+}
+
 public struct KotlinStruct {
     public var intVar = 1
 

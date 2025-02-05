@@ -200,6 +200,16 @@ public protocol SwiftGenericProtocol {
     func genericProtocolFunc(p: T) -> T
 }
 
+extension SwiftProtocol {
+    public func stringValue() -> String {
+        return "<default>"
+    }
+
+    public var protocolExtensionVar: Int {
+        return 0
+    }
+}
+
 public struct SwiftStruct {
     public var intVar = 1
 
