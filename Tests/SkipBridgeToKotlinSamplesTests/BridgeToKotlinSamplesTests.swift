@@ -5,6 +5,7 @@
 // as published by the Free Software Foundation https://fsf.org
 
 import Foundation
+import SkipBridge
 import SkipBridgeKt
 import SkipBridgeToKotlinSamples
 import SkipBridgeToKotlinSamplesHelpers
@@ -566,6 +567,15 @@ final class BridgeToKotlinTests: XCTestCase {
             // Expected
             break
         }
+    }
+
+    func testSwiftHashable() {
+        XCTAssertEqual(swiftHashable1, swiftHashable2)
+        XCTAssertEqual(swiftHashable1.hashValue, swiftHashable2.hashValue)
+
+        XCTAssertNotEqual(swiftHashable1, swiftHashable3)
+        XCTAssertNotEqual(swiftHashable1.hashValue, swiftHashable3.hashValue)
+
     }
 
     func testThrowingFunctions() throws {

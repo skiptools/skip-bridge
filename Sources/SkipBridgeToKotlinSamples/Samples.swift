@@ -5,6 +5,7 @@
 // as published by the Free Software Foundation https://fsf.org
 
 import Foundation
+import SkipBridge
 import SkipBridgeToKotlinSamplesHelpers
 
 // MARK: Global constants
@@ -376,6 +377,15 @@ public var swiftStringSetVar: Set<String> = ["a", "b", "c"]
 public var swiftIntStringDictionaryVar = [1: "a", 2: "b", 3: "c"]
 public var swiftIntStringTuple = (1, "s")
 public var swiftIntErrorResult: Result<Int, SwiftError> = .success(1)
+public var swiftHashable1: AnyHashable = SwiftHashable(HashableEnum.first)
+public var swiftHashable2: AnyHashable = SwiftHashable(HashableEnum.first)
+public var swiftHashable3: AnyHashable = SwiftHashable(HashableEnum.second)
+
+// SKIP @nobridge
+public enum HashableEnum : Hashable {
+    case first
+    case second
+}
 
 // MARK: Functions
 
