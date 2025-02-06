@@ -404,6 +404,18 @@ public func testSupport_swiftProtocolMember() -> String? {
     return nil
 }
 
+public func testSupport_protocolExtension() -> String? {
+    let helper = KotlinHelperClass()
+    helper.stringVar = "foo"
+    guard helper.stringVar == "foo" else {
+        return "helper.stringVar == 'foo'"
+    }
+    guard helper.protocolExtensionVar == 0 else {
+        return "helper.protocolExtensionVar == 0"
+    }
+    return nil
+}
+
 public func testSupport_kotlinStruct() -> String? {
     let s1 = KotlinStruct(string: "2")
     guard s1.intVar == 2 else {

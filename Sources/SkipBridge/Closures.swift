@@ -186,7 +186,7 @@ public func SwiftBackedFunction1_Swift_release(_ Java_env: JNIEnvPointer, _ Java
 @_cdecl("Java_skip_bridge_kt_SwiftBackedFunction1_Swift_1invoke")
 public func SwiftBackedFunction1_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer?) -> JavaObjectPointer? {
     let value_swift: SwiftClosure1 = Swift_peer.pointee()!
-    let p0_swift = (value_swift.p0Type as! JConvertible.Type).fromJavaObject(p0, options: value_swift.options)
+    let p0_swift = AnyBridging.fromAnyTypeJavaObject(p0, toBaseType: value_swift.p0Type, options: value_swift.options)
     let c_return_swift = value_swift.closure(p0_swift)
     return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject(options: value_swift.options)
 }
@@ -239,8 +239,8 @@ public func SwiftBackedFunction2_Swift_release(_ Java_env: JNIEnvPointer, _ Java
 @_cdecl("Java_skip_bridge_kt_SwiftBackedFunction2_Swift_1invoke")
 public func SwiftBackedFunction2_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer?, _ p1: JavaObjectPointer?) -> JavaObjectPointer? {
     let value_swift: SwiftClosure2 = Swift_peer.pointee()!
-    let p0_swift = (value_swift.p0Type as! JConvertible.Type).fromJavaObject(p0, options: value_swift.options)
-    let p1_swift = (value_swift.p1Type as! JConvertible.Type).fromJavaObject(p1, options: value_swift.options)
+    let p0_swift = AnyBridging.fromAnyTypeJavaObject(p0, toBaseType: value_swift.p0Type, options: value_swift.options)
+    let p1_swift = AnyBridging.fromAnyTypeJavaObject(p1, toBaseType: value_swift.p1Type, options: value_swift.options)
     let c_return_swift = value_swift.closure(p0_swift, p1_swift)
     return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject(options: value_swift.options)
 }
@@ -295,9 +295,9 @@ public func SwiftBackedFunction3_Swift_release(_ Java_env: JNIEnvPointer, _ Java
 @_cdecl("Java_skip_bridge_kt_SwiftBackedFunction3_Swift_1invoke")
 public func SwiftBackedFunction3_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer?, _ p1: JavaObjectPointer?, _ p2: JavaObjectPointer?) -> JavaObjectPointer? {
     let value_swift: SwiftClosure3 = Swift_peer.pointee()!
-    let p0_swift = (value_swift.p0Type as! JConvertible.Type).fromJavaObject(p0, options: value_swift.options)
-    let p1_swift = (value_swift.p1Type as! JConvertible.Type).fromJavaObject(p1, options: value_swift.options)
-    let p2_swift = (value_swift.p2Type as! JConvertible.Type).fromJavaObject(p2, options: value_swift.options)
+    let p0_swift = AnyBridging.fromAnyTypeJavaObject(p0, toBaseType: value_swift.p0Type, options: value_swift.options)
+    let p1_swift = AnyBridging.fromAnyTypeJavaObject(p1, toBaseType: value_swift.p1Type, options: value_swift.options)
+    let p2_swift = AnyBridging.fromAnyTypeJavaObject(p2, toBaseType: value_swift.p2Type, options: value_swift.options)
     let c_return_swift = value_swift.closure(p0_swift, p1_swift, p2_swift)
     return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject(options: value_swift.options)
 }
@@ -354,10 +354,10 @@ public func SwiftBackedFunction4_Swift_release(_ Java_env: JNIEnvPointer, _ Java
 @_cdecl("Java_skip_bridge_kt_SwiftBackedFunction4_Swift_1invoke")
 public func SwiftBackedFunction4_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer?, _ p1: JavaObjectPointer?, _ p2: JavaObjectPointer?, _ p3: JavaObjectPointer?) -> JavaObjectPointer? {
     let value_swift: SwiftClosure4 = Swift_peer.pointee()!
-    let p0_swift = (value_swift.p0Type as! JConvertible.Type).fromJavaObject(p0, options: value_swift.options)
-    let p1_swift = (value_swift.p1Type as! JConvertible.Type).fromJavaObject(p1, options: value_swift.options)
-    let p2_swift = (value_swift.p2Type as! JConvertible.Type).fromJavaObject(p2, options: value_swift.options)
-    let p3_swift = (value_swift.p3Type as! JConvertible.Type).fromJavaObject(p3, options: value_swift.options)
+    let p0_swift = AnyBridging.fromAnyTypeJavaObject(p0, toBaseType: value_swift.p0Type, options: value_swift.options)
+    let p1_swift = AnyBridging.fromAnyTypeJavaObject(p1, toBaseType: value_swift.p1Type, options: value_swift.options)
+    let p2_swift = AnyBridging.fromAnyTypeJavaObject(p2, toBaseType: value_swift.p2Type, options: value_swift.options)
+    let p3_swift = AnyBridging.fromAnyTypeJavaObject(p3, toBaseType: value_swift.p3Type, options: value_swift.options)
     let c_return_swift = value_swift.closure(p0_swift, p1_swift, p2_swift, p3_swift)
     return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject(options: value_swift.options)
 }
@@ -416,11 +416,11 @@ public func SwiftBackedFunction5_Swift_release(_ Java_env: JNIEnvPointer, _ Java
 @_cdecl("Java_skip_bridge_kt_SwiftBackedFunction5_Swift_1invoke")
 public func SwiftBackedFunction5_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer?, _ p1: JavaObjectPointer?, _ p2: JavaObjectPointer?, _ p3: JavaObjectPointer?, _ p4: JavaObjectPointer?) -> JavaObjectPointer? {
     let value_swift: SwiftClosure5 = Swift_peer.pointee()!
-    let p0_swift = (value_swift.p0Type as! JConvertible.Type).fromJavaObject(p0, options: value_swift.options)
-    let p1_swift = (value_swift.p1Type as! JConvertible.Type).fromJavaObject(p1, options: value_swift.options)
-    let p2_swift = (value_swift.p2Type as! JConvertible.Type).fromJavaObject(p2, options: value_swift.options)
-    let p3_swift = (value_swift.p3Type as! JConvertible.Type).fromJavaObject(p3, options: value_swift.options)
-    let p4_swift = (value_swift.p4Type as! JConvertible.Type).fromJavaObject(p4, options: value_swift.options)
+    let p0_swift = AnyBridging.fromAnyTypeJavaObject(p0, toBaseType: value_swift.p0Type, options: value_swift.options)
+    let p1_swift = AnyBridging.fromAnyTypeJavaObject(p1, toBaseType: value_swift.p1Type, options: value_swift.options)
+    let p2_swift = AnyBridging.fromAnyTypeJavaObject(p2, toBaseType: value_swift.p2Type, options: value_swift.options)
+    let p3_swift = AnyBridging.fromAnyTypeJavaObject(p3, toBaseType: value_swift.p3Type, options: value_swift.options)
+    let p4_swift = AnyBridging.fromAnyTypeJavaObject(p4, toBaseType: value_swift.p4Type, options: value_swift.options)
     let c_return_swift = value_swift.closure(p0_swift, p1_swift, p2_swift, p3_swift, p4_swift)
     return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject(options: value_swift.options)
 }

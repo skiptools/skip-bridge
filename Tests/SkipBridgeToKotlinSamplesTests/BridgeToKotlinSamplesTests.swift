@@ -5,6 +5,7 @@
 // as published by the Free Software Foundation https://fsf.org
 
 import Foundation
+import SkipBridge
 import SkipBridgeKt
 import SkipBridgeToKotlinSamples
 import SkipBridgeToKotlinSamplesHelpers
@@ -320,7 +321,14 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertTrue(obj.optionalKotlinProtocolVar is KotlinHelperClass)
         XCTAssertEqual(obj.optionalKotlinProtocolVar?.hashValue, helper.hashValue)
     }
-    
+
+    public func testSwiftProtocolExtension() {
+        let helper = SwiftHelperClass()
+        helper.stringVar = "foo"
+        XCTAssertEqual(helper.stringVar, "foo")
+        XCTAssertEqual(helper.protocolExtensionVar, 0)
+    }
+
     public func testStruct() {
         let s1 = SwiftStruct(string: "2")
         XCTAssertEqual(s1.intVar, 2)
@@ -559,6 +567,15 @@ final class BridgeToKotlinTests: XCTestCase {
             // Expected
             break
         }
+    }
+
+    func testSwiftHashable() {
+        XCTAssertEqual(swiftHashable1, swiftHashable2)
+        XCTAssertEqual(swiftHashable1.hashValue, swiftHashable2.hashValue)
+
+        XCTAssertNotEqual(swiftHashable1, swiftHashable3)
+        XCTAssertNotEqual(swiftHashable1.hashValue, swiftHashable3.hashValue)
+
     }
 
     func testThrowingFunctions() throws {

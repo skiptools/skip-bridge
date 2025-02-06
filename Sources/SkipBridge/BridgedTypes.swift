@@ -132,6 +132,19 @@ public struct AnyBridging {
         }
     }
 
+    /// Convert a Kotlin/Java instance of an `Any` base type to its Swift projection.
+    public static func fromAnyTypeJavaObject(_ ptr: JavaObjectPointer?, toBaseType: Any.Type, options: JConvertibleOptions) -> Any? {
+        guard let ptr else {
+            return nil
+        }
+        // Convert non-polymorphic JConvertibles directly, else fall back to AnyBridging
+        if let convertibleType = toBaseType as? JConvertible.Type, !(toBaseType is AnyObject.Type) || (toBaseType is BridgedFinalClass.Type) {
+            return convertibleType.fromJavaObject(ptr, options: options)
+        } else {
+            return AnyBridging.fromJavaObject(ptr, options: options)
+        }
+    }
+
     private static func tryProjection(of ptr: JavaObjectPointer, options: JConvertibleOptions) -> Any? {
         let ptr_java = ptr.toJavaParameter(options: options)
         let options_java = options.rawValue.toJavaParameter(options: options)
