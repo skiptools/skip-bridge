@@ -11,8 +11,6 @@ public final class SwiftHashable: SwiftPeerBridged, skip.lib.SwiftProjecting {
 
     public init(Swift_peer: SwiftObjectPointer) {
         self.Swift_peer = Swift_peer
-        //~~~
-        android.util.Log.e("", "CONSTRUCTED WITH HASH CODE: \(self.hashCode())")
     }
 
     deinit {
