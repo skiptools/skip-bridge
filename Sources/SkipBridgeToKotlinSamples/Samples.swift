@@ -168,9 +168,11 @@ public final class SwiftHelperClass: SwiftProtocol, SwiftGenericProtocol, Compar
         return p + 1
     }
 
+    #if compiler(>=6.0) // needed for MainActor.assumeIsolated
     @MainActor public func mainActorFunc(p: Int) -> Int {
         return p
     }
+    #endif
 
     public static func ==(lhs: SwiftHelperClass, rhs: SwiftHelperClass) -> Bool {
         return lhs.stringVar == rhs.stringVar
@@ -279,7 +281,9 @@ public enum SwiftAssociatedValuesEnum {
 
 public class SwiftGenericClass<T> {
     public var value: T
+    #if compiler(>=6.0) // needed for MainActor.assumeIsolated
     @MainActor public var mainActorValue: T? = nil
+    #endif
 
     // SKIP @nobridge
     public init(value: T) {
