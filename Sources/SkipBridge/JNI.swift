@@ -622,12 +622,15 @@ public final class JThrowable: JObject {
     private static let javaErrorExceptionClass = try! JClass(name: "skip/lib/ErrorException")
     private static let javaErrorExceptionConstructor = javaErrorExceptionClass.getMethodID(name: "<init>", sig: "(Ljava/lang/String;)V")!
 
-    public static func toError(_ ptr: JavaObjectPointer, options: JConvertibleOptions) -> Error {
+    public static func toError(_ ptr: JavaObjectPointer?, options: JConvertibleOptions) -> Error? {
+        guard let ptr else {
+            return nil
+        }
         // Note: It would be nice to keep JNI independent of some of the Skip-specific logic in AnyBridging, but
         // if we want to support bridging arbitrary Error types, we need to include Skip compatibility
         return AnyBridging.fromJavaObject(ptr, options: options, fallback: {
             descriptionToError(ptr, options: options)
-        }) as! Error
+        }) as? Error
     }
 
     fileprivate static func descriptionToError(_ ptr: JavaObjectPointer, options: JConvertibleOptions) -> ThrowableError {
@@ -635,11 +638,14 @@ public final class JThrowable: JObject {
         return ThrowableError(description: str ?? "A Java exception occurred, and an error was raised when trying to get the exception message")
     }
 
-    public static func toThrowable(_ error: any Error, options: JConvertibleOptions) -> JavaObjectPointer {
+    public static func toThrowable(_ error: (any Error)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+        guard let error else {
+            return nil
+        }
         guard let convertibleError = error as? JConvertible else {
             return descriptionToThrowable(error, options: options)
         }
-        return convertibleError.toJavaObject(options: options)!
+        return convertibleError.toJavaObject(options: options)
     }
 
     fileprivate static func descriptionToThrowable(_ error: any Error, options: JConvertibleOptions) -> JavaObjectPointer {
@@ -672,7 +678,7 @@ public final class JThrowable: JObject {
     private static let toStringID = javaClass.getMethodID(name: "toString", sig: "()Ljava/lang/String;")!
 
     public func toError(options: JConvertibleOptions) -> Error {
-        return Self.toError(ptr, options: options)
+        return Self.toError(ptr, options: options)!
     }
 }
 
