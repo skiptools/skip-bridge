@@ -62,17 +62,17 @@ final class BridgeToKotlinCompatTests: XCTestCase {
         #endif
     }
 
-//    func testCompatErrorVar() {
-//        #if SKIP
-//        let uuid = java.util.UUID.randomUUID()
-//        let compat = Compat(id: uuid)
-//
-//        XCTAssertTrue(compat.errorvar is CompatError)
-//        XCTAssertTrue(compat.errorvar is Throwable)
-//        compat.errorvar = RuntimeException("description")
-//        XCTAssertTrue(compat.errorvar is Throwable)
-//        XCTAssertTrue(compat.errorvar is Error)
-//        compat.errorvar = CompatError()
-//        #endif
-//    }
+    func testCompatErrorVar() {
+        #if SKIP
+        let uuid = java.util.UUID.randomUUID()
+        let compat = Compat(id: uuid)
+
+        XCTAssertTrue(compat.errorvar is CompatError)
+        XCTAssertTrue(compat.errorvar is Exception)
+        compat.errorvar = java.lang.RuntimeException("description")
+        XCTAssertTrue(compat.errorvar is Exception)
+        XCTAssertTrue(compat.errorvar is Error)
+        compat.errorvar = CompatError()
+        #endif
+    }
 }

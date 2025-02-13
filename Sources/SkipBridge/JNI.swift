@@ -633,7 +633,7 @@ public final class JThrowable: JObject {
         }) as? Error
     }
 
-    fileprivate static func descriptionToError(_ ptr: JavaObjectPointer, options: JConvertibleOptions) -> ThrowableError {
+    public static func descriptionToError(_ ptr: JavaObjectPointer, options: JConvertibleOptions) -> ThrowableError {
         let str = try? String.call(toStringID, on: ptr, options: options, args: [])
         return ThrowableError(description: str ?? "A Java exception occurred, and an error was raised when trying to get the exception message")
     }
@@ -648,7 +648,7 @@ public final class JThrowable: JObject {
         return convertibleError.toJavaObject(options: options)
     }
 
-    fileprivate static func descriptionToThrowable(_ error: any Error, options: JConvertibleOptions) -> JavaObjectPointer {
+    public static func descriptionToThrowable(_ error: any Error, options: JConvertibleOptions) -> JavaObjectPointer {
         // Note: It would be nice to keep JNI independent of some of the Skip-specific skip.lib.ErrorException, but
         // if we want to support compatibility with transpiled Swift we need to use Skip types
         let throwable = try! javaErrorExceptionClass.create(ctor: javaErrorExceptionConstructor, options: options, args: [String(describing: error).toJavaParameter(options: options)])

@@ -83,7 +83,7 @@ public func bridgedTypeOf(_ object: Any) -> BridgedTypes {
         return .result
     } else if object is kotlin.collections.Set<Any> {
         return .set
-    } else if object is java.lang.Throwable {
+    } else if object is kotlin.Throwable {
         return .throwable
     } else if object is java.util.UUID {
         return .uuid
