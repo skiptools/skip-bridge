@@ -22,7 +22,7 @@ public final class JavaBackedClosure<R>: JObject {
 
     public func invoke(_ p0: Any?) throws -> R {
         return try jniContext {
-            let p0_java = ((p0 as? JConvertible)?.toJavaObject(options: options)).toJavaParameter(options: options)
+            let p0_java = AnyBridging.toJavaObject(p0, options: options).toJavaParameter(options: options)
             let object: JavaObjectPointer? = try call(method: Java_Function1_invoke_methodID, options: options, args: [p0_java])
             return returnValue(for: object)
         }
@@ -30,8 +30,8 @@ public final class JavaBackedClosure<R>: JObject {
 
     public func invoke(_ p0: Any?, _ p1: Any?) throws -> R {
         return try jniContext {
-            let p0_java = ((p0 as? JConvertible)?.toJavaObject(options: options)).toJavaParameter(options: options)
-            let p1_java = ((p1 as? JConvertible)?.toJavaObject(options: options)).toJavaParameter(options: options)
+            let p0_java = AnyBridging.toJavaObject(p0, options: options).toJavaParameter(options: options)
+            let p1_java = AnyBridging.toJavaObject(p1, options: options).toJavaParameter(options: options)
             let object: JavaObjectPointer? = try call(method: Java_Function2_invoke_methodID, options: options, args: [p0_java, p1_java])
             return returnValue(for: object)
         }
@@ -39,9 +39,9 @@ public final class JavaBackedClosure<R>: JObject {
 
     public func invoke(_ p0: Any?, _ p1: Any?, _ p2: Any?) throws -> R {
         return try jniContext {
-            let p0_java = ((p0 as? JConvertible)?.toJavaObject(options: options)).toJavaParameter(options: options)
-            let p1_java = ((p1 as? JConvertible)?.toJavaObject(options: options)).toJavaParameter(options: options)
-            let p2_java = ((p2 as? JConvertible)?.toJavaObject(options: options)).toJavaParameter(options: options)
+            let p0_java = AnyBridging.toJavaObject(p0, options: options).toJavaParameter(options: options)
+            let p1_java = AnyBridging.toJavaObject(p1, options: options).toJavaParameter(options: options)
+            let p2_java = AnyBridging.toJavaObject(p2, options: options).toJavaParameter(options: options)
             let object: JavaObjectPointer? = try call(method: Java_Function3_invoke_methodID, options: options, args: [p0_java, p1_java, p2_java])
             return returnValue(for: object)
         }
@@ -49,10 +49,10 @@ public final class JavaBackedClosure<R>: JObject {
 
     public func invoke(_ p0: Any?, _ p1: Any?, _ p2: Any?, _ p3: Any?) throws -> R {
         return try jniContext {
-            let p0_java = ((p0 as? JConvertible)?.toJavaObject(options: options)).toJavaParameter(options: options)
-            let p1_java = ((p1 as? JConvertible)?.toJavaObject(options: options)).toJavaParameter(options: options)
-            let p2_java = ((p2 as? JConvertible)?.toJavaObject(options: options)).toJavaParameter(options: options)
-            let p3_java = ((p3 as? JConvertible)?.toJavaObject(options: options)).toJavaParameter(options: options)
+            let p0_java = AnyBridging.toJavaObject(p0, options: options).toJavaParameter(options: options)
+            let p1_java = AnyBridging.toJavaObject(p1, options: options).toJavaParameter(options: options)
+            let p2_java = AnyBridging.toJavaObject(p2, options: options).toJavaParameter(options: options)
+            let p3_java = AnyBridging.toJavaObject(p3, options: options).toJavaParameter(options: options)
             let object: JavaObjectPointer? = try call(method: Java_Function4_invoke_methodID, options: options, args: [p0_java, p1_java, p2_java, p3_java])
             return returnValue(for: object)
         }
@@ -60,11 +60,11 @@ public final class JavaBackedClosure<R>: JObject {
 
     public func invoke(_ p0: Any?, _ p1: Any?, _ p2: Any?, _ p3: Any?, _ p4: Any?) throws -> R {
         return try jniContext {
-            let p0_java = ((p0 as? JConvertible)?.toJavaObject(options: options)).toJavaParameter(options: options)
-            let p1_java = ((p1 as? JConvertible)?.toJavaObject(options: options)).toJavaParameter(options: options)
-            let p2_java = ((p2 as? JConvertible)?.toJavaObject(options: options)).toJavaParameter(options: options)
-            let p3_java = ((p3 as? JConvertible)?.toJavaObject(options: options)).toJavaParameter(options: options)
-            let p4_java = ((p4 as? JConvertible)?.toJavaObject(options: options)).toJavaParameter(options: options)
+            let p0_java = AnyBridging.toJavaObject(p0, options: options).toJavaParameter(options: options)
+            let p1_java = AnyBridging.toJavaObject(p1, options: options).toJavaParameter(options: options)
+            let p2_java = AnyBridging.toJavaObject(p2, options: options).toJavaParameter(options: options)
+            let p3_java = AnyBridging.toJavaObject(p3, options: options).toJavaParameter(options: options)
+            let p4_java = AnyBridging.toJavaObject(p4, options: options).toJavaParameter(options: options)
             let object: JavaObjectPointer? = try call(method: Java_Function5_invoke_methodID, options: options, args: [p0_java, p1_java, p2_java, p3_java, p4_java])
             return returnValue(for: object)
         }
@@ -137,7 +137,7 @@ public func SwiftBackedFunction0_Swift_release(_ Java_env: JNIEnvPointer, _ Java
 public func SwiftBackedFunction0_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer) -> JavaObjectPointer? {
     let value_swift: SwiftClosure0 = Swift_peer.pointee()!
     let c_return_swift = value_swift.closure()
-    return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject(options: value_swift.options)
+    return value_swift.returnType == Void.self ? nil : AnyBridging.toJavaObject(c_return_swift, options: value_swift.options)
 }
 
 /// A Swift reference type that wraps a 1-parameter closure.
@@ -188,7 +188,7 @@ public func SwiftBackedFunction1_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_
     let value_swift: SwiftClosure1 = Swift_peer.pointee()!
     let p0_swift = AnyBridging.fromAnyTypeJavaObject(p0, toBaseType: value_swift.p0Type, options: value_swift.options)
     let c_return_swift = value_swift.closure(p0_swift)
-    return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject(options: value_swift.options)
+    return value_swift.returnType == Void.self ? nil : AnyBridging.toJavaObject(c_return_swift, options: value_swift.options)
 }
 
 /// A Swift reference type that wraps a 2-parameter closure.
@@ -242,7 +242,7 @@ public func SwiftBackedFunction2_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_
     let p0_swift = AnyBridging.fromAnyTypeJavaObject(p0, toBaseType: value_swift.p0Type, options: value_swift.options)
     let p1_swift = AnyBridging.fromAnyTypeJavaObject(p1, toBaseType: value_swift.p1Type, options: value_swift.options)
     let c_return_swift = value_swift.closure(p0_swift, p1_swift)
-    return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject(options: value_swift.options)
+    return value_swift.returnType == Void.self ? nil : AnyBridging.toJavaObject(c_return_swift, options: value_swift.options)
 }
 
 /// A Swift reference type that wraps a 3-parameter closure.
@@ -299,7 +299,7 @@ public func SwiftBackedFunction3_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_
     let p1_swift = AnyBridging.fromAnyTypeJavaObject(p1, toBaseType: value_swift.p1Type, options: value_swift.options)
     let p2_swift = AnyBridging.fromAnyTypeJavaObject(p2, toBaseType: value_swift.p2Type, options: value_swift.options)
     let c_return_swift = value_swift.closure(p0_swift, p1_swift, p2_swift)
-    return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject(options: value_swift.options)
+    return value_swift.returnType == Void.self ? nil : AnyBridging.toJavaObject(c_return_swift, options: value_swift.options)
 }
 
 /// A Swift reference type that wraps a 4-parameter closure.
@@ -359,7 +359,7 @@ public func SwiftBackedFunction4_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_
     let p2_swift = AnyBridging.fromAnyTypeJavaObject(p2, toBaseType: value_swift.p2Type, options: value_swift.options)
     let p3_swift = AnyBridging.fromAnyTypeJavaObject(p3, toBaseType: value_swift.p3Type, options: value_swift.options)
     let c_return_swift = value_swift.closure(p0_swift, p1_swift, p2_swift, p3_swift)
-    return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject(options: value_swift.options)
+    return value_swift.returnType == Void.self ? nil : AnyBridging.toJavaObject(c_return_swift, options: value_swift.options)
 }
 
 /// A Swift reference type that wraps a 5-parameter closure.
@@ -422,5 +422,5 @@ public func SwiftBackedFunction5_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_
     let p3_swift = AnyBridging.fromAnyTypeJavaObject(p3, toBaseType: value_swift.p3Type, options: value_swift.options)
     let p4_swift = AnyBridging.fromAnyTypeJavaObject(p4, toBaseType: value_swift.p4Type, options: value_swift.options)
     let c_return_swift = value_swift.closure(p0_swift, p1_swift, p2_swift, p3_swift, p4_swift)
-    return value_swift.returnType == Void.self ? nil : (c_return_swift as? JConvertible)?.toJavaObject(options: value_swift.options)
+    return value_swift.returnType == Void.self ? nil : AnyBridging.toJavaObject(c_return_swift, options: value_swift.options)
 }

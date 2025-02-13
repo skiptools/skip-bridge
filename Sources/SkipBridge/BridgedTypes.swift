@@ -29,6 +29,7 @@ public enum BridgedTypes: String {
     case map
     case result
     case set
+    case throwable
     case uuid
     case uri
 
@@ -46,6 +47,20 @@ public enum BridgedTypes: String {
 
 /// Utilities to convert unknown bridged objects.
 public struct AnyBridging {
+    /// Convert an unknown-typed Swift instance to its Java form.
+    public static func toJavaObject(_ value: Any?, options: JConvertibleOptions) -> JavaObjectPointer? {
+        guard let value else {
+            return nil
+        }
+        if let convertible = value as? JConvertible {
+            return convertible.toJavaObject(options: options)
+        } else if let error = value as? Error {
+            return JThrowable.toThrowable(error, options: options)
+        } else {
+            fatalError("Unable to bridge Swift instance \(value)")
+        }
+    }
+
     /// Convert a Kotlin/Java instance of a known base type to its Swift projection.
     public static func fromJavaObject<T>(_ ptr: JavaObjectPointer?, toBaseType: T.Type, options: JConvertibleOptions) -> T? {
         guard let ptr else {
@@ -103,6 +118,8 @@ public struct AnyBridging {
             return Result<Any, Error>.fromJavaObject(ptr, options: options)
         case .set:
             return Array<AnyHashable>.fromJavaObject(ptr, options: options)
+        case .throwable:
+            return JThrowable.descriptionToError(ptr, options: options)
         case .uuid:
             return UUID.fromJavaObject(ptr, options: options)
         case .uri:
@@ -394,7 +411,7 @@ extension Result: JObjectProtocol, JConvertible {
             let value_java = (value as! JConvertible).toJavaObject(options: options)
             pair_java = try! Java_Pair.create(ctor: Java_Pair_constructor_methodID, options: options, args: [value_java.toJavaParameter(options: options), (nil as JavaObjectPointer?).toJavaParameter(options: options)])
         case .failure(let error):
-            let value_java = JThrowable.toThrowable(error, options: options)
+            let value_java = JThrowable.toThrowable(error, options: options)!
             pair_java = try! Java_Pair.create(ctor: Java_Pair_constructor_methodID, options: options, args: [(nil as JavaObjectPointer?).toJavaParameter(options: options), value_java.toJavaParameter(options: options)])
         }
         guard !options.contains(.kotlincompat) else {

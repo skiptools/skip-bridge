@@ -29,6 +29,7 @@ public enum BridgedTypes {
     case map
     case result
     case set
+    case throwable
     case uuid
     case uri
 
@@ -82,6 +83,8 @@ public func bridgedTypeOf(_ object: Any) -> BridgedTypes {
         return .result
     } else if object is kotlin.collections.Set<Any> {
         return .set
+    } else if object is kotlin.Throwable {
+        return .throwable
     } else if object is java.util.UUID {
         return .uuid
     } else if object is java.net.URI {

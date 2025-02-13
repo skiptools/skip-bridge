@@ -60,6 +60,19 @@ final class BridgeToKotlinCompatTests: XCTestCase {
         XCTAssertNil(compat.result?.first)
         XCTAssertNotNil(compat.result?.second)
         #endif
+    }
 
+    func testCompatErrorVar() {
+        #if SKIP
+        let uuid = java.util.UUID.randomUUID()
+        let compat = Compat(id: uuid)
+
+        XCTAssertTrue(compat.errorvar is CompatError)
+        XCTAssertTrue(compat.errorvar is Exception)
+        compat.errorvar = java.lang.RuntimeException("description")
+        XCTAssertTrue(compat.errorvar is Exception)
+        XCTAssertTrue(compat.errorvar is Error)
+        compat.errorvar = CompatError()
+        #endif
     }
 }
