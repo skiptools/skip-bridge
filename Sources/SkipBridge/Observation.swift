@@ -137,7 +137,7 @@ private final class BridgeObservationSupport: @unchecked Sendable {
         }
     }
 
-    private let lock = DispatchSemaphore(value: 0)
+    private let lock = DispatchSemaphore(value: 1)
     private var indexes: [AnyKeyPath: Int] = [:]
 
     private func index(forKeyPath keyPath: AnyKeyPath) -> Int {
