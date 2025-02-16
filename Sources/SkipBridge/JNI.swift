@@ -5,8 +5,11 @@
 // as published by the Free Software Foundation https://fsf.org
 
 import CJNI
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
-
+#endif
 #if canImport(Android)
 import Android
 #endif

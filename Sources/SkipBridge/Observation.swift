@@ -7,7 +7,12 @@
 #if SKIP_BRIDGE
 
 import CJNI
+#if canImport(FoundationEssentials)
+import FoundationEssentials
+#else
 import Foundation
+#endif
+import Dispatch
 
 public struct Observation {
     @available(macOS 14.0, iOS 17.0, watchOS 10.0, tvOS 17.0, *)
@@ -83,8 +88,8 @@ private final class BridgeObservationSupport: @unchecked Sendable {
     private var Java_hasInitialized = false
 
     private func Java_init(forKeyPath keyPath: AnyKeyPath) -> Int {
-        lock.lock()
-        defer { lock.unlock() }
+        lock.wait()
+        defer { lock.signal() }
         if !Java_hasInitialized {
             Java_hasInitialized = true
             Java_peer = Java_initPeer()
@@ -132,7 +137,7 @@ private final class BridgeObservationSupport: @unchecked Sendable {
         }
     }
 
-    private let lock = NSLock()
+    private let lock = DispatchSemaphore(value: 0)
     private var indexes: [AnyKeyPath: Int] = [:]
 
     private func index(forKeyPath keyPath: AnyKeyPath) -> Int {
