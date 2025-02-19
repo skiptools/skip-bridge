@@ -488,6 +488,10 @@ public func swiftMakeDate(matching date: Date) -> Date {
     return Date(timeIntervalSinceReferenceDate: date.timeIntervalSinceReferenceDate)
 }
 
+public func swiftMakeLocale(matching locale: Locale) -> Locale {
+    return Locale(identifier: locale.identifier)
+}
+
 struct SwiftSampleError: Error {
 }
 

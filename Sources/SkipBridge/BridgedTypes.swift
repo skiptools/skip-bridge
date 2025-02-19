@@ -30,6 +30,7 @@ public enum BridgedTypes: String {
     case byteArray
     case date
     case list
+    case locale
     case map
     case result
     case set
@@ -41,6 +42,7 @@ public enum BridgedTypes: String {
     case swiftData
     case swiftDate
     case swiftDictionary
+    case swiftLocale
     case swiftResult
     case swiftSet
     case swiftUUID
@@ -116,6 +118,8 @@ public struct AnyBridging {
             return Date.fromJavaObject(ptr, options: options)
         case .list:
             return Array<Any>.fromJavaObject(ptr, options: options)
+        case .locale:
+            return Locale.fromJavaObject(ptr, options: options)
         case .map:
             return Dictionary<AnyHashable, Any>.fromJavaObject(ptr, options: options)
         case .result:
@@ -136,6 +140,8 @@ public struct AnyBridging {
             return Date.fromJavaObject(ptr, options: options)
         case .swiftDictionary:
             return Dictionary<AnyHashable, Any>.fromJavaObject(ptr, options: options)
+        case .swiftLocale:
+            return Locale.fromJavaObject(ptr, options: options)
         case .swiftResult:
             return Result<Any, Error>.fromJavaObject(ptr, options: options)
         case .swiftSet:
@@ -277,11 +283,11 @@ extension Data: JObjectProtocol, JConvertible {
     }
 }
 
-// MARK: Date
-
 private let Java_SkipData = try! JClass(name: "skip/foundation/Data")
 private let Java_SkipData_constructor_methodID = Java_SkipData.getMethodID(name: "<init>", sig: "([B)V")!
 private let Java_SkipData_kotlin_methodID = Java_SkipData.getMethodID(name: "kotlin", sig: "(Z)[B")!
+
+// MARK: Date
 
 extension Date: JObjectProtocol, JConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Date {
@@ -385,6 +391,36 @@ private let Java_Set_size_methodID = Java_Set.getMethodID(name: "size", sig: "()
 private let Java_Set_iterator_methodID = Java_Set.getMethodID(name: "iterator", sig: "()Ljava/util/Iterator;")!
 private let Java_Iterator = try! JClass(name: "java/util/Iterator")
 private let Java_Iterator_next_methodID = Java_Iterator.getMethodID(name: "next", sig: "()Ljava/lang/Object;")!
+
+// MARK: Locale
+
+extension Locale: JObjectProtocol, JConvertible {
+    public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Locale {
+        let identifier: String
+        if options.contains(.kotlincompat) {
+            identifier = try! String.call(Java_Locale_toLanguageTag_methodID, on: obj!, options: options, args: []).replacing("-", with: "_")
+        } else {
+            identifier = try! String.call(Java_SkipLocale_identifier_methodID, on: obj!, options: options, args: [])
+        }
+        return Locale(identifier: identifier)
+    }
+
+    public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
+        if options.contains(.kotlincompat) {
+            let identifier = self.identifier.replacing("_", with: "-")
+            return try! JavaObjectPointer.callStatic(Java_Locale_forLanguageTag_methodID, on: Java_Locale.ptr, options: options, args: [identifier.toJavaParameter(options: options)])
+        } else {
+            return try! Java_SkipLocale.create(ctor: Java_SkipLocale_constructor_methodID, options: options, args: [self.identifier.toJavaParameter(options: options)])
+        }
+    }
+}
+
+private let Java_SkipLocale = try! JClass(name: "skip/foundation/Locale")
+private let Java_SkipLocale_constructor_methodID = Java_SkipLocale.getMethodID(name: "<init>", sig: "(Ljava/lang/String;)V")!
+private let Java_SkipLocale_identifier_methodID = Java_SkipLocale.getMethodID(name: "getIdentifier", sig: "()Ljava/lang/String;")!
+private let Java_Locale = try! JClass(name: "java/util/Locale")
+private let Java_Locale_forLanguageTag_methodID = Java_Locale.getStaticMethodID(name: "forLanguageTag", sig: "(Ljava/lang/String;)Ljava/util/Locale;")!
+private let Java_Locale_toLanguageTag_methodID = Java_Locale.getMethodID(name: "toLanguageTag", sig: "()Ljava/lang/String;")!
 
 // MARK: Result
 

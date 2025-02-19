@@ -30,6 +30,11 @@ final class BridgeToKotlinCompatTests: XCTestCase {
         let list2 = compat.urls
         XCTAssertEqual(list2.size, 1)
         XCTAssertEqual(list2[0], url)
+
+        let locale = compat.locale
+        XCTAssertTrue(locale is java.util.Locale)
+        compat.locale = java.util.Locale.CHINA
+        XCTAssertEqual(compat.locale, java.util.Locale.CHINA)
         #endif
     }
 
