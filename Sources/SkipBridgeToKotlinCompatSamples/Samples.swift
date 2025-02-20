@@ -12,6 +12,7 @@ public class Compat {
     public var attempts: (Int, URL)?
     public var result: Result<String, Error>?
     public var errorvar: Error = CompatError()
+    public var locale = Locale.current
 
     public init(id: UUID) {
         self.id = id

@@ -662,6 +662,11 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(date, swiftMakeDate(matching: date))
     }
 
+    func testLocale() {
+        let locale = Locale.current
+        XCTAssertEqual(locale.identifier, swiftMakeLocale(matching: locale).identifier)
+    }
+
     func testUnicode() {
         XCTAssertEqual("😀", swiftUTF8StringVar1)
         XCTAssertEqual("🚀123456", swiftUTF8StringVar2)

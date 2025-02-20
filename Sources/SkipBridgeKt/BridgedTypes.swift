@@ -26,6 +26,7 @@ public enum BridgedTypes {
     case byteArray
     case date
     case list
+    case locale
     case map
     case result
     case set
@@ -37,6 +38,7 @@ public enum BridgedTypes {
     case swiftData
     case swiftDate
     case swiftDictionary
+    case swiftLocale
     case swiftResult
     case swiftSet
     case swiftUUID
@@ -77,6 +79,8 @@ public func bridgedTypeOf(_ object: Any) -> BridgedTypes {
         return .date
     } else if object is kotlin.collections.List<Any> {
         return .list
+    } else if object is java.util.Locale {
+        return .locale
     } else if object is kotlin.collections.Map<Any, Any> {
         return .map
     } else if object is kotlin.Result<Any> {
@@ -102,6 +106,8 @@ public func bridgedTypeOf(_ object: Any) -> BridgedTypes {
         return .swiftDate
     case "skip.lib.Dictionary":
         return .swiftDictionary
+    case "skip.foundation.Locale":
+        return .swiftLocale
     case "skip.lib.Result":
         return .swiftResult
     case "skip.lib.Set":
