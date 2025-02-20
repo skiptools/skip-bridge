@@ -9,129 +9,77 @@
 @dynamicMemberLookup
 open class AnyDynamicObject: JObjectProtocol, JConvertible {
     private var object: JObject!
+    private var options: JConvertibleOptions!
 
     /// Supply the class name of the object and arguments to pass to the constructor.
-    public convenience init(className: String, _ arguments: Any?...) throws {
-        try self.init(className: className, arguments: arguments)
+    public convenience init(className: String, options: JConvertibleOptions = .kotlincompat, _ arguments: Any?...) throws {
+        try self.init(className: className, options: options, arguments: arguments)
     }
 
     /// Supply the class name of the object and arguments to pass to the constructor.
-    public init(className: String, arguments: [Any?]) throws {
+    public init(className: String, options: JConvertibleOptions = .kotlincompat, arguments: [Any?]) throws {
         try jniContext {
             let arguments: [Any?]? = arguments.isEmpty ? nil : arguments
-            let ptr = try Java_reflectorClass.create(ctor: Java_reflectorClassNameConstructor, options: [], args: [className.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+            let ptr = try Java_reflectorClass.create(ctor: Java_reflectorClassNameConstructor, options: options, args: [className.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
             self.object = JObject(ptr)
+            self.options = options
         }
     }
 
     /// Supply the class name of the statics to access.
-    public init(forStaticsOfClassName className: String) throws {
+    public init(forStaticsOfClassName className: String, options: JConvertibleOptions = .kotlincompat) throws {
         try jniContext {
-            let ptr = try Java_reflectorClass.create(ctor: Java_reflectorStaticsOfClassNameConstructor, options: [], args: [className.toJavaParameter(options: [])])
+            let ptr = try Java_reflectorClass.create(ctor: Java_reflectorStaticsOfClassNameConstructor, options: options, args: [className.toJavaParameter(options: options)])
             self.object = JObject(ptr)
+            self.options = options
         }
     }
 
     /// Interact wih the given Kotlin object in Swift.
-    public required init(for object: JavaObjectPointer) throws {
+    public required init(for object: JavaObjectPointer, options: JConvertibleOptions = .kotlincompat) throws {
         try jniContext {
-            let reflectorPtr = try Java_reflectorClass.create(ctor: Java_reflectorConstructor, options: [], args: [object.toJavaParameter(options: [])])
+            let reflectorPtr = try Java_reflectorClass.create(ctor: Java_reflectorConstructor, options: options, args: [object.toJavaParameter(options: options)])
             self.object = JObject(reflectorPtr)
-        }
-    }
-
-    public subscript(dynamicMember member: String) -> Bool {
-        get {
-            jniContext {
-                let ret: Bool? = try! object.call(method: Java_reflectorBooleanProperty, options: [], args: [member.toJavaParameter(options: [])])
-                return ret!
-            }
-        }
-        set {
-            jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), (newValue as Bool?).toJavaParameter(options: [])])
-            }
+            self.options = options
         }
     }
 
     public subscript(dynamicMember member: String) -> Bool? {
         get {
             jniContext {
-                return try! object.call(method: Java_reflectorBooleanProperty, options: [], args: [member.toJavaParameter(options: [])])
+                return try! object.call(method: Java_reflectorBooleanProperty, options: options, args: [member.toJavaParameter(options: options)])
             }
         }
         set {
             jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), newValue.toJavaParameter(options: [])])
+                try! object.call(method: Java_reflectorSetProperty, options: options, args: [member.toJavaParameter(options: options), newValue.toJavaParameter(options: options)])
             }
         }
     }
 
     // TODO: Character
-//    public subscript(dynamicMember member: String) -> Character {
-//        get {
-//            jniContext {
-//                let ret: Character? = try! object.call(method: Java_reflectorCharProperty, options: [], args: [member.toJavaParameter(options: [])])
-//                return ret!
-//            }
-//        }
-//        set {
-//            jniContext {
-//                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), (newValue as Character?).toJavaParameter(options: [])])
-//            }
-//        }
-//    }
-//
 //    public subscript(dynamicMember member: String) -> Character? {
 //        get {
 //            jniContext {
-//                return try! object.call(method: Java_reflectorCharProperty, options: [], args: [member.toJavaParameter(options: [])])
+//                return try! object.call(method: Java_reflectorCharProperty, options: options, args: [member.toJavaParameter(options: options)])
 //            }
 //        }
 //        set {
 //            jniContext {
-//                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), newValue.toJavaParameter(options: [])])
+//                try! object.call(method: Java_reflectorSetProperty, options: options, args: [member.toJavaParameter(options: options), newValue.toJavaParameter(options: options)])
 //            }
 //        }
 //    }
-
-    public subscript(dynamicMember member: String) -> Double {
-        get {
-            jniContext {
-                let ret: Double? = try! object.call(method: Java_reflectorDoubleProperty, options: [], args: [member.toJavaParameter(options: [])])
-                return ret!
-            }
-        }
-        set {
-            jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), (newValue as Double?).toJavaParameter(options: [])])
-            }
-        }
-    }
 
     public subscript(dynamicMember member: String) -> Double? {
         get {
             jniContext {
-                return try! object.call(method: Java_reflectorDoubleProperty, options: [], args: [member.toJavaParameter(options: [])])
+                return try! object.call(method: Java_reflectorDoubleProperty, options: options, args: [member.toJavaParameter(options: options)])
             }
         }
         set {
             jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), newValue.toJavaParameter(options: [])])
-            }
-        }
-    }
-
-    public subscript(dynamicMember member: String) -> Float {
-        get {
-            jniContext {
-                let ret: Float? = try! object.call(method: Java_reflectorFloatProperty, options: [], args: [member.toJavaParameter(options: [])])
-                return ret!
-            }
-        }
-        set {
-            jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), (newValue as Float?).toJavaParameter(options: [])])
+                try! object.call(method: Java_reflectorSetProperty, options: options, args: [member.toJavaParameter(options: options), newValue.toJavaParameter(options: options)])
             }
         }
     }
@@ -139,26 +87,12 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
     public subscript(dynamicMember member: String) -> Float? {
         get {
             jniContext {
-                return try! object.call(method: Java_reflectorFloatProperty, options: [], args: [member.toJavaParameter(options: [])])
+                return try! object.call(method: Java_reflectorFloatProperty, options: options, args: [member.toJavaParameter(options: options)])
             }
         }
         set {
             jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), newValue.toJavaParameter(options: [])])
-            }
-        }
-    }
-
-    public subscript(dynamicMember member: String) -> Int {
-        get {
-            jniContext {
-                let ret: Int? = try! object.call(method: Java_reflectorIntProperty, options: [], args: [member.toJavaParameter(options: [])])
-                return ret!
-            }
-        }
-        set {
-            jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), (newValue as Int?).toJavaParameter(options: [])])
+                try! object.call(method: Java_reflectorSetProperty, options: options, args: [member.toJavaParameter(options: options), newValue.toJavaParameter(options: options)])
             }
         }
     }
@@ -166,26 +100,12 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
     public subscript(dynamicMember member: String) -> Int? {
         get {
             jniContext {
-                return try! object.call(method: Java_reflectorIntProperty, options: [], args: [member.toJavaParameter(options: [])])
+                return try! object.call(method: Java_reflectorIntProperty, options: options, args: [member.toJavaParameter(options: options)])
             }
         }
         set {
             jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), newValue.toJavaParameter(options: [])])
-            }
-        }
-    }
-
-    public subscript(dynamicMember member: String) -> Int8 {
-        get {
-            jniContext {
-                let ret: Int8? = try! object.call(method: Java_reflectorByteProperty, options: [], args: [member.toJavaParameter(options: [])])
-                return ret!
-            }
-        }
-        set {
-            jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), (newValue as Int8?).toJavaParameter(options: [])])
+                try! object.call(method: Java_reflectorSetProperty, options: options, args: [member.toJavaParameter(options: options), newValue.toJavaParameter(options: options)])
             }
         }
     }
@@ -193,26 +113,12 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
     public subscript(dynamicMember member: String) -> Int8? {
         get {
             jniContext {
-                return try! object.call(method: Java_reflectorByteProperty, options: [], args: [member.toJavaParameter(options: [])])
+                return try! object.call(method: Java_reflectorByteProperty, options: options, args: [member.toJavaParameter(options: options)])
             }
         }
         set {
             jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), newValue.toJavaParameter(options: [])])
-            }
-        }
-    }
-
-    public subscript(dynamicMember member: String) -> Int16 {
-        get {
-            jniContext {
-                let ret: Int16? = try! object.call(method: Java_reflectorShortProperty, options: [], args: [member.toJavaParameter(options: [])])
-                return ret!
-            }
-        }
-        set {
-            jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), (newValue as Int16?).toJavaParameter(options: [])])
+                try! object.call(method: Java_reflectorSetProperty, options: options, args: [member.toJavaParameter(options: options), newValue.toJavaParameter(options: options)])
             }
         }
     }
@@ -220,26 +126,12 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
     public subscript(dynamicMember member: String) -> Int16? {
         get {
             jniContext {
-                return try! object.call(method: Java_reflectorShortProperty, options: [], args: [member.toJavaParameter(options: [])])
+                return try! object.call(method: Java_reflectorShortProperty, options: options, args: [member.toJavaParameter(options: options)])
             }
         }
         set {
             jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), newValue.toJavaParameter(options: [])])
-            }
-        }
-    }
-
-    public subscript(dynamicMember member: String) -> Int32 {
-        get {
-            jniContext {
-                let ret: Int32? = try! object.call(method: Java_reflectorIntProperty, options: [], args: [member.toJavaParameter(options: [])])
-                return ret!
-            }
-        }
-        set {
-            jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), (newValue as Int32?).toJavaParameter(options: [])])
+                try! object.call(method: Java_reflectorSetProperty, options: options, args: [member.toJavaParameter(options: options), newValue.toJavaParameter(options: options)])
             }
         }
     }
@@ -247,26 +139,12 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
     public subscript(dynamicMember member: String) -> Int32? {
         get {
             jniContext {
-                return try! object.call(method: Java_reflectorIntProperty, options: [], args: [member.toJavaParameter(options: [])])
+                return try! object.call(method: Java_reflectorIntProperty, options: options, args: [member.toJavaParameter(options: options)])
             }
         }
         set {
             jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), newValue.toJavaParameter(options: [])])
-            }
-        }
-    }
-
-    public subscript(dynamicMember member: String) -> Int64 {
-        get {
-            jniContext {
-                let ret: Int64? = try! object.call(method: Java_reflectorLongProperty, options: [], args: [member.toJavaParameter(options: [])])
-                return ret!
-            }
-        }
-        set {
-            jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), (newValue as Int64?).toJavaParameter(options: [])])
+                try! object.call(method: Java_reflectorSetProperty, options: options, args: [member.toJavaParameter(options: options), newValue.toJavaParameter(options: options)])
             }
         }
     }
@@ -274,12 +152,12 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
     public subscript(dynamicMember member: String) -> Int64? {
         get {
             jniContext {
-                return try! object.call(method: Java_reflectorLongProperty, options: [], args: [member.toJavaParameter(options: [])])
+                return try! object.call(method: Java_reflectorLongProperty, options: options, args: [member.toJavaParameter(options: options)])
             }
         }
         set {
             jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), newValue.toJavaParameter(options: [])])
+                try! object.call(method: Java_reflectorSetProperty, options: options, args: [member.toJavaParameter(options: options), newValue.toJavaParameter(options: options)])
             }
         }
     }
@@ -287,74 +165,41 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
     // Allow assignment to any generated AnyDynamicObject type. This is also the fallback the compiler uses in call
     // chaining, i.e. when evaluating `a.b` in `let x: Int = a.b.c`
 
-    public subscript<T: AnyDynamicObject>(dynamicMember member: String) -> T {
-        get {
-            jniContext {
-                let ptr: JavaObjectPointer? = try! object.call(method: Java_reflectorObjectProperty, options: [], args: [member.toJavaParameter(options: [])])
-                return try! T.init(for: ptr!)
-            }
-        }
-        set {
-            jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), newValue.toJavaParameter(options: [])])
-            }
-        }
-    }
-
     public subscript<T: AnyDynamicObject>(dynamicMember member: String) -> T? {
         get {
             jniContext {
-                guard let ptr = try! object.call(method: Java_reflectorObjectProperty, options: [], args: [member.toJavaParameter(options: [])]) as JavaObjectPointer? else {
+                guard let ptr = try! object.call(method: Java_reflectorObjectProperty, options: options, args: [member.toJavaParameter(options: options)]) as JavaObjectPointer? else {
                     return nil
                 }
-                return try! T.init(for: ptr)
+                return try! T.init(for: ptr, options: options)
             }
         }
         set {
             jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), newValue.toJavaParameter(options: [])])
+                try! object.call(method: Java_reflectorSetProperty, options: options, args: [member.toJavaParameter(options: options), newValue.toJavaParameter(options: options)])
             }
         }
     }
 
     // Allow assignment of return values to any JConvertible
 
-    public subscript<T: JConvertible>(dynamicMember member: String) -> T {
-        get {
-            jniContext {
-                if T.self == String.self {
-                    let ret: String? = try! object.call(method: Java_reflectorStringProperty, options: [], args: [member.toJavaParameter(options: [])])
-                    return ret! as! T
-                } else {
-                    let ptr: JavaObjectPointer? = try! object.call(method: Java_reflectorObjectProperty, options: [], args: [member.toJavaParameter(options: [])])
-                    return T.fromJavaObject(ptr!, options: .kotlincompat)
-                }
-            }
-        }
-        set {
-            jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), newValue.toJavaParameter(options: .kotlincompat)])
-            }
-        }
-    }
-
     public subscript<T: JConvertible>(dynamicMember member: String) -> T? {
         get {
             jniContext {
                 if T.self == String.self {
-                    let string: String? = try! object.call(method: Java_reflectorStringProperty, options: [], args: [member.toJavaParameter(options: [])])
+                    let string: String? = try! object.call(method: Java_reflectorStringProperty, options: options, args: [member.toJavaParameter(options: options)])
                     return string as! T?
                 } else {
-                    guard let ptr = try! object.call(method: Java_reflectorObjectProperty, options: [], args: [member.toJavaParameter(options: [])]) as JavaObjectPointer? else {
+                    guard let ptr = try! object.call(method: Java_reflectorObjectProperty, options: options, args: [member.toJavaParameter(options: options)]) as JavaObjectPointer? else {
                         return nil
                     }
-                    return T.fromJavaObject(ptr, options: .kotlincompat)
+                    return T.fromJavaObject(ptr, options: options)
                 }
             }
         }
         set {
             jniContext {
-                try! object.call(method: Java_reflectorSetProperty, options: [], args: [member.toJavaParameter(options: []), newValue.toJavaParameter(options: .kotlincompat)])
+                try! object.call(method: Java_reflectorSetProperty, options: options, args: [member.toJavaParameter(options: options), newValue.toJavaParameter(options: options)])
             }
         }
     }
@@ -362,17 +207,17 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
     // Swift will call this variant when invoking a method, i.e. `let x: Int = a.f()`
 
     public subscript(dynamicMember member: String) -> AnyDynamicObjectFunction {
-        return AnyDynamicObjectFunction(object: object, name: member)
+        return AnyDynamicObjectFunction(object: object, name: member, options: options)
     }
 
     // JConvertible
 
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Self {
-        return try! .init(for: obj!)
+        return try! .init(for: obj!, options: options)
     }
 
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
-        let ptr: JavaObjectPointer = try! object.call(method: Java_reflectorReflecting, options: [], args: [])
+        let ptr: JavaObjectPointer = try! object.call(method: Java_reflectorReflecting, options: options, args: [])
         return ptr
     }
 }
@@ -399,351 +244,166 @@ private let Java_reflectorObjectProperty = Java_reflectorClass.getMethodID(name:
 public struct AnyDynamicObjectFunction {
     let object: JObject
     let name: String
+    let options: JConvertibleOptions
 
     public func dynamicallyCall(withArguments: [Any?]) throws {
         try jniContext {
             let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            try object.call(method: Java_reflectorVoidFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+            try object.call(method: Java_reflectorVoidFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws {
         try jniContext {
             let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            try object.call(method: Java_reflectorVoidKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-        }
-    }
-
-    public func dynamicallyCall(withArguments: [Any?]) throws -> Bool {
-        try jniContext {
-            let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            let ret: Bool? = try object.call(method: Java_reflectorBooleanFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
-        }
-    }
-
-    public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Bool {
-        try jniContext {
-            let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            let ret: Bool? = try object.call(method: Java_reflectorBooleanKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
+            try object.call(method: Java_reflectorVoidKeywordFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withArguments: [Any?]) throws -> Bool? {
         try jniContext {
             let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            return try object.call(method: Java_reflectorBooleanFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+            return try object.call(method: Java_reflectorBooleanFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Bool? {
         try jniContext {
             let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            return try object.call(method: Java_reflectorBooleanKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+            return try object.call(method: Java_reflectorBooleanKeywordFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     // TODO: Character
-//    public func dynamicallyCall(withArguments: [Any?]) throws -> Character {
-//        try jniContext {
-//            let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-//            let ret: Character? = try object.call(method: Java_reflectorCharFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-//            return ret!
-//        }
-//    }
-//
-//    public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Character {
-//        try jniContext {
-//            let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-//            let ret: Character? = try object.call(method: Java_reflectorCharKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-//            return ret!
-//        }
-//    }
-//
 //    public func dynamicallyCall(withArguments: [Any?]) throws -> Character? {
 //        try jniContext {
 //            let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-//            return try object.call(method: Java_reflectorCharFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+//            return try object.call(method: Java_reflectorCharFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlinCompatContainer)])
 //        }
 //    }
 //
 //    public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Character? {
 //        try jniContext {
 //            let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-//            return try object.call(method: Java_reflectorCharKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+//            return try object.call(method: Java_reflectorCharKeywordFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
 //        }
 //    }
-
-    public func dynamicallyCall(withArguments: [Any?]) throws -> Double {
-        try jniContext {
-            let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            let ret: Double? = try object.call(method: Java_reflectorDoubleFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
-        }
-    }
-
-    public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Double {
-        try jniContext {
-            let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            let ret: Double? = try object.call(method: Java_reflectorDoubleKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
-        }
-    }
 
     public func dynamicallyCall(withArguments: [Any?]) throws -> Double? {
         try jniContext {
             let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            return try object.call(method: Java_reflectorDoubleFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+            return try object.call(method: Java_reflectorDoubleFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Double? {
         try jniContext {
             let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            return try object.call(method: Java_reflectorDoubleKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-        }
-    }
-
-    public func dynamicallyCall(withArguments: [Any?]) throws -> Float {
-        try jniContext {
-            let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            let ret: Float? = try object.call(method: Java_reflectorFloatFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
-        }
-    }
-
-    public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Float {
-        try jniContext {
-            let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            let ret: Float? = try object.call(method: Java_reflectorFloatKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
+            return try object.call(method: Java_reflectorDoubleKeywordFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withArguments: [Any?]) throws -> Float? {
         try jniContext {
             let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            return try object.call(method: Java_reflectorFloatFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+            return try object.call(method: Java_reflectorFloatFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Float? {
         try jniContext {
             let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            return try object.call(method: Java_reflectorFloatKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-        }
-    }
-
-    public func dynamicallyCall(withArguments: [Any?]) throws -> Int {
-        try jniContext {
-            let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            let ret: Int? = try object.call(method: Java_reflectorIntFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
-        }
-    }
-
-    public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Int {
-        try jniContext {
-            let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            let ret: Int? = try object.call(method: Java_reflectorIntKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
+            return try object.call(method: Java_reflectorFloatKeywordFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withArguments: [Any?]) throws -> Int? {
         try jniContext {
             let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            return try object.call(method: Java_reflectorIntFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+            return try object.call(method: Java_reflectorIntFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Int? {
         try jniContext {
             let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            return try object.call(method: Java_reflectorIntKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-        }
-    }
-
-    public func dynamicallyCall(withArguments: [Any?]) throws -> Int8 {
-        try jniContext {
-            let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            let ret: Int8? = try object.call(method: Java_reflectorByteFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
-        }
-    }
-
-    public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Int8 {
-        try jniContext {
-            let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            let ret: Int8? = try object.call(method: Java_reflectorByteKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
+            return try object.call(method: Java_reflectorIntKeywordFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withArguments: [Any?]) throws -> Int8? {
         try jniContext {
             let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            return try object.call(method: Java_reflectorByteFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+            return try object.call(method: Java_reflectorByteFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Int8? {
         try jniContext {
             let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            return try object.call(method: Java_reflectorByteKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-        }
-    }
-
-    public func dynamicallyCall(withArguments: [Any?]) throws -> Int16 {
-        try jniContext {
-            let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            let ret: Int16? = try object.call(method: Java_reflectorShortFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
-        }
-    }
-
-    public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Int16 {
-        try jniContext {
-            let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            let ret: Int16? = try object.call(method: Java_reflectorShortKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
+            return try object.call(method: Java_reflectorByteKeywordFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withArguments: [Any?]) throws -> Int16? {
         try jniContext {
             let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            return try object.call(method: Java_reflectorShortFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+            return try object.call(method: Java_reflectorShortFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Int16? {
         try jniContext {
             let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            return try object.call(method: Java_reflectorShortKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-        }
-    }
-
-    public func dynamicallyCall(withArguments: [Any?]) throws -> Int32 {
-        try jniContext {
-            let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            let ret: Int32? = try object.call(method: Java_reflectorIntFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
-        }
-    }
-
-    public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Int32 {
-        try jniContext {
-            let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            let ret: Int32? = try object.call(method: Java_reflectorIntKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
+            return try object.call(method: Java_reflectorShortKeywordFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withArguments: [Any?]) throws -> Int32? {
         try jniContext {
             let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            return try object.call(method: Java_reflectorIntFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+            return try object.call(method: Java_reflectorIntFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Int32? {
         try jniContext {
             let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            return try object.call(method: Java_reflectorIntKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-        }
-    }
-
-    public func dynamicallyCall(withArguments: [Any?]) throws -> Int64 {
-        try jniContext {
-            let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            let ret: Int64? = try object.call(method: Java_reflectorLongFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
-        }
-    }
-
-    public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Int64 {
-        try jniContext {
-            let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            let ret: Int64? = try object.call(method: Java_reflectorLongKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return ret!
+            return try object.call(method: Java_reflectorIntKeywordFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withArguments: [Any?]) throws -> Int64? {
         try jniContext {
             let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            return try object.call(method: Java_reflectorLongFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+            return try object.call(method: Java_reflectorLongFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall(withKeywordArguments: [String: Any?]) throws -> Int64? {
         try jniContext {
             let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            return try object.call(method: Java_reflectorLongKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-        }
-    }
-
-    public func dynamicallyCall<T: AnyDynamicObject>(withArguments: [Any?]) throws -> T {
-        try jniContext {
-            let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            let ptr: JavaObjectPointer? = try object.call(method: Java_reflectorObjectFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return try T.init(for: ptr!)
-        }
-    }
-
-    public func dynamicallyCall<T: AnyDynamicObject>(withKeywordArguments: [String: Any?]) throws -> T {
-        try jniContext {
-            let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            let ptr: JavaObjectPointer? = try object.call(method: Java_reflectorObjectKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-            return try T.init(for: ptr!)
+            return try object.call(method: Java_reflectorLongKeywordFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
         }
     }
 
     public func dynamicallyCall<T: AnyDynamicObject>(withArguments: [Any?]) throws -> T? {
         try jniContext {
             let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            guard let ptr = try object.call(method: Java_reflectorObjectFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)]) as JavaObjectPointer? else {
+            guard let ptr = try object.call(method: Java_reflectorObjectFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))]) as JavaObjectPointer? else {
                 return nil
             }
-            return try T.init(for: ptr)
+            return try T.init(for: ptr, options: options)
         }
     }
 
     public func dynamicallyCall<T: AnyDynamicObject>(withKeywordArguments: [String: Any?]) throws -> T? {
         try jniContext {
             let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            guard let ptr = try object.call(method: Java_reflectorObjectKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)]) as JavaObjectPointer? else {
+            guard let ptr = try object.call(method: Java_reflectorObjectKeywordFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))]) as JavaObjectPointer? else {
                 return nil
             }
-            return try T.init(for: ptr)
-        }
-    }
-
-    public func dynamicallyCall<T: JConvertible>(withArguments: [Any?]) throws -> T {
-        try jniContext {
-            let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
-            if T.self == String.self {
-                let ret: String? = try object.call(method: Java_reflectorStringFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-                return ret! as! T
-            } else {
-                let ptr: JavaObjectPointer? = try object.call(method: Java_reflectorObjectFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-                return T.fromJavaObject(ptr!, options: .kotlincompat)
-            }
-        }
-    }
-
-    public func dynamicallyCall<T: JConvertible>(withKeywordArguments: [String: Any?]) throws -> T {
-        try jniContext {
-            let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
-            if T.self == String.self {
-                let ret: String? = try object.call(method: Java_reflectorStringKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-                return ret! as! T
-            } else {
-                let ptr: JavaObjectPointer? = try object.call(method: Java_reflectorObjectKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
-                return T.fromJavaObject(ptr!, options: .kotlincompat)
-            }
+            return try T.init(for: ptr, options: options)
         }
     }
 
@@ -751,13 +411,13 @@ public struct AnyDynamicObjectFunction {
         try jniContext {
             let arguments: [Any?]? = withArguments.isEmpty ? nil : withArguments
             if T.self == String.self {
-                let string: String? = try object.call(method: Java_reflectorStringFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+                let string: String? = try object.call(method: Java_reflectorStringFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
                 return string as! T?
             } else {
-                guard let ptr = try object.call(method: Java_reflectorObjectFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)]) as JavaObjectPointer? else {
+                guard let ptr = try object.call(method: Java_reflectorObjectFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))]) as JavaObjectPointer? else {
                     return nil
                 }
-                return T.fromJavaObject(ptr, options: .kotlincompat)
+                return T.fromJavaObject(ptr, options: options)
             }
         }
     }
@@ -766,13 +426,13 @@ public struct AnyDynamicObjectFunction {
         try jniContext {
             let arguments: [String: Any?]? = withKeywordArguments.isEmpty ? nil : withKeywordArguments
             if T.self == String.self {
-                let string: String? = try object.call(method: Java_reflectorStringKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)])
+                let string: String? = try object.call(method: Java_reflectorStringKeywordFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))])
                 return string as! T?
             } else {
-                guard let ptr = try object.call(method: Java_reflectorObjectKeywordFunction, options: [], args: [name.toJavaParameter(options: []), arguments.toJavaParameter(options: .kotlincompat)]) as JavaObjectPointer? else {
+                guard let ptr = try object.call(method: Java_reflectorObjectKeywordFunction, options: options, args: [name.toJavaParameter(options: options), arguments.toJavaParameter(options: options.union(.kotlincompatContainer))]) as JavaObjectPointer? else {
                     return nil
                 }
-                return T.fromJavaObject(ptr, options: .kotlincompat)
+                return T.fromJavaObject(ptr, options: options)
             }
         }
     }

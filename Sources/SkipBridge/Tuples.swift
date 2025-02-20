@@ -10,8 +10,8 @@ public final class SwiftTuple {
         guard let tuple else {
             return nil
         }
-        let t0_java = (tuple.0 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
-        let t1_java = (tuple.1 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
+        let t0_java = AnyBridging.toJavaObject(tuple.0, options: options).toJavaParameter(options: options)
+        let t1_java = AnyBridging.toJavaObject(tuple.1, options: options).toJavaParameter(options: options)
         if options.contains(.kotlincompat) {
             return try! Java_Pair.create(ctor: Java_Pair_constructor_methodID, options: options, args: [t0_java, t1_java])
         } else {
@@ -43,9 +43,9 @@ public final class SwiftTuple {
         guard let tuple else {
             return nil
         }
-        let t0_java = (tuple.0 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
-        let t1_java = (tuple.1 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
-        let t2_java = (tuple.2 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
+        let t0_java = AnyBridging.toJavaObject(tuple.0, options: options).toJavaParameter(options: options)
+        let t1_java = AnyBridging.toJavaObject(tuple.1, options: options).toJavaParameter(options: options)
+        let t2_java = AnyBridging.toJavaObject(tuple.2, options: options).toJavaParameter(options: options)
         if options.contains(.kotlincompat) {
             return try! Java_Triple.create(ctor: Java_Triple_constructor_methodID, options: options, args: [t0_java, t1_java, t2_java])
         } else {
@@ -82,10 +82,10 @@ public final class SwiftTuple {
         guard let tuple else {
             return nil
         }
-        let t0_java = (tuple.0 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
-        let t1_java = (tuple.1 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
-        let t2_java = (tuple.2 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
-        let t3_java = (tuple.3 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
+        let t0_java = AnyBridging.toJavaObject(tuple.0, options: options).toJavaParameter(options: options)
+        let t1_java = AnyBridging.toJavaObject(tuple.1, options: options).toJavaParameter(options: options)
+        let t2_java = AnyBridging.toJavaObject(tuple.2, options: options).toJavaParameter(options: options)
+        let t3_java = AnyBridging.toJavaObject(tuple.3, options: options).toJavaParameter(options: options)
         return try! Java_Tuple4.create(ctor: Java_Tuple4_constructor_methodID, options: options, args: [t0_java, t1_java, t2_java, t3_java])
     }
 
@@ -108,11 +108,11 @@ public final class SwiftTuple {
         guard let tuple else {
             return nil
         }
-        let t0_java = (tuple.0 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
-        let t1_java = (tuple.1 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
-        let t2_java = (tuple.2 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
-        let t3_java = (tuple.3 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
-        let t4_java = (tuple.4 as! JConvertible).toJavaObject(options: options).toJavaParameter(options: options)
+        let t0_java = AnyBridging.toJavaObject(tuple.0, options: options).toJavaParameter(options: options)
+        let t1_java = AnyBridging.toJavaObject(tuple.1, options: options).toJavaParameter(options: options)
+        let t2_java = AnyBridging.toJavaObject(tuple.2, options: options).toJavaParameter(options: options)
+        let t3_java = AnyBridging.toJavaObject(tuple.3, options: options).toJavaParameter(options: options)
+        let t4_java = AnyBridging.toJavaObject(tuple.4, options: options).toJavaParameter(options: options)
         return try! Java_Tuple4.create(ctor: Java_Tuple5_constructor_methodID, options: options, args: [t0_java, t1_java, t2_java, t3_java, t4_java])
     }
 

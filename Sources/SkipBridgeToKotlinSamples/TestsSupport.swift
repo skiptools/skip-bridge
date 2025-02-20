@@ -82,7 +82,7 @@ public func testSupport_dynamicKotlinObjects() throws -> Bool {
     try dict.put(key: "a", value: 1) as Void
     try dict.put(key: "b", value: 2) as Void
     try dict.put(key: "c", value: 3) as Void
-    let count: Int = dict.keys.count
+    let count: Int = dict.keys.count!
     guard count == 3 else {
         return false
     }
