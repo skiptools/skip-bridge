@@ -6,7 +6,6 @@
 
 import Foundation
 import SkipBridge
-import SkipBridgeKt
 import SkipBridgeToKotlinSamples
 import SkipBridgeToKotlinSamplesHelpers
 import XCTest
