@@ -322,6 +322,9 @@ public struct ThrowableError: Error, CustomStringConvertible, JObjectProtocol, J
 public struct JConvertibleOptions: OptionSet {
     /// Optimize for bridging to pure Kotlin code rather than transpiled Swift.
     public static let kotlincompat = JConvertibleOptions(rawValue: 1 << 0)
+    /// Map to a Kotlin container type. Useful for passing an array or dictionary to a known List or Map, even when content might
+    /// not be expected to be `.kotlincompat`.
+    public static let kotlincompatContainer = JConvertibleOptions(rawValue: 1 << 1)
 
     public let rawValue: Int
 

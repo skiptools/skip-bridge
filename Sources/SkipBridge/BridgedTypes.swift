@@ -63,7 +63,11 @@ public struct AnyBridging {
         } else if let error = value as? Error {
             return JThrowable.toThrowable(error, options: options)
         } else {
-            fatalError("Unable to bridge Swift instance \(value)")
+            // Was this a double optional nil? Is there a way to check? Any casts to Optional<Any> always succeed
+            if String(describing: value) == "nil" && Mirror(reflecting: value).displayStyle == .optional {
+                return nil
+            }
+            fatalError("Unable to bridge Swift instance \(value) of type: \(type(of: value))")
         }
     }
 
@@ -201,9 +205,11 @@ private let Java_bridgedTypeString_methodID = Java_fileClass.getStaticMethodID(n
 
 extension Array: JObjectProtocol, JConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Array<Element> {
+        let isKotlincompatContainer = options.contains(.kotlincompatContainer)
+        let options = options.subtracting(.kotlincompatContainer)
         // let list = arr.kotlin(nocopy: true)
         let list_java: JavaObjectPointer
-        if options.contains(.kotlincompat) {
+        if isKotlincompatContainer || options.contains(.kotlincompat) {
             list_java = obj!
         } else {
             list_java = try! JavaObjectPointer.call(Java_SkipArray_kotlin_methodID, on: obj!, options: options, args: [true.toJavaParameter(options: options)])
@@ -223,17 +229,19 @@ extension Array: JObjectProtocol, JConvertible {
     }
 
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
+        let isKotlincompatContainer = options.contains(.kotlincompatContainer)
+        let options = options.subtracting(.kotlincompatContainer)
         // let list = ArrayList(count)
         let list_java = try! Java_ArrayList.create(ctor: Java_ArrayList_constructor_methodID, options: options, args: [Int32(self.count).toJavaParameter(options: options)])
         for element in self {
             // list.add(element)
-            let element_java = (element as! JConvertible).toJavaObject(options: options)
+            let element_java = AnyBridging.toJavaObject(element, options: options)
             let _ = try! Bool.call(Java_ArrayList_add_methodID, on: list_java, options: options, args: [element_java.toJavaParameter(options: options)])
             if let element_java {
                 jni.deleteLocalRef(element_java)
             }
         }
-        if options.contains(.kotlincompat) {
+        if isKotlincompatContainer || options.contains(.kotlincompat) {
             return list_java
         } else {
             // return Array(list, nocopy: true, shared: false)
@@ -323,9 +331,11 @@ private let Java_Date_getTime_methodID = Java_Date.getMethodID(name: "getTime", 
 
 extension Dictionary: JObjectProtocol, JConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Dictionary<Key, Value> {
+        let isKotlincompatContainer = options.contains(.kotlincompatContainer)
+        let options = options.subtracting(.kotlincompatContainer)
         // let map = dict.kotlin(nocopy: true)
         let map_java: JavaObjectPointer
-        if options.contains(.kotlincompat) {
+        if isKotlincompatContainer || options.contains(.kotlincompat) {
             map_java = obj!
         } else {
             map_java = try! JavaObjectPointer.call(Java_SkipDictionary_kotlin_methodID, on: obj!, options: options, args: [true.toJavaParameter(options: options)])
@@ -353,12 +363,14 @@ extension Dictionary: JObjectProtocol, JConvertible {
     }
 
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
+        let isKotlincompatContainer = options.contains(.kotlincompatContainer)
+        let options = options.subtracting(.kotlincompatContainer)
         // let map = LinkedHashMap(count)
         let map_java = try! Java_LinkedHashMap.create(ctor: Java_LinkedHashMap_constructor_methodID, options: options, args: [Int32(self.count).toJavaParameter(options: options)])
         for (key, value) in self {
             // map.put(key, value)
-            let key_java = (key as! JConvertible).toJavaObject(options: options)
-            let value_java = (value as! JConvertible).toJavaObject(options: options)
+            let key_java = AnyBridging.toJavaObject(key, options: options)
+            let value_java = AnyBridging.toJavaObject(value, options: options)
             let _ = try! JavaObjectPointer?.call(Java_LinkedHashMap_put_methodID, on: map_java, options: options, args: [key_java.toJavaParameter(options: options), value_java.toJavaParameter(options: options)])
             if let key_java {
                 jni.deleteLocalRef(key_java)
@@ -367,7 +379,7 @@ extension Dictionary: JObjectProtocol, JConvertible {
                 jni.deleteLocalRef(value_java)
             }
         }
-        if options.contains(.kotlincompat) {
+        if isKotlincompatContainer || options.contains(.kotlincompat) {
             return map_java
         } else {
             // return Dictionary(map, nocopy: true, shared: false)
@@ -448,7 +460,7 @@ extension Result: JObjectProtocol, JConvertible {
         let pair_java: JavaObjectPointer
         switch self {
         case .success(let value):
-            let value_java = (value as! JConvertible).toJavaObject(options: options)
+            let value_java = AnyBridging.toJavaObject(value, options: options)
             pair_java = try! Java_Pair.create(ctor: Java_Pair_constructor_methodID, options: options, args: [value_java.toJavaParameter(options: options), (nil as JavaObjectPointer?).toJavaParameter(options: options)])
         case .failure(let error):
             let value_java = JThrowable.toThrowable(error, options: options)!
@@ -475,9 +487,11 @@ private let Java_Pair_second_methodID = Java_Pair.getMethodID(name: "getSecond",
 
 extension Set: JObjectProtocol, JConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Set<Element> {
+        let isKotlincompatContainer = options.contains(.kotlincompatContainer)
+        let options = options.subtracting(.kotlincompatContainer)
         // let set = set.kotlin(nocopy: true)
         let set_java: JavaObjectPointer
-        if options.contains(.kotlincompat) {
+        if isKotlincompatContainer || options.contains(.kotlincompat) {
             set_java = obj!
         } else {
             set_java = try! JavaObjectPointer.call(Java_SkipSet_kotlin_methodID, on: obj!, options: options, args: [true.toJavaParameter(options: options)])
@@ -499,17 +513,19 @@ extension Set: JObjectProtocol, JConvertible {
     }
 
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
+        let isKotlincompatContainer = options.contains(.kotlincompatContainer)
+        let options = options.subtracting(.kotlincompatContainer)
         // let set = LinkedHashSet()
         let hashset_java = try! Java_LinkedHashSet.create(ctor: Java_LinkedHashSet_constructor_methodID, options: options, args: [])
         for element in self {
             // set.add(element)
-            let element_java = (element as! JConvertible).toJavaObject(options: options)
+            let element_java = AnyBridging.toJavaObject(element, options: options)
             let _ = try! Bool.call(Java_LinkedHashSet_add_methodID, on: hashset_java, options: options, args: [element_java.toJavaParameter(options: options)])
             if let element_java {
                 jni.deleteLocalRef(element_java)
             }
         }
-        if options.contains(.kotlincompat) {
+        if isKotlincompatContainer || options.contains(.kotlincompat) {
             return hashset_java
         } else {
             // return Set(set, nocopy: true, shared: false)
