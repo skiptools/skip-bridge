@@ -74,7 +74,7 @@ Released 2024-11-17
   - Fix path to local skip tool to accomodate iOS builds
   - Updates to work with new package output tree; add SKIP_BRIDGE blocks
   - Divide SkipBridgeSamples into single-mode modules
-  - Divide SkipBridge into SkipBridge/SkipBridgeKt
+  - Divide SkipBridge into SkipBridge/SkipBridge
   - Merge pull request #19 from skiptools/skip-bridge-deps
   - Change SKIP_JNI_MODE to SKIP_BRIDGE and outpit swift build to shared buildDir
   - Merge pull request #18 from skiptools/kotlinstruct

@@ -69,9 +69,9 @@ extension SwiftObjectPointer {
         return ptr == SwiftObjectNil ? nil : ptr
     }
 }
-private let Java_fileClass = try! JClass(name: "skip/bridge/kt/BridgeSupportKt")
+private let Java_fileClass = try! JClass(name: "skip/bridge/BridgeSupportKt")
 private let Java_tryPeer_methodID = Java_fileClass.getStaticMethodID(name: "Swift_peer", sig: "(Ljava/lang/Object;)J")!
-private let Java_PeerBridged_class = try! JClass(name: "skip/bridge/kt/SwiftPeerBridged")
+private let Java_PeerBridged_class = try! JClass(name: "skip/bridge/SwiftPeerBridged")
 private let Java_PeerBridged_peer_methodID = Java_PeerBridged_class.getMethodID(name: "Swift_peer", sig: "()J")!
 
 /// Reference type to hold a value type.
@@ -133,3 +133,49 @@ public protocol BridgedToKotlinSubclass2: AnyObject {
 public protocol BridgedToKotlinSubclass3: AnyObject {
     static var Java_subclass3Constructor: (JClass, JavaMethodID) { get }
 }
+
+#if SKIP
+
+/// An opaque reference to a Swift object.
+// SKIP @nobridge
+public typealias SwiftObjectPointer = Int64
+// SKIP @nobridge
+public let SwiftObjectNil = Int64(0)
+
+/// Return a Swift object pointer to a Kotlin instance, else `SwiftObjectNil`.
+// SKIP @nobridge
+public func Swift_peer(of object: Any) -> SwiftObjectPointer {
+    let peer = (object as? SwiftPeerBridged)?.Swift_peer()
+    return peer ?? SwiftObjectNil
+}
+
+/// Protocol added to a Kotlin projection type backed by a Swift peer object.
+// SKIP @nobridge
+public protocol SwiftPeerBridged {
+    func Swift_peer() -> SwiftObjectPointer
+}
+
+/// Marker type used to guarantee uniqueness of our `Swift_peer` constructor.
+// SKIP @nobridge
+public final class SwiftPeerMarker {
+}
+
+/// Return a closure that creates a Swift projection of this Kotlin instance, else nil.
+// SKIP @nobridge
+public func Swift_projection(of object: Any, options: Int) -> (() -> Any)? {
+    return (object as? skip.lib.SwiftProjecting)?.Swift_projection(options: options)
+}
+
+/// Return the Java class name of the given object.
+// SKIP @nobridge
+public func javaClassNameOf(_ object: Any) -> String {
+    return object.javaClass.name
+}
+
+/// Return the `BridgedTypes` enum case name for the given Kotlin/Java object's type.
+// SKIP @nobridge
+public func bridgedTypeStringOf(_ object: Any) -> String {
+    return bridgedTypeOf(object).name
+}
+
+#endif
