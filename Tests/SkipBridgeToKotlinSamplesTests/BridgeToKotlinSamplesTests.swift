@@ -685,12 +685,6 @@ final class BridgeToKotlinTests: XCTestCase {
         #endif
     }
 
-    #if compiler(>=6.0)
-    func testExerciseObservable() {
-        swiftExerciseObservable()
-    }
-    #endif
-
     func testGlobalFunction() {
         XCTAssertEqual(8, multiplyInt32s(i1: 2, i2: 4))
     }

@@ -457,17 +457,6 @@ public let swiftUTF8StringVar1 = "😀" + ""
 public let swiftUTF8StringVar2 = "🚀" + "123" + "456"
 public let swiftUTF8StringVar3 = "😀" + "🚀"
 
-// MARK: Observation
-
-#if compiler(>=6.0)
-public func swiftExerciseObservable() {
-    if #available(macOS 14, iOS 17, *) {
-        let obj = ObservedClass()
-        obj.i += 1
-    }
-}
-#endif
-
 // MARK: Bridged Types
 
 public func swiftMakeURL(matching url: URL) -> URL? {
