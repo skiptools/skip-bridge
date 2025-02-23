@@ -451,6 +451,30 @@ public func swiftAsyncThrowingVoidFunction(shouldThrow: Bool) async throws {
     }
 }
 
+public func swiftMakeAsyncStream() -> AsyncStream<Int> {
+    let (stream, continuation) = AsyncStream.makeStream(of: Int.self)
+    continuation.yield(100)
+    continuation.yield(200)
+    continuation.finish()
+    return stream
+}
+
+public func swiftRoundtripAsyncStream(_ stream: AsyncStream<Int>) -> AsyncStream<Int> {
+    return stream
+}
+
+public func swiftMakeAsyncThrowingStream(throwing: Bool) -> AsyncThrowingStream<String, Error> {
+    let (stream, continuation) = AsyncThrowingStream.makeStream(of: String.self)
+    continuation.yield("100")
+    continuation.yield("200")
+    continuation.finish(throwing: throwing ? SwiftError() : nil)
+    return stream
+}
+
+public func swiftRoundtripAsyncThrowingStream(_ stream: AsyncThrowingStream<String, Error>) -> AsyncThrowingStream<String, Error> {
+    return stream
+}
+
 // MARK: Unicode
 
 public let swiftUTF8StringVar1 = "😀" + ""

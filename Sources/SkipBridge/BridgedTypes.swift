@@ -29,6 +29,7 @@ public enum BridgedTypes: String {
 
     case byteArray
     case date
+    case flow
     case list
     case locale
     case map
@@ -39,6 +40,8 @@ public enum BridgedTypes: String {
     case uri
 
     case swiftArray
+    case swiftAsyncStream
+    case swiftAsyncThrowingStream
     case swiftData
     case swiftDate
     case swiftDictionary
@@ -67,6 +70,7 @@ public enum BridgedTypes {
 
     case byteArray
     case date
+    case flow
     case list
     case locale
     case map
@@ -77,6 +81,8 @@ public enum BridgedTypes {
     case uri
 
     case swiftArray
+    case swiftAsyncStream
+    case swiftAsyncThrowingStream
     case swiftData
     case swiftDate
     case swiftDictionary
@@ -120,6 +126,8 @@ public func bridgedTypeOf(_ object: Any) -> BridgedTypes {
         return .byteArray
     } else if object is java.util.Date {
         return .date
+    } else if object is kotlinx.coroutines.flow.Flow<Any> {
+        return .flow
     } else if object is kotlin.collections.List<Any> {
         return .list
     } else if object is java.util.Locale {
@@ -143,6 +151,10 @@ public func bridgedTypeOf(_ object: Any) -> BridgedTypes {
     switch className {
     case "skip.lib.Array":
         return .swiftArray
+    case "skip.lib.AsyncStream":
+        return .swiftAsyncStream
+    case "skip.lib.AsyncThrowingStream":
+        return .swiftAsyncThrowingStream
     case "skip.foundation.Data":
         return .swiftData
     case "skip.foundation.Date":
@@ -231,6 +243,8 @@ public struct AnyBridging {
             return Data.fromJavaObject(ptr, options: options)
         case .date:
             return Date.fromJavaObject(ptr, options: options)
+        case .flow:
+            return AsyncStream<Any>.fromJavaObject(ptr, options: options)
         case .list:
             return Array<Any>.fromJavaObject(ptr, options: options)
         case .locale:
@@ -249,6 +263,10 @@ public struct AnyBridging {
             return URL.fromJavaObject(ptr, options: options)
         case .swiftArray:
             return Array<Any>.fromJavaObject(ptr, options: options)
+        case .swiftAsyncStream:
+            return AsyncStream<Any>.fromJavaObject(ptr, options: options)
+        case .swiftAsyncThrowingStream:
+            return AsyncThrowingStream<Any, Error>.fromJavaObject(ptr, options: options)
         case .swiftData:
             return Data.fromJavaObject(ptr, options: options)
         case .swiftDate:
@@ -371,6 +389,195 @@ private let Java_ArrayList_add_methodID = Java_ArrayList.getMethodID(name: "add"
 private let Java_List = try! JClass(name: "java/util/List")
 private let Java_List_size_methodID = Java_List.getMethodID(name: "size", sig: "()I")!
 private let Java_List_get_methodID = Java_List.getMethodID(name: "get", sig: "(I)Ljava/lang/Object;")!
+
+// MARK: AsyncStream
+
+extension AsyncStream: JObjectProtocol, JConvertible {
+    public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> AsyncStream<Element> {
+        let bridgingDataSourceConstructorMethodID: JavaMethodID
+        if options.contains(.kotlincompat) {
+            bridgingDataSourceConstructorMethodID = Java_SkipAsyncStreamBridgingDataSource_flowConstructor_methodID
+        } else {
+            // if let dataSource = stream.swiftDataSource
+            let swiftDataSource_java: JavaObjectPointer? = try! obj!.call(method: Java_SkipAsyncStream_swiftDataSource_methodID, options: options, args: [])
+            if let swiftDataSource_java {
+                // return dataSource.Swift_producer
+                let ptr: SwiftObjectPointer = try! swiftDataSource_java.call(method: Java_SkipAsyncStreamSwiftDataSource_Swift_producer_methodID, options: options, args: [])
+                let box: TypeErasedAsyncStreamBox = ptr.pointee()!
+                return box.stream as! AsyncStream<Element>
+            } else {
+                bridgingDataSourceConstructorMethodID = Java_SkipAsyncStreamBridgingDataSource_streamConstructor_methodID
+            }
+        }
+
+        // let dataSource = AsyncStreamBridgingDataSource(stream or flow)
+        let dataSource_java = try! Java_SkipAsyncStreamBridgingDataSource.create(ctor: bridgingDataSourceConstructorMethodID, options: options, args: [obj.toJavaParameter(options: options)])
+        return AsyncStream { continuation in
+            let onNext: (Element) -> Void = {
+                continuation.yield($0)
+            }
+            let onFinish: (JavaObjectPointer?) -> Void = { _ in
+                continuation.finish()
+            }
+            jniContext {
+                let onNext_java = SwiftClosure1.javaObject(for: onNext, options: []).toJavaParameter(options: options)
+                let onFinish_java = SwiftClosure1.javaObject(for: onFinish, options: []).toJavaParameter(options: options)
+                // dataSource.collect(onNext, onFinish)
+                try! dataSource_java.call(method: Java_SkipAsyncStreamBridgingDataSource_collect_methodID, options: options, args: [onNext_java, onFinish_java])
+            }
+        }
+    }
+
+    public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
+        // let dataSource = AsyncStreamSwiftDataSource(self)
+        let box = TypeErasedAsyncStreamBox(stream: self, options: options, next: {
+            var itr = makeAsyncIterator()
+            return await itr.next()
+        })
+        let ptr = SwiftObjectPointer.pointer(to: box, retain: true)
+        let dataSource_java = try! Java_SkipAsyncStreamSwiftDataSource.create(ctor: Java_SkipAsyncStreamSwiftDataSource_constructor_methodID, options: options, args: [ptr.toJavaParameter(options: options)])
+        if options.contains(.kotlincompat) {
+            // return dataSource.asFlow()
+            let flow_java: JavaObjectPointer = try! dataSource_java.call(method: Java_SkipAsyncStreamSwiftDataSource_asFlow_methodID, options: options, args: [])
+            return flow_java
+        } else {
+            // return AsyncStream(dataSource)
+            let stream_java: JavaObjectPointer = try! Java_SkipAsyncStream.create(ctor: Java_SkipAsyncStream_constructor_methodID, options: options, args: [dataSource_java.toJavaParameter(options: options)])
+            return stream_java
+        }
+    }
+}
+
+extension AsyncThrowingStream: JObjectProtocol, JConvertible where Failure == Error {
+    public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> AsyncThrowingStream<Element, Failure> {
+        let bridgingDataSourceConstructorMethodID: JavaMethodID
+        if options.contains(.kotlincompat) {
+            bridgingDataSourceConstructorMethodID = Java_SkipAsyncStreamBridgingDataSource_flowConstructor_methodID
+        } else {
+            // if let dataSource = stream.swiftDataSource
+            let swiftDataSource_java: JavaObjectPointer? = try! obj!.call(method: Java_SkipAsyncThrowingStream_swiftDataSource_methodID, options: options, args: [])
+            if let swiftDataSource_java {
+                // return dataSource.Swift_producer
+                let ptr: SwiftObjectPointer = try! swiftDataSource_java.call(method: Java_SkipAsyncThrowingStreamSwiftDataSource_Swift_producer_methodID, options: options, args: [])
+                let box: TypeErasedAsyncStreamBox = ptr.pointee()!
+                return box.stream as! AsyncThrowingStream<Element, Failure>
+            } else {
+                bridgingDataSourceConstructorMethodID = Java_SkipAsyncStreamBridgingDataSource_throwingStreamConstructor_methodID
+            }
+        }
+
+        // let dataSource = AsyncStreamBridgingDataSource(stream or flow)
+        let dataSource_java = try! Java_SkipAsyncStreamBridgingDataSource.create(ctor: bridgingDataSourceConstructorMethodID, options: options, args: [obj.toJavaParameter(options: options)])
+        return AsyncThrowingStream { continuation in
+            let onNext: (Element) -> Void = {
+                continuation.yield($0)
+            }
+            let onFinish: (JavaObjectPointer?) -> Void = {
+                let error = JThrowable.toError($0, options: options)
+                continuation.finish(throwing: error)
+            }
+            jniContext {
+                let onNext_java = SwiftClosure1.javaObject(for: onNext, options: options).toJavaParameter(options: options)
+                let onFinish_java = SwiftClosure1.javaObject(for: onFinish, options: options).toJavaParameter(options: options)
+                // dataSource.collect(onNext, onFinish)
+                try! dataSource_java.call(method: Java_SkipAsyncStreamBridgingDataSource_collect_methodID, options: options, args: [onNext_java, onFinish_java])
+            }
+        }
+    }
+
+    public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
+        // let dataSource = AsyncStreamSwiftDataSource(self)
+        let box = TypeErasedAsyncStreamBox(stream: self, options: options, next: {
+            var itr = makeAsyncIterator()
+            return try await itr.next()
+        })
+        let ptr = SwiftObjectPointer.pointer(to: box, retain: true)
+        let dataSource_java = try! Java_SkipAsyncThrowingStreamSwiftDataSource.create(ctor: Java_SkipAsyncThrowingStreamSwiftDataSource_constructor_methodID, options: options, args: [ptr.toJavaParameter(options: options)])
+        if options.contains(.kotlincompat) {
+            // return dataSource.asFlow()
+            let flow_java: JavaObjectPointer = try! dataSource_java.call(method: Java_SkipAsyncThrowingStreamSwiftDataSource_asFlow_methodID, options: options, args: [])
+            return flow_java
+        } else {
+            // return AsyncThrowingStream(dataSource)
+            let stream_java: JavaObjectPointer = try! Java_SkipAsyncThrowingStream.create(ctor: Java_SkipAsyncThrowingStream_constructor_methodID, options: options, args: [dataSource_java.toJavaParameter(options: options)])
+            return stream_java
+        }
+    }
+}
+
+private final class TypeErasedAsyncStreamBox {
+    let stream: Any
+    let options: JConvertibleOptions
+    let next: () async throws -> Any?
+
+    init(stream: Any, options: JConvertibleOptions, next: @escaping () async throws -> Any?) {
+        self.stream = stream
+        self.options = options
+        self.next = next
+    }
+}
+
+@_cdecl("Java_skip_lib_AsyncStreamSwiftDataSource_Swift_1next")
+public func AsyncStreamSwiftDataSource_Swift_next(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_producer: SwiftObjectPointer, _ callback: JavaObjectPointer) {
+    let box_swift: TypeErasedAsyncStreamBox = Swift_producer.pointee()!
+    let callback_swift = SwiftClosure1.closure(forJavaObject: callback, options: box_swift.options)! as (Any?) -> Void
+    Task {
+        let next_swift = try! await box_swift.next()
+        callback_swift(next_swift)
+    }
+}
+
+@_cdecl("Java_skip_lib_AsyncStreamSwiftDataSource_Swift_1release")
+public func AsyncStreamSwiftDataSource_Swift_release(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_producer: SwiftObjectPointer) -> SwiftObjectPointer {
+    Swift_producer.release(as: TypeErasedAsyncStreamBox.self)
+    return SwiftObjectNil
+}
+
+@_cdecl("Java_skip_lib_AsyncThrowingStreamSwiftDataSource_Swift_1next")
+public func AsyncThrowingStreamSwiftDataSource_Swift_next(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_producer: SwiftObjectPointer, _ callback: JavaObjectPointer) {
+    let box_swift: TypeErasedAsyncStreamBox = Swift_producer.pointee()!
+    let callback_swift = SwiftClosure2.closure(forJavaObject: callback, options: box_swift.options)! as (Any?, JavaObjectPointer?) -> Void
+    Task {
+        do {
+            let next_swift = try await box_swift.next()
+            callback_swift(next_swift, nil)
+        } catch {
+            jniContext {
+                callback_swift(nil, JThrowable.toThrowable(error, options: [])!)
+            }
+        }
+    }
+}
+
+@_cdecl("Java_skip_lib_AsyncThrowingStreamSwiftDataSource_Swift_1release")
+public func AsyncThrowingStreamSwiftDataSource_Swift_release(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_producer: SwiftObjectPointer) -> SwiftObjectPointer {
+    Swift_producer.release(as: TypeErasedAsyncStreamBox.self)
+    return SwiftObjectNil
+}
+
+private let Java_SkipAsyncStream = try! JClass(name: "skip/lib/AsyncStream")
+private let Java_SkipAsyncStream_constructor_methodID = Java_SkipAsyncStream.getMethodID(name: "<init>", sig: "(Lskip/lib/AsyncStreamSwiftDataSource;)V")!
+private let Java_SkipAsyncStream_swiftDataSource_methodID = Java_SkipAsyncStream.getMethodID(name: "getSwiftDataSource", sig: "()Lskip/lib/AsyncStreamSwiftDataSource;")!
+
+private let Java_SkipAsyncThrowingStream = try! JClass(name: "skip/lib/AsyncThrowingStream")
+private let Java_SkipAsyncThrowingStream_constructor_methodID = Java_SkipAsyncThrowingStream.getMethodID(name: "<init>", sig: "(Lskip/lib/AsyncThrowingStreamSwiftDataSource;)V")!
+private let Java_SkipAsyncThrowingStream_swiftDataSource_methodID = Java_SkipAsyncThrowingStream.getMethodID(name: "getSwiftDataSource", sig: "()Lskip/lib/AsyncThrowingStreamSwiftDataSource;")!
+
+private let Java_SkipAsyncStreamBridgingDataSource = try! JClass(name: "skip/lib/AsyncStreamBridgingDataSource")
+private let Java_SkipAsyncStreamBridgingDataSource_flowConstructor_methodID = Java_SkipAsyncStreamBridgingDataSource.getMethodID(name: "<init>", sig: "(Lkotlinx/coroutines/flow/Flow;)V")!
+private let Java_SkipAsyncStreamBridgingDataSource_streamConstructor_methodID = Java_SkipAsyncStreamBridgingDataSource.getMethodID(name: "<init>", sig: "(Lskip/lib/AsyncStream;)V")!
+private let Java_SkipAsyncStreamBridgingDataSource_throwingStreamConstructor_methodID = Java_SkipAsyncStreamBridgingDataSource.getMethodID(name: "<init>", sig: "(Lskip/lib/AsyncThrowingStream;)V")!
+private let Java_SkipAsyncStreamBridgingDataSource_collect_methodID = Java_SkipAsyncStreamBridgingDataSource.getMethodID(name: "collect", sig: "(Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V")!
+
+private let Java_SkipAsyncStreamSwiftDataSource = try! JClass(name: "skip/lib/AsyncStreamSwiftDataSource")
+private let Java_SkipAsyncStreamSwiftDataSource_constructor_methodID = Java_SkipAsyncStreamSwiftDataSource.getMethodID(name: "<init>", sig: "(J)V")!
+private let Java_SkipAsyncStreamSwiftDataSource_Swift_producer_methodID = Java_SkipAsyncStreamSwiftDataSource.getMethodID(name: "getSwift_producer", sig: "()J")!
+private let Java_SkipAsyncStreamSwiftDataSource_asFlow_methodID = Java_SkipAsyncStreamSwiftDataSource.getMethodID(name: "asFlow", sig: "()Lkotlinx/coroutines/flow/Flow;")!
+
+private let Java_SkipAsyncThrowingStreamSwiftDataSource = try! JClass(name: "skip/lib/AsyncThrowingStreamSwiftDataSource")
+private let Java_SkipAsyncThrowingStreamSwiftDataSource_constructor_methodID = Java_SkipAsyncThrowingStreamSwiftDataSource.getMethodID(name: "<init>", sig: "(J)V")!
+private let Java_SkipAsyncThrowingStreamSwiftDataSource_Swift_producer_methodID = Java_SkipAsyncThrowingStreamSwiftDataSource.getMethodID(name: "getSwift_producer", sig: "()J")!
+private let Java_SkipAsyncThrowingStreamSwiftDataSource_asFlow_methodID = Java_SkipAsyncThrowingStreamSwiftDataSource.getMethodID(name: "asFlow", sig: "()Lkotlinx/coroutines/flow/Flow;")!
 
 // MARK: Data
 

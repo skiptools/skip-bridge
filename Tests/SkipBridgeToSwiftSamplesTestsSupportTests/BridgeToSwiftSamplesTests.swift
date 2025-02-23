@@ -332,6 +332,19 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(result, 1)
     }
 
+    func testAsyncStream() async {
+        let result = await testSupport_kotlinAsyncStream(content: [100, 200])
+        XCTAssertTrue(result)
+    }
+
+    func testAsyncThrowingStream() async {
+        let result = await testSupport_kotlinAsyncThrowingStream(content: ["100", "200"], throwing: false)
+        XCTAssertNil(result)
+
+        let throwingResult = await testSupport_kotlinAsyncThrowingStream(content: ["100", "200"], throwing: true)
+        XCTAssertNil(throwingResult)
+    }
+
     func testURL() {
         let string = "https://skip.tools"
         XCTAssertEqual(string, testSupport_kotlinMakeURL(string: string))

@@ -80,4 +80,20 @@ final class BridgeToKotlinCompatTests: XCTestCase {
         compat.errorvar = CompatError()
         #endif
     }
+
+    func testCompatAsyncStream() async {
+        #if SKIP
+        let uuid = java.util.UUID.randomUUID()
+        let compat = Compat(id: uuid)
+
+        let flow = compat.makeAsyncStream()
+        var collected: [Int] = []
+        flow.collect { collected.append($0) }
+        XCTAssertEqual(collected, [100, 200])
+
+        let flow2 = compat.makeAsyncStream()
+        let collected2 = await compat.collect(stream: flow2)
+        XCTAssertEqual(collected2, listOf(100, 200))
+        #endif
+    }
 }
