@@ -5,7 +5,7 @@
 // as published by the Free Software Foundation https://fsf.org
 
 import Foundation
-import SkipBridgeKt
+import SkipBridge
 import SkipBridgeToKotlinCompatSamples
 import XCTest
 

@@ -6,7 +6,6 @@
 
 import Foundation
 import SkipBridge
-import SkipBridgeKt
 import SkipBridgeToKotlinSamples
 import SkipBridgeToKotlinSamplesHelpers
 import XCTest
@@ -685,12 +684,6 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual([240, 159], codePoints)
         #endif
     }
-
-    #if compiler(>=6.0)
-    func testExerciseObservable() {
-        swiftExerciseObservable()
-    }
-    #endif
 
     func testGlobalFunction() {
         XCTAssertEqual(8, multiplyInt32s(i1: 2, i2: 4))

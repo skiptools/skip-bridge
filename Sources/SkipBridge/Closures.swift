@@ -126,14 +126,14 @@ public final class SwiftClosure0 {
     }
 }
 
-private let Java_SwiftBackedFunction0_class = try! JClass(name: "skip/bridge/kt/SwiftBackedFunction0")
+private let Java_SwiftBackedFunction0_class = try! JClass(name: "skip/bridge/SwiftBackedFunction0")
 private let Java_SwiftBackedFunction0_constructor_methodID = Java_SwiftBackedFunction0_class.getMethodID(name: "<init>", sig: "(J)V")!
 
-@_cdecl("Java_skip_bridge_kt_SwiftBackedFunction0_Swift_1release")
+@_cdecl("Java_skip_bridge_SwiftBackedFunction0_Swift_1release")
 public func SwiftBackedFunction0_Swift_release(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer) {
     Swift_peer.release(as: SwiftClosure0.self)
 }
-@_cdecl("Java_skip_bridge_kt_SwiftBackedFunction0_Swift_1invoke")
+@_cdecl("Java_skip_bridge_SwiftBackedFunction0_Swift_1invoke")
 public func SwiftBackedFunction0_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer) -> JavaObjectPointer? {
     let value_swift: SwiftClosure0 = Swift_peer.pointee()!
     let c_return_swift = value_swift.closure()
@@ -176,14 +176,14 @@ public final class SwiftClosure1 {
         self.options = options
     }
 }
-private let Java_SwiftBackedFunction1_class = try! JClass(name: "skip/bridge/kt/SwiftBackedFunction1")
+private let Java_SwiftBackedFunction1_class = try! JClass(name: "skip/bridge/SwiftBackedFunction1")
 private let Java_SwiftBackedFunction1_constructor_methodID = Java_SwiftBackedFunction1_class.getMethodID(name: "<init>", sig: "(J)V")!
 
-@_cdecl("Java_skip_bridge_kt_SwiftBackedFunction1_Swift_1release")
+@_cdecl("Java_skip_bridge_SwiftBackedFunction1_Swift_1release")
 public func SwiftBackedFunction1_Swift_release(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer) {
     Swift_peer.release(as: SwiftClosure1.self)
 }
-@_cdecl("Java_skip_bridge_kt_SwiftBackedFunction1_Swift_1invoke")
+@_cdecl("Java_skip_bridge_SwiftBackedFunction1_Swift_1invoke")
 public func SwiftBackedFunction1_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer?) -> JavaObjectPointer? {
     let value_swift: SwiftClosure1 = Swift_peer.pointee()!
     let p0_swift = AnyBridging.fromAnyTypeJavaObject(p0, toBaseType: value_swift.p0Type, options: value_swift.options)
@@ -229,14 +229,14 @@ public final class SwiftClosure2 {
         self.options = options
     }
 }
-private let Java_SwiftBackedFunction2_class = try! JClass(name: "skip/bridge/kt/SwiftBackedFunction2")
+private let Java_SwiftBackedFunction2_class = try! JClass(name: "skip/bridge/SwiftBackedFunction2")
 private let Java_SwiftBackedFunction2_constructor_methodID = Java_SwiftBackedFunction2_class.getMethodID(name: "<init>", sig: "(J)V")!
 
-@_cdecl("Java_skip_bridge_kt_SwiftBackedFunction2_Swift_1release")
+@_cdecl("Java_skip_bridge_SwiftBackedFunction2_Swift_1release")
 public func SwiftBackedFunction2_Swift_release(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer) {
     Swift_peer.release(as: SwiftClosure2.self)
 }
-@_cdecl("Java_skip_bridge_kt_SwiftBackedFunction2_Swift_1invoke")
+@_cdecl("Java_skip_bridge_SwiftBackedFunction2_Swift_1invoke")
 public func SwiftBackedFunction2_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer?, _ p1: JavaObjectPointer?) -> JavaObjectPointer? {
     let value_swift: SwiftClosure2 = Swift_peer.pointee()!
     let p0_swift = AnyBridging.fromAnyTypeJavaObject(p0, toBaseType: value_swift.p0Type, options: value_swift.options)
@@ -285,14 +285,14 @@ public final class SwiftClosure3 {
         self.options = options
     }
 }
-private let Java_SwiftBackedFunction3_class = try! JClass(name: "skip/bridge/kt/SwiftBackedFunction3")
+private let Java_SwiftBackedFunction3_class = try! JClass(name: "skip/bridge/SwiftBackedFunction3")
 private let Java_SwiftBackedFunction3_constructor_methodID = Java_SwiftBackedFunction3_class.getMethodID(name: "<init>", sig: "(J)V")!
 
-@_cdecl("Java_skip_bridge_kt_SwiftBackedFunction3_Swift_1release")
+@_cdecl("Java_skip_bridge_SwiftBackedFunction3_Swift_1release")
 public func SwiftBackedFunction3_Swift_release(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer) {
     Swift_peer.release(as: SwiftClosure2.self)
 }
-@_cdecl("Java_skip_bridge_kt_SwiftBackedFunction3_Swift_1invoke")
+@_cdecl("Java_skip_bridge_SwiftBackedFunction3_Swift_1invoke")
 public func SwiftBackedFunction3_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer?, _ p1: JavaObjectPointer?, _ p2: JavaObjectPointer?) -> JavaObjectPointer? {
     let value_swift: SwiftClosure3 = Swift_peer.pointee()!
     let p0_swift = AnyBridging.fromAnyTypeJavaObject(p0, toBaseType: value_swift.p0Type, options: value_swift.options)
@@ -344,14 +344,14 @@ public final class SwiftClosure4 {
         self.options = options
     }
 }
-private let Java_SwiftBackedFunction4_class = try! JClass(name: "skip/bridge/kt/SwiftBackedFunction4")
+private let Java_SwiftBackedFunction4_class = try! JClass(name: "skip/bridge/SwiftBackedFunction4")
 private let Java_SwiftBackedFunction4_constructor_methodID = Java_SwiftBackedFunction4_class.getMethodID(name: "<init>", sig: "(J)V")!
 
-@_cdecl("Java_skip_bridge_kt_SwiftBackedFunction4_Swift_1release")
+@_cdecl("Java_skip_bridge_SwiftBackedFunction4_Swift_1release")
 public func SwiftBackedFunction4_Swift_release(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer) {
     Swift_peer.release(as: SwiftClosure4.self)
 }
-@_cdecl("Java_skip_bridge_kt_SwiftBackedFunction4_Swift_1invoke")
+@_cdecl("Java_skip_bridge_SwiftBackedFunction4_Swift_1invoke")
 public func SwiftBackedFunction4_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer?, _ p1: JavaObjectPointer?, _ p2: JavaObjectPointer?, _ p3: JavaObjectPointer?) -> JavaObjectPointer? {
     let value_swift: SwiftClosure4 = Swift_peer.pointee()!
     let p0_swift = AnyBridging.fromAnyTypeJavaObject(p0, toBaseType: value_swift.p0Type, options: value_swift.options)
@@ -406,14 +406,14 @@ public final class SwiftClosure5 {
         self.options = options
     }
 }
-private let Java_SwiftBackedFunction5_class = try! JClass(name: "skip/bridge/kt/SwiftBackedFunction5")
+private let Java_SwiftBackedFunction5_class = try! JClass(name: "skip/bridge/SwiftBackedFunction5")
 private let Java_SwiftBackedFunction5_constructor_methodID = Java_SwiftBackedFunction5_class.getMethodID(name: "<init>", sig: "(J)V")!
 
-@_cdecl("Java_skip_bridge_kt_SwiftBackedFunction5_Swift_1release")
+@_cdecl("Java_skip_bridge_SwiftBackedFunction5_Swift_1release")
 public func SwiftBackedFunction5_Swift_release(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer) {
     Swift_peer.release(as: SwiftClosure5.self)
 }
-@_cdecl("Java_skip_bridge_kt_SwiftBackedFunction5_Swift_1invoke")
+@_cdecl("Java_skip_bridge_SwiftBackedFunction5_Swift_1invoke")
 public func SwiftBackedFunction5_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer?, _ p1: JavaObjectPointer?, _ p2: JavaObjectPointer?, _ p3: JavaObjectPointer?, _ p4: JavaObjectPointer?) -> JavaObjectPointer? {
     let value_swift: SwiftClosure5 = Swift_peer.pointee()!
     let p0_swift = AnyBridging.fromAnyTypeJavaObject(p0, toBaseType: value_swift.p0Type, options: value_swift.options)
@@ -424,3 +424,169 @@ public func SwiftBackedFunction5_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_
     let c_return_swift = value_swift.closure(p0_swift, p1_swift, p2_swift, p3_swift, p4_swift)
     return value_swift.returnType == Void.self ? nil : AnyBridging.toJavaObject(c_return_swift, options: value_swift.options)
 }
+
+#if SKIP
+
+/// A Swift-backed `kotlin.jvm.functions.Function0` implementor.
+// SKIP @nobridge
+public final class SwiftBackedFunction0<R>: kotlin.jvm.functions.Function0<R>, SwiftPeerBridged {
+    private var Swift_peer: SwiftObjectPointer
+
+    public init(Swift_peer: SwiftObjectPointer) {
+        self.Swift_peer = Swift_peer
+    }
+
+    deinit {
+        Swift_release(Swift_peer)
+        Swift_peer = SwiftObjectNil
+    }
+    // SKIP EXTERN
+    private func Swift_release(Swift_peer: SwiftObjectPointer)
+
+    public override func invoke() -> R {
+        return Swift_invoke(Swift_peer) as! R
+    }
+    // SKIP EXTERN
+    private func Swift_invoke(Swift_peer: SwiftObjectPointer) -> Any?
+
+    override func Swift_peer() -> SwiftObjectPointer {
+        return Swift_peer
+    }
+}
+
+/// A Swift-backed `kotlin.jvm.functions.Function1` implementor.
+// SKIP @nobridge
+public final class SwiftBackedFunction1<P0, R>: kotlin.jvm.functions.Function1<P0, R>, SwiftPeerBridged {
+    private var Swift_peer: SwiftObjectPointer
+
+    public init(Swift_peer: SwiftObjectPointer) {
+        self.Swift_peer = Swift_peer
+    }
+
+    deinit {
+        Swift_release(Swift_peer)
+        Swift_peer = SwiftObjectNil
+    }
+    // SKIP EXTERN
+    private func Swift_release(Swift_peer: SwiftObjectPointer)
+
+    public override func invoke(_ p0: P0) -> R {
+        return Swift_invoke(Swift_peer, p0) as! R
+    }
+    // SKIP EXTERN
+    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?) -> Any?
+
+    override func Swift_peer() -> SwiftObjectPointer {
+        return Swift_peer
+    }
+}
+
+/// A Swift-backed `kotlin.jvm.functions.Function2` implementor.
+// SKIP @nobridge
+public final class SwiftBackedFunction2<P0, P1, R>: kotlin.jvm.functions.Function2<P0, P1, R>, SwiftPeerBridged {
+    private var Swift_peer: SwiftObjectPointer
+
+    public init(Swift_peer: SwiftObjectPointer) {
+        self.Swift_peer = Swift_peer
+    }
+
+    deinit {
+        Swift_release(Swift_peer)
+        Swift_peer = SwiftObjectNil
+    }
+    // SKIP EXTERN
+    private func Swift_release(Swift_peer: SwiftObjectPointer)
+
+    public override func invoke(_ p0: P0, _ p1: P1) -> R {
+        return Swift_invoke(Swift_peer, p0, p1) as! R
+    }
+    // SKIP EXTERN
+    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?) -> Any?
+
+    override func Swift_peer() -> SwiftObjectPointer {
+        return Swift_peer
+    }
+}
+
+/// A Swift-backed `kotlin.jvm.functions.Function3` implementor.
+// SKIP @nobridge
+public final class SwiftBackedFunction3<P0, P1, P2, R>: kotlin.jvm.functions.Function3<P0, P1, P2, R>, SwiftPeerBridged {
+    private var Swift_peer: SwiftObjectPointer
+
+    public init(Swift_peer: SwiftObjectPointer) {
+        self.Swift_peer = Swift_peer
+    }
+
+    deinit {
+        Swift_release(Swift_peer)
+        Swift_peer = SwiftObjectNil
+    }
+    // SKIP EXTERN
+    private func Swift_release(Swift_peer: SwiftObjectPointer)
+
+    public override func invoke(_ p0: P0, _ p1: P1, _ p2: P2) -> R {
+        return Swift_invoke(Swift_peer, p0, p1, p2) as! R
+    }
+    // SKIP EXTERN
+    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?, p2: Any?) -> Any?
+
+    override func Swift_peer() -> SwiftObjectPointer {
+        return Swift_peer
+    }
+}
+
+/// A Swift-backed `kotlin.jvm.functions.Function4` implementor.
+// SKIP @nobridge
+public final class SwiftBackedFunction4<P0, P1, P2, P3, R>: kotlin.jvm.functions.Function4<P0, P1, P2, P3, R>, SwiftPeerBridged {
+    private var Swift_peer: SwiftObjectPointer
+
+    public init(Swift_peer: SwiftObjectPointer) {
+        self.Swift_peer = Swift_peer
+    }
+
+    deinit {
+        Swift_release(Swift_peer)
+        Swift_peer = SwiftObjectNil
+    }
+    // SKIP EXTERN
+    private func Swift_release(Swift_peer: SwiftObjectPointer)
+
+    public override func invoke(_ p0: P0, _ p1: P1, _ p2: P2, _ p3: P3) -> R {
+        return Swift_invoke(Swift_peer, p0, p1, p2, p3) as! R
+    }
+    // SKIP EXTERN
+    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?, p2: Any?, p3: Any?) -> Any?
+
+    override func Swift_peer() -> SwiftObjectPointer {
+        return Swift_peer
+    }
+}
+
+/// A Swift-backed `kotlin.jvm.functions.Function5` implementor.
+// SKIP @nobridge
+public final class SwiftBackedFunction5<P0, P1, P2, P3, P4, R>: kotlin.jvm.functions.Function5<P0, P1, P2, P3, P4, R>, SwiftPeerBridged {
+    private var Swift_peer: SwiftObjectPointer
+
+    public init(Swift_peer: SwiftObjectPointer) {
+        self.Swift_peer = Swift_peer
+    }
+
+    deinit {
+        Swift_release(Swift_peer)
+        Swift_peer = SwiftObjectNil
+    }
+    // SKIP EXTERN
+    private func Swift_release(Swift_peer: SwiftObjectPointer)
+
+    public override func invoke(_ p0: P0, _ p1: P1, _ p2: P2, _ p3: P3, _ p4: P4) -> R {
+        return Swift_invoke(Swift_peer, p0, p1, p2, p3, p4) as! R
+    }
+    // SKIP EXTERN
+    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?, p2: Any?, p3: Any?, p4: Any?) -> Any?
+
+    override func Swift_peer() -> SwiftObjectPointer {
+        return Swift_peer
+    }
+}
+
+#endif
