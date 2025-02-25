@@ -17,6 +17,22 @@ public class Compat {
     public init(id: UUID) {
         self.id = id
     }
+
+    public func makeAsyncStream() -> AsyncStream<Int> {
+        let (stream, continuation) = AsyncStream.makeStream(of: Int.self)
+        continuation.yield(100)
+        continuation.yield(200)
+        continuation.finish()
+        return stream
+    }
+
+    public func collect(stream: AsyncStream<Int>) async -> [Int] {
+        var collected: [Int] = []
+        for await value in stream {
+            collected.append(value)
+        }
+        return collected
+    }
 }
 
 public struct CompatError: Error {

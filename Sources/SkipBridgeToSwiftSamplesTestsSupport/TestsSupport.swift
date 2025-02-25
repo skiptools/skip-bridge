@@ -811,6 +811,65 @@ public func testSupport_callKotlinAsyncThrowingVoidFunction(shouldThrow: Bool) a
     try await kotlinAsyncThrowingVoidFunction(shouldThrow: shouldThrow)
 }
 
+public func testSupport_kotlinAsyncStream(content: [Int]) async -> Bool {
+    let stream = kotlinMakeAsyncStream()
+    var i = 0
+    for await value in stream {
+        if i < content.count {
+            guard value == content[i] else {
+                return false
+            }
+        }
+        i += 1
+    }
+    guard i == content.count else {
+        return false
+    }
+
+    let roundtripped = kotlinRoundtripAsyncStream(stream)
+    for await _ in roundtripped {
+        return false // Should be empty
+    }
+    return true
+}
+
+public func testSupport_kotlinAsyncThrowingStream(content: [String], throwing: Bool) async -> String? {
+    let stream = kotlinMakeAsyncThrowingStream(throwing: throwing)
+    var i = 0
+    do {
+        for try await value in stream {
+            if i < content.count {
+                guard value == content[i] else {
+                    return "\(value) == \(content[i])"
+                }
+            }
+            i += 1
+        }
+        if throwing {
+            return "Did not throw at end" // Should have thrown at end
+        }
+    } catch {
+        if !throwing {
+            return "Should not have thrown"
+        }
+    }
+    guard i == content.count else {
+        return "Did not iterate content: \(i)"
+    }
+
+    let roundtripped = kotlinRoundtripAsyncThrowingStream(stream)
+    do {
+        for try await _ in roundtripped {
+            return "Was not empty" // Should be empty
+        }
+    } catch {
+        if !throwing {
+            return "Threw on empty: \(error)"
+        }
+    }
+    return nil
+}
+
 public func testSupport_kotlinMakeURL(string: String) -> String {
     let url = kotlinMakeURL(matching: URL(string: string)!)
     return url!.absoluteString

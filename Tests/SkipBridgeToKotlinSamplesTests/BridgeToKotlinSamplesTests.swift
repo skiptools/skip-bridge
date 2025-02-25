@@ -640,6 +640,57 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(result, 1)
     }
 
+    func testAsyncStream() async {
+        let stream = swiftMakeAsyncStream()
+        let content = [100, 200]
+        var i = 0
+        for await value in stream {
+            if i < content.count {
+                XCTAssertEqual(value, content[i])
+            }
+            i += 1
+        }
+        XCTAssertEqual(i, content.count)
+
+        let roundtripped = swiftRoundtripAsyncStream(stream)
+        for await _ in roundtripped {
+            XCTFail("Stream should now be empty")
+        }
+    }
+
+    func testAsyncThrowingStream() async throws {
+        let stream = swiftMakeAsyncThrowingStream(throwing: false)
+        let content = ["100", "200"]
+        var i = 0
+        for try await value in stream {
+            if i < content.count {
+                XCTAssertEqual(value, content[i])
+            }
+            i += 1
+        }
+        XCTAssertEqual(i, content.count)
+
+        let roundtripped = swiftRoundtripAsyncThrowingStream(stream)
+        for try await _ in roundtripped {
+            XCTFail("Stream should now be empty")
+        }
+
+        let throwingStream = swiftMakeAsyncThrowingStream(throwing: true)
+        i = 0
+        do {
+            for try await value in throwingStream {
+                if i < content.count {
+                    XCTAssertEqual(value, content[i])
+                }
+                i += 1
+            }
+            XCTFail("Expected to throw on finish")
+        } catch {
+            // Expected
+        }
+        XCTAssertEqual(i, content.count)
+    }
+
     func testURL() {
         let url = URL(string: "https://skip.tools")!
         XCTAssertEqual(url.absoluteString, swiftMakeURL(matching: url)?.absoluteString)

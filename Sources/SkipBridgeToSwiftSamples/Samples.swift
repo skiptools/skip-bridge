@@ -427,6 +427,30 @@ public func kotlinAsyncThrowingVoidFunction(shouldThrow: Bool) async throws {
     }
 }
 
+public func kotlinMakeAsyncStream() -> AsyncStream<Int> {
+    let (stream, continuation) = AsyncStream.makeStream(of: Int.self)
+    continuation.yield(100)
+    continuation.yield(200)
+    continuation.finish()
+    return stream
+}
+
+public func kotlinRoundtripAsyncStream(_ stream: AsyncStream<Int>) -> AsyncStream<Int> {
+    return stream
+}
+
+public func kotlinMakeAsyncThrowingStream(throwing: Bool) -> AsyncThrowingStream<String, Error> {
+    let (stream, continuation) = AsyncThrowingStream.makeStream(of: String.self)
+    continuation.yield("100")
+    continuation.yield("200")
+    continuation.finish(throwing: throwing ? KotlinError() : nil)
+    return stream
+}
+
+public func kotlinRoundtripAsyncThrowingStream(_ stream: AsyncThrowingStream<String, Error>) -> AsyncThrowingStream<String, Error> {
+    return stream
+}
+
 // MARK: Bridged Types
 
 public func kotlinMakeURL(matching url: URL) -> URL? {
