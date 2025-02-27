@@ -119,7 +119,7 @@ public class JNI {
 
 extension JNI {
     /// Perform an operation with the current thread's `JNIEnviPointer`.
-    fileprivate func withEnv<T>(_ block: (JNINativeInterface, JNIEnvPointer) throws -> T) rethrows -> T {
+    public func withEnv<T>(_ block: (JNINativeInterface, JNIEnvPointer) throws -> T) rethrows -> T {
         let jvm: JNIInvokeInterface = _jvm.pointee!.pointee
         var tenv: UnsafeMutableRawPointer?
         let threadStatus = jvm.GetEnv(_jvm, &tenv, JavaInt(JNI_VERSION_1_6))
@@ -132,7 +132,7 @@ extension JNI {
 
     /// Same as `withEnv`, but also checks for any java exceptions. If an exception occurred,
     /// it will throw a `JavaException` and clear the JNI exception.
-    fileprivate func withEnvThrowing<T>(options: JConvertibleOptions, _ block: (JNINativeInterface, JNIEnvPointer) throws -> T) throws -> T {
+    public func withEnvThrowing<T>(options: JConvertibleOptions, _ block: (JNINativeInterface, JNIEnvPointer) throws -> T) throws -> T {
         let result = try withEnv(block)
         try checkExceptionAndThrow(options: options)
         return result
