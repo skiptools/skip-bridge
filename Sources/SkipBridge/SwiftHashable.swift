@@ -14,6 +14,15 @@ public final class SwiftHashable: Hashable {
 
     public let value: Any
 
+    /// Unwrap the value if it is `AnyHashable` to its base value.
+    public var base: Any {
+        if let hashable = value as? AnyHashable {
+            return hashable.base
+        } else {
+            return value
+        }
+    }
+
     public func hash(into hasher: inout Hasher) {
         self.hasher(&hasher)
     }
@@ -27,7 +36,10 @@ extension SwiftHashable: BridgedToKotlin, BridgedFinalClass {
     private static let Java_class = try! JClass(name: "skip.bridge.SwiftHashable")
 
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Self {
-        let ptr = SwiftObjectPointer.peer(of: obj!, options: options)
+        guard let obj else {
+            return SwiftHashable(nil as AnyHashable?) as! Self
+        }
+        let ptr = SwiftObjectPointer.peer(of: obj, options: options)
         return ptr.pointee()!
     }
 
