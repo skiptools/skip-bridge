@@ -1,5 +1,6 @@
 // Copyright 2024–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
+
 /// In order to use JNI to access the Swift side of the bridge, we need to first manually load the library.
 /// This only works on macOS; Android will need to load the .so from the embedded jni library path.
 ///
