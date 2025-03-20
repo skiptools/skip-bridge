@@ -17,11 +17,11 @@ let package = Package(
         .package(url: "https://source.skip.tools/skip.git", from: "1.2.22"),
         .package(url: "https://source.skip.tools/skip-lib.git", from: "1.3.2"),
         .package(url: "https://source.skip.tools/skip-foundation.git", from: "1.2.12"),
+        .package(url: "https://source.skip.tools/swift-jni.git", "0.0.0"..<"2.0.0"),
     ],
     targets: [
-        .target(name: "CJNI"),
         .target(name: "SkipBridge",
-            dependencies: ["CJNI", .product(name: "SkipLib", package: "skip-lib")],
+            dependencies: [.product(name: "SwiftJNI", package: "swift-jni"), .product(name: "SkipLib", package: "skip-lib")],
             plugins: [.plugin(name: "skipstone", package: "skip")]),
         .target(name: "SkipBridgeToKotlinSamples",
             dependencies: ["SkipBridgeToKotlinSamplesHelpers"],

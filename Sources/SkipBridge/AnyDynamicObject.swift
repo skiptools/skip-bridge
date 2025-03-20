@@ -1,5 +1,6 @@
 // Copyright 2024–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
+
 /// A dynamic object is able to represent any Kotlin object using dynamic member lookups
 /// in Swift and reflection in Kotlin.
 @dynamicMemberLookup

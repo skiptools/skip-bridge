@@ -1,5 +1,6 @@
 // Copyright 2024–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
+
 /// A Swift object that is backed by a Java closure in the form of a `kotlin.jvm.functions.FunctionN` object.
 public final class JavaBackedClosure<R>: JObject {
     private let options: JConvertibleOptions

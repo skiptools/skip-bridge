@@ -1,5 +1,6 @@
 // Copyright 2024–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
+
 /// Tuple conversions.
 public final class SwiftTuple {
     public static func javaObject<T0, T1>(for tuple: (T0, T1)?, options: JConvertibleOptions) -> JavaObjectPointer? {

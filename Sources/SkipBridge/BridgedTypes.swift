@@ -172,6 +172,15 @@ public func bridgedTypeOf(_ object: Any) -> BridgedTypes {
 
 /// Utilities to convert unknown bridged objects.
 public struct AnyBridging {
+    /// Set up the SwiftJNI `JThrowable.errorConverter` to bridge to the Kotlin error.
+    internal static func initJThrowableErrorConverter() {
+        JThrowable.errorConverter = { ptr, options in
+            AnyBridging.fromJavaObject(ptr, options: options, fallback: {
+                JThrowable.descriptionToError(ptr, options: options)
+            }) as? Error
+        }
+    }
+
     /// Convert an unknown-typed Swift instance to its Java form.
     public static func toJavaObject(_ value: Any?, options: JConvertibleOptions) -> JavaObjectPointer? {
         guard let value else {
@@ -326,9 +335,11 @@ private let Java_bridgedTypeString_methodID = Java_fileClass.getStaticMethodID(n
 // Kotlin type when the `kotlincompat` option is given.
 //
 
+public typealias JObjectConvertible = JObjectProtocol & JConvertible
+
 // MARK: Array
 
-extension Array: JObjectProtocol, JConvertible {
+extension Array: JObjectConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Array<Element> {
         let isKotlincompatContainer = options.contains(.kotlincompatContainer)
         let options = options.subtracting(.kotlincompatContainer)
@@ -347,7 +358,7 @@ extension Array: JObjectProtocol, JConvertible {
             let element = AnyBridging.fromJavaObject(element_java, toBaseType: Element.self, options: options)!
             arr.append(element)
             if let element_java {
-                jni.deleteLocalRef(element_java)
+                JNI.jni.deleteLocalRef(element_java)
             }
         }
         return arr
@@ -363,7 +374,7 @@ extension Array: JObjectProtocol, JConvertible {
             let element_java = AnyBridging.toJavaObject(element, options: options)
             let _ = try! Bool.call(Java_ArrayList_add_methodID, on: list_java, options: options, args: [element_java.toJavaParameter(options: options)])
             if let element_java {
-                jni.deleteLocalRef(element_java)
+                JNI.jni.deleteLocalRef(element_java)
             }
         }
         if isKotlincompatContainer || options.contains(.kotlincompat) {
@@ -388,7 +399,7 @@ private let Java_List_get_methodID = Java_List.getMethodID(name: "get", sig: "(I
 
 // MARK: AsyncStream
 
-extension AsyncStream: JObjectProtocol, JConvertible {
+extension AsyncStream: JObjectConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> AsyncStream<Element> {
         let bridgingDataSourceConstructorMethodID: JavaMethodID
         if options.contains(.kotlincompat) {
@@ -444,7 +455,7 @@ extension AsyncStream: JObjectProtocol, JConvertible {
     }
 }
 
-extension AsyncThrowingStream: JObjectProtocol, JConvertible where Failure == Error {
+extension AsyncThrowingStream: JObjectConvertible where Failure == Error {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> AsyncThrowingStream<Element, Failure> {
         let bridgingDataSourceConstructorMethodID: JavaMethodID
         if options.contains(.kotlincompat) {
@@ -577,7 +588,7 @@ private let Java_SkipAsyncThrowingStreamSwiftDataSource_asFlow_methodID = Java_S
 
 // MARK: Data
 
-extension Data: JObjectProtocol, JConvertible {
+extension Data: JObjectConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Data {
         let kotlinByteArray: JavaObjectPointer
         if options.contains(.kotlincompat) {
@@ -585,8 +596,8 @@ extension Data: JObjectProtocol, JConvertible {
         } else {
             kotlinByteArray = try! JavaObjectPointer.call(Java_SkipData_kotlin_methodID, on: obj!, options: options, args: [true.toJavaParameter(options: options)])
         }
-        let (bytes, length) = jni.getByteArrayElements(kotlinByteArray)
-        defer { jni.releaseByteArrayElements(kotlinByteArray, elements: bytes, mode: .unpin) }
+        let (bytes, length) = JNI.jni.getByteArrayElements(kotlinByteArray)
+        defer { JNI.jni.releaseByteArrayElements(kotlinByteArray, elements: bytes, mode: .unpin) }
         guard let bytes else {
             return Data()
         }
@@ -595,7 +606,7 @@ extension Data: JObjectProtocol, JConvertible {
 
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
         self.withUnsafeBytes { buffer in
-            let kotlinByteArray = jni.newByteArray(buffer.baseAddress, size: Int32(count))!
+            let kotlinByteArray = JNI.jni.newByteArray(buffer.baseAddress, size: Int32(count))!
             if options.contains(.kotlincompat) {
                 return kotlinByteArray
             } else {
@@ -611,7 +622,7 @@ private let Java_SkipData_kotlin_methodID = Java_SkipData.getMethodID(name: "kot
 
 // MARK: Date
 
-extension Date: JObjectProtocol, JConvertible {
+extension Date: JObjectConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Date {
         let timeInterval: Double
         if options.contains(.kotlincompat) {
@@ -643,7 +654,7 @@ private let Java_Date_getTime_methodID = Java_Date.getMethodID(name: "getTime", 
 
 // MARK: Dictionary
 
-extension Dictionary: JObjectProtocol, JConvertible {
+extension Dictionary: JObjectConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Dictionary<Key, Value> {
         let isKotlincompatContainer = options.contains(.kotlincompatContainer)
         let options = options.subtracting(.kotlincompatContainer)
@@ -667,10 +678,10 @@ extension Dictionary: JObjectProtocol, JConvertible {
             let value = AnyBridging.fromJavaObject(value_java, toBaseType: Value.self, options: options)!
             dict[key] = value
             if let key_java {
-                jni.deleteLocalRef(key_java)
+                JNI.jni.deleteLocalRef(key_java)
             }
             if let value_java {
-                jni.deleteLocalRef(value_java)
+                JNI.jni.deleteLocalRef(value_java)
             }
         }
         return dict
@@ -687,10 +698,10 @@ extension Dictionary: JObjectProtocol, JConvertible {
             let value_java = AnyBridging.toJavaObject(value, options: options)
             let _ = try! JavaObjectPointer?.call(Java_LinkedHashMap_put_methodID, on: map_java, options: options, args: [key_java.toJavaParameter(options: options), value_java.toJavaParameter(options: options)])
             if let key_java {
-                jni.deleteLocalRef(key_java)
+                JNI.jni.deleteLocalRef(key_java)
             }
             if let value_java {
-                jni.deleteLocalRef(value_java)
+                JNI.jni.deleteLocalRef(value_java)
             }
         }
         if isKotlincompatContainer || options.contains(.kotlincompat) {
@@ -720,7 +731,7 @@ private let Java_Iterator_next_methodID = Java_Iterator.getMethodID(name: "next"
 
 // MARK: Locale
 
-extension Locale: JObjectProtocol, JConvertible {
+extension Locale: JObjectConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Locale {
         let identifier: String
         if options.contains(.kotlincompat) {
@@ -734,7 +745,7 @@ extension Locale: JObjectProtocol, JConvertible {
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
         if options.contains(.kotlincompat) {
             let identifier = self.identifier.replacing("_", with: "-")
-            return try! JavaObjectPointer.callStatic(Java_Locale_forLanguageTag_methodID, on: Java_Locale.ptr, options: options, args: [identifier.toJavaParameter(options: options)])
+            return try! Java_Locale.callStatic(method: Java_Locale_forLanguageTag_methodID, options: options, args: [identifier.toJavaParameter(options: options)])
         } else {
             return try! Java_SkipLocale.create(ctor: Java_SkipLocale_constructor_methodID, options: options, args: [self.identifier.toJavaParameter(options: options)])
         }
@@ -750,7 +761,7 @@ private let Java_Locale_toLanguageTag_methodID = Java_Locale.getMethodID(name: "
 
 // MARK: Result
 
-extension Result: JObjectProtocol, JConvertible {
+extension Result: JObjectConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Result<Success, Failure> {
         // let result = res.kotlin(nocopy: true)
         let pair_java: JavaObjectPointer
@@ -799,7 +810,7 @@ private let Java_Pair_second_methodID = Java_Pair.getMethodID(name: "getSecond",
 
 // MARK: Set
 
-extension Set: JObjectProtocol, JConvertible {
+extension Set: JObjectConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Set<Element> {
         let isKotlincompatContainer = options.contains(.kotlincompatContainer)
         let options = options.subtracting(.kotlincompatContainer)
@@ -819,7 +830,7 @@ extension Set: JObjectProtocol, JConvertible {
             let element = AnyBridging.fromJavaObject(element_java, toBaseType: Element.self, options: options)!
             set.insert(element)
             if let element_java {
-                jni.deleteLocalRef(element_java)
+                JNI.jni.deleteLocalRef(element_java)
             }
 
         }
@@ -836,7 +847,7 @@ extension Set: JObjectProtocol, JConvertible {
             let element_java = AnyBridging.toJavaObject(element, options: options)
             let _ = try! Bool.call(Java_LinkedHashSet_add_methodID, on: hashset_java, options: options, args: [element_java.toJavaParameter(options: options)])
             if let element_java {
-                jni.deleteLocalRef(element_java)
+                JNI.jni.deleteLocalRef(element_java)
             }
         }
         if isKotlincompatContainer || options.contains(.kotlincompat) {
@@ -858,7 +869,7 @@ private let Java_LinkedHashSet_add_methodID = Java_LinkedHashSet.getMethodID(nam
 
 // MARK: UUID
 
-extension UUID: JObjectProtocol, JConvertible {
+extension UUID: JObjectConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> UUID {
         let uuidString: String
         if options.contains(.kotlincompat) {
@@ -888,7 +899,7 @@ private let Java_UUID_toString_methodID = Java_UUID.getMethodID(name: "toString"
 
 // MARK: URL
 
-extension URL: JObjectProtocol, JConvertible {
+extension URL: JObjectConvertible {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> URL {
         let absoluteString: String
         if options.contains(.kotlincompat) {
