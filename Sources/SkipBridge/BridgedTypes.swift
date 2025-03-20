@@ -172,11 +172,8 @@ public func bridgedTypeOf(_ object: Any) -> BridgedTypes {
 
 /// Utilities to convert unknown bridged objects.
 public struct AnyBridging {
-    private static var JThrowableErrorConverterInit = false
-
+    /// Set up the SwiftJNI `JThrowable.errorConverter` to bridge to the Kotlin error.
     internal static func initJThrowableErrorConverter() {
-        if JThrowableErrorConverterInit { return }
-        JThrowableErrorConverterInit = true
         JThrowable.errorConverter = { ptr, options in
             AnyBridging.fromJavaObject(ptr, options: options, fallback: {
                 JThrowable.descriptionToError(ptr, options: options)
