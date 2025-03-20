@@ -1,19 +1,39 @@
 // Copyright 2024–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
+@_exported import SwiftJNI
 
-/// In order to use JNI to access the Swift side of the bridge, we need to first manually load the library.
-/// This only works on macOS; Android will need to load the .so from the embedded jni library path.
+/// That this needs to be manually loaded with `System.loadLibrary("SwiftJNI")` in order to have `JNI_OnLoad` called.
 ///
-/// When searching for the library to load, there are four scenarios we need to handle,
-/// each of which has different paths that need to be searched:
+/// A dynamic library that loads another dynamic library will *not* have `JNI_OnLoad` automatically called.
 ///
-/// 1. Xcode-launched Swift tests where the embedded JVM needs to load the Xcode-created library ("SkipBridgeSamples.framework/SkipBridgeSamples")
-/// 2. Xcode-launched Skip gradle tests, where gradle's JVM needs to load the Xcode created-library ("SkipBridgeSamples.framework/SkipBridgeSamples")
-/// 3. SwiftPM-launched Swift tests where the embedded JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
-/// 4. SwiftPM-launched Skip gradle tests, where gradle's JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
-public func loadLibrary(packageName: String, moduleName libName: String) throws {
-    let libName_java = libName.toJavaParameter(options: [])
-    try Java_systemClass.get().callStatic(method: Java_loadLibrary_methodID.get(), options: [], args: [libName_java])
+/// The alternative is to `dlsym("JNI_GetCreatedJavaVMs")` from the right shared object file (e.g., `libnativehelper.so` in recent Android APIs), but this is much easier.
+@_silgen_name("JNI_OnLoad")
+public func JNI_OnLoad(jvm: UnsafeMutablePointer<JavaVM?>, reserved: UnsafeMutableRawPointer) -> JavaInt {
+    JNI.jni = JNI(jvm: jvm)
+    if JNI.jni == nil {
+        fatalError("SwiftJNI: global jni variable was nil after JNI_OnLoad")
+    }
+
+    AnyBridging.initJThrowableErrorConverter()
+
+    return JavaInt(0x00010006) // JNI_VERSION_1_6
+}
+
+extension JNI {
+    /// In order to use JNI to access the Swift side of the bridge, we need to first manually load the library.
+    /// This only works on macOS; Android will need to load the .so from the embedded jni library path.
+    ///
+    /// When searching for the library to load, there are four scenarios we need to handle,
+    /// each of which has different paths that need to be searched:
+    ///
+    /// 1. Xcode-launched Swift tests where the embedded JVM needs to load the Xcode-created library ("SkipBridgeSamples.framework/SkipBridgeSamples")
+    /// 2. Xcode-launched Skip gradle tests, where gradle's JVM needs to load the Xcode created-library ("SkipBridgeSamples.framework/SkipBridgeSamples")
+    /// 3. SwiftPM-launched Swift tests where the embedded JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
+    /// 4. SwiftPM-launched Skip gradle tests, where gradle's JVM needs to load the SwiftPM-created library ("libSkipBridgeSamples.dylib")
+    public static func loadLibrary(packageName: String, moduleName libName: String) throws {
+        let libName_java = libName.toJavaParameter(options: [])
+        try Java_systemClass.get().callStatic(method: Java_loadLibrary_methodID.get(), options: [], args: [libName_java])
+    }
 }
 
 private let Java_systemClass = Result { try JClass(name: "skip.bridge.SystemKt") }

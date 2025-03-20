@@ -174,7 +174,7 @@ public func bridgedTypeOf(_ object: Any) -> BridgedTypes {
 public struct AnyBridging {
     private static var JThrowableErrorConverterInit = false
 
-    private static func initJThrowableErrorConverter() {
+    internal static func initJThrowableErrorConverter() {
         if JThrowableErrorConverterInit { return }
         JThrowableErrorConverterInit = true
         JThrowable.errorConverter = { ptr, options in
@@ -186,7 +186,6 @@ public struct AnyBridging {
 
     /// Convert an unknown-typed Swift instance to its Java form.
     public static func toJavaObject(_ value: Any?, options: JConvertibleOptions) -> JavaObjectPointer? {
-        initJThrowableErrorConverter()
         guard let value else {
             return nil
         }
@@ -205,7 +204,6 @@ public struct AnyBridging {
 
     /// Convert a Kotlin/Java instance of a known base type to its Swift projection.
     public static func fromJavaObject<T>(_ ptr: JavaObjectPointer?, toBaseType: T.Type, options: JConvertibleOptions) -> T? {
-        initJThrowableErrorConverter()
         guard let ptr else {
             return nil
         }
@@ -219,7 +217,6 @@ public struct AnyBridging {
 
     /// Convert an unknown Kotlin/Java instance to its Swift projection.
     public static func fromJavaObject(_ ptr: JavaObjectPointer?, options: JConvertibleOptions, fallback: (() -> Any)? = nil) -> Any? {
-        initJThrowableErrorConverter()
         guard let ptr else {
             return nil
         }
@@ -305,7 +302,6 @@ public struct AnyBridging {
 
     /// Convert a Kotlin/Java instance of an `Any` base type to its Swift projection.
     public static func fromAnyTypeJavaObject(_ ptr: JavaObjectPointer?, toBaseType: Any.Type, options: JConvertibleOptions) -> Any? {
-        initJThrowableErrorConverter()
         guard let ptr else {
             return nil
         }
@@ -365,7 +361,7 @@ extension Array: JObjectConvertible {
             let element = AnyBridging.fromJavaObject(element_java, toBaseType: Element.self, options: options)!
             arr.append(element)
             if let element_java {
-                jni.deleteLocalRef(element_java)
+                JNI.jni.deleteLocalRef(element_java)
             }
         }
         return arr
@@ -381,7 +377,7 @@ extension Array: JObjectConvertible {
             let element_java = AnyBridging.toJavaObject(element, options: options)
             let _ = try! Bool.call(Java_ArrayList_add_methodID, on: list_java, options: options, args: [element_java.toJavaParameter(options: options)])
             if let element_java {
-                jni.deleteLocalRef(element_java)
+                JNI.jni.deleteLocalRef(element_java)
             }
         }
         if isKotlincompatContainer || options.contains(.kotlincompat) {
@@ -603,8 +599,8 @@ extension Data: JObjectConvertible {
         } else {
             kotlinByteArray = try! JavaObjectPointer.call(Java_SkipData_kotlin_methodID, on: obj!, options: options, args: [true.toJavaParameter(options: options)])
         }
-        let (bytes, length) = jni.getByteArrayElements(kotlinByteArray)
-        defer { jni.releaseByteArrayElements(kotlinByteArray, elements: bytes, mode: .unpin) }
+        let (bytes, length) = JNI.jni.getByteArrayElements(kotlinByteArray)
+        defer { JNI.jni.releaseByteArrayElements(kotlinByteArray, elements: bytes, mode: .unpin) }
         guard let bytes else {
             return Data()
         }
@@ -613,7 +609,7 @@ extension Data: JObjectConvertible {
 
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
         self.withUnsafeBytes { buffer in
-            let kotlinByteArray = jni.newByteArray(buffer.baseAddress, size: Int32(count))!
+            let kotlinByteArray = JNI.jni.newByteArray(buffer.baseAddress, size: Int32(count))!
             if options.contains(.kotlincompat) {
                 return kotlinByteArray
             } else {
@@ -685,10 +681,10 @@ extension Dictionary: JObjectConvertible {
             let value = AnyBridging.fromJavaObject(value_java, toBaseType: Value.self, options: options)!
             dict[key] = value
             if let key_java {
-                jni.deleteLocalRef(key_java)
+                JNI.jni.deleteLocalRef(key_java)
             }
             if let value_java {
-                jni.deleteLocalRef(value_java)
+                JNI.jni.deleteLocalRef(value_java)
             }
         }
         return dict
@@ -705,10 +701,10 @@ extension Dictionary: JObjectConvertible {
             let value_java = AnyBridging.toJavaObject(value, options: options)
             let _ = try! JavaObjectPointer?.call(Java_LinkedHashMap_put_methodID, on: map_java, options: options, args: [key_java.toJavaParameter(options: options), value_java.toJavaParameter(options: options)])
             if let key_java {
-                jni.deleteLocalRef(key_java)
+                JNI.jni.deleteLocalRef(key_java)
             }
             if let value_java {
-                jni.deleteLocalRef(value_java)
+                JNI.jni.deleteLocalRef(value_java)
             }
         }
         if isKotlincompatContainer || options.contains(.kotlincompat) {
@@ -837,7 +833,7 @@ extension Set: JObjectConvertible {
             let element = AnyBridging.fromJavaObject(element_java, toBaseType: Element.self, options: options)!
             set.insert(element)
             if let element_java {
-                jni.deleteLocalRef(element_java)
+                JNI.jni.deleteLocalRef(element_java)
             }
 
         }
@@ -854,7 +850,7 @@ extension Set: JObjectConvertible {
             let element_java = AnyBridging.toJavaObject(element, options: options)
             let _ = try! Bool.call(Java_LinkedHashSet_add_methodID, on: hashset_java, options: options, args: [element_java.toJavaParameter(options: options)])
             if let element_java {
-                jni.deleteLocalRef(element_java)
+                JNI.jni.deleteLocalRef(element_java)
             }
         }
         if isKotlincompatContainer || options.contains(.kotlincompat) {
