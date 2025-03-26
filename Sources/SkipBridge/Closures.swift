@@ -1,5 +1,6 @@
 // Copyright 2024–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
+import SwiftJNI
 
 /// A Swift object that is backed by a Java closure in the form of a `kotlin.jvm.functions.FunctionN` object.
 public final class JavaBackedClosure<R>: JObject {
@@ -88,9 +89,28 @@ private let Java_Function4_invoke_methodID = Java_Function4_class.getMethodID(na
 private let Java_Function5_class = try! JClass(name: "kotlin/jvm/functions/Function5")
 private let Java_Function5_invoke_methodID = Java_Function5_class.getMethodID(name: "invoke", sig: "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")!
 
+private func SwiftBackedFunction_invoke(_ closure: () throws -> Any?, returnType: Any.Type, options: JConvertibleOptions) -> JavaObjectPointer {
+    let return_swift: Any?
+    let error_swift: Error?
+    do {
+        let c_return_swift = try closure()
+        return_swift = returnType == Void.self ? nil : c_return_swift
+        error_swift = nil
+    } catch {
+        return_swift = nil
+        error_swift = error
+    }
+    let return_java = AnyBridging.toJavaObject(return_swift, options: options).toJavaParameter(options: options)
+    let error_java = JThrowable.toThrowable(error_swift, options: options).toJavaParameter(options: options)
+    return try! Java_Pair_class.create(ctor: Java_Pair_constructor_methodID, options: options, args: [return_java, error_java])
+}
+
+private let Java_Pair_class = try! JClass(name: "kotlin/Pair")
+private let Java_Pair_constructor_methodID = Java_Pair_class.getMethodID(name: "<init>", sig: "(Ljava/lang/Object;Ljava/lang/Object;)V")!
+
 /// A Swift reference type that wraps a 0-parameters closure.
 public final class SwiftClosure0 {
-    public static func javaObject<R>(for closure: (() -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+    public static func javaObject<R>(for closure: (() throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -105,18 +125,31 @@ public final class SwiftClosure0 {
         }
         if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
             let closure: SwiftClosure0 = ptr.pointee()!
-            return { closure.closure() as! R }
+            return { try! closure.closure() as! R }
         } else {
             let closure = JavaBackedClosure<R>(function, options: options)
             return { try! closure.invoke() }
         }
     }
 
-    public let closure: () -> Any?
+    public static func closure<R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (() throws -> R)? {
+        guard let function else {
+            return nil
+        }
+        if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
+            let closure: SwiftClosure0 = ptr.pointee()!
+            return { try closure.closure() as! R }
+        } else {
+            let closure = JavaBackedClosure<R>(function, options: options)
+            return { try closure.invoke() }
+        }
+    }
+
+    public let closure: () throws -> Any?
     public let returnType: Any.Type
     public let options: JConvertibleOptions
 
-    public init<R>(closure: @escaping () -> R, options: JConvertibleOptions) {
+    public init<R>(closure: @escaping () throws -> R, options: JConvertibleOptions) {
         self.closure = closure
         self.returnType = R.self
         self.options = options
@@ -131,15 +164,14 @@ public func SwiftBackedFunction0_Swift_release(_ Java_env: JNIEnvPointer, _ Java
     Swift_peer.release(as: SwiftClosure0.self)
 }
 @_cdecl("Java_skip_bridge_SwiftBackedFunction0_Swift_1invoke")
-public func SwiftBackedFunction0_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer) -> JavaObjectPointer? {
+public func SwiftBackedFunction0_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer) -> JavaObjectPointer {
     let value_swift: SwiftClosure0 = Swift_peer.pointee()!
-    let c_return_swift = value_swift.closure()
-    return value_swift.returnType == Void.self ? nil : AnyBridging.toJavaObject(c_return_swift, options: value_swift.options)
+    return SwiftBackedFunction_invoke({ try value_swift.closure() }, returnType: value_swift.returnType, options: value_swift.options)
 }
 
 /// A Swift reference type that wraps a 1-parameter closure.
 public final class SwiftClosure1 {
-    public static func javaObject<P0, R>(for closure: ((P0) -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+    public static func javaObject<P0, R>(for closure: ((P0) throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -154,20 +186,33 @@ public final class SwiftClosure1 {
         }
         if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
             let closure: SwiftClosure1 = ptr.pointee()!
-            return { p0 in closure.closure(p0) as! R }
+            return { p0 in try! closure.closure(p0) as! R }
         } else {
             let closure = JavaBackedClosure<R>(function, options: options)
             return { p0 in try! closure.invoke(p0) }
         }
     }
 
-    public let closure: (Any?) -> Any?
+    public static func closure<P0, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0) throws -> R)? {
+        guard let function else {
+            return nil
+        }
+        if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
+            let closure: SwiftClosure1 = ptr.pointee()!
+            return { p0 in try closure.closure(p0) as! R }
+        } else {
+            let closure = JavaBackedClosure<R>(function, options: options)
+            return { p0 in try closure.invoke(p0) }
+        }
+    }
+
+    public let closure: (Any?) throws -> Any?
     public let p0Type: Any.Type
     public let returnType: Any.Type
     public let options: JConvertibleOptions
 
-    public init<P0, R>(closure: @escaping (P0) -> R, options: JConvertibleOptions) {
-        self.closure = { p0 in closure(p0 as! P0) }
+    public init<P0, R>(closure: @escaping (P0) throws -> R, options: JConvertibleOptions) {
+        self.closure = { p0 in try closure(p0 as! P0) }
         self.p0Type = P0.self
         self.returnType = R.self
         self.options = options
@@ -181,16 +226,15 @@ public func SwiftBackedFunction1_Swift_release(_ Java_env: JNIEnvPointer, _ Java
     Swift_peer.release(as: SwiftClosure1.self)
 }
 @_cdecl("Java_skip_bridge_SwiftBackedFunction1_Swift_1invoke")
-public func SwiftBackedFunction1_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer?) -> JavaObjectPointer? {
+public func SwiftBackedFunction1_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer?) -> JavaObjectPointer {
     let value_swift: SwiftClosure1 = Swift_peer.pointee()!
     let p0_swift = AnyBridging.fromAnyTypeJavaObject(p0, toBaseType: value_swift.p0Type, options: value_swift.options)
-    let c_return_swift = value_swift.closure(p0_swift)
-    return value_swift.returnType == Void.self ? nil : AnyBridging.toJavaObject(c_return_swift, options: value_swift.options)
+    return SwiftBackedFunction_invoke({ try value_swift.closure(p0_swift) }, returnType: value_swift.returnType, options: value_swift.options)
 }
 
 /// A Swift reference type that wraps a 2-parameter closure.
 public final class SwiftClosure2 {
-    public static func javaObject<P0, P1, R>(for closure: ((P0, P1) -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+    public static func javaObject<P0, P1, R>(for closure: ((P0, P1) throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -205,21 +249,34 @@ public final class SwiftClosure2 {
         }
         if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
             let closure: SwiftClosure2 = ptr.pointee()!
-            return { p0, p1 in closure.closure(p0, p1) as! R }
+            return { p0, p1 in try! closure.closure(p0, p1) as! R }
         } else {
             let closure = JavaBackedClosure<R>(function, options: options)
             return { p0, p1 in try! closure.invoke(p0, p1) }
         }
     }
 
-    public let closure: (Any?, Any?) -> Any?
+    public static func closure<P0, P1, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1) throws -> R)? {
+        guard let function else {
+            return nil
+        }
+        if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
+            let closure: SwiftClosure2 = ptr.pointee()!
+            return { p0, p1 in try closure.closure(p0, p1) as! R }
+        } else {
+            let closure = JavaBackedClosure<R>(function, options: options)
+            return { p0, p1 in try closure.invoke(p0, p1) }
+        }
+    }
+
+    public let closure: (Any?, Any?) throws -> Any?
     public let p0Type: Any.Type
     public let p1Type: Any.Type
     public let returnType: Any.Type
     public let options: JConvertibleOptions
 
-    public init<P0, P1, R>(closure: @escaping (P0, P1) -> R, options: JConvertibleOptions) {
-        self.closure = { p0, p1 in closure(p0 as! P0, p1 as! P1) }
+    public init<P0, P1, R>(closure: @escaping (P0, P1) throws -> R, options: JConvertibleOptions) {
+        self.closure = { p0, p1 in try closure(p0 as! P0, p1 as! P1) }
         self.p0Type = P0.self
         self.p1Type = P1.self
         self.returnType = R.self
@@ -234,17 +291,16 @@ public func SwiftBackedFunction2_Swift_release(_ Java_env: JNIEnvPointer, _ Java
     Swift_peer.release(as: SwiftClosure2.self)
 }
 @_cdecl("Java_skip_bridge_SwiftBackedFunction2_Swift_1invoke")
-public func SwiftBackedFunction2_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer?, _ p1: JavaObjectPointer?) -> JavaObjectPointer? {
+public func SwiftBackedFunction2_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer, _ p0: JavaObjectPointer?, _ p1: JavaObjectPointer?) -> JavaObjectPointer {
     let value_swift: SwiftClosure2 = Swift_peer.pointee()!
     let p0_swift = AnyBridging.fromAnyTypeJavaObject(p0, toBaseType: value_swift.p0Type, options: value_swift.options)
     let p1_swift = AnyBridging.fromAnyTypeJavaObject(p1, toBaseType: value_swift.p1Type, options: value_swift.options)
-    let c_return_swift = value_swift.closure(p0_swift, p1_swift)
-    return value_swift.returnType == Void.self ? nil : AnyBridging.toJavaObject(c_return_swift, options: value_swift.options)
+    return SwiftBackedFunction_invoke({ try value_swift.closure(p0_swift, p1_swift) }, returnType: value_swift.returnType, options: value_swift.options)
 }
 
 /// A Swift reference type that wraps a 3-parameter closure.
 public final class SwiftClosure3 {
-    public static func javaObject<P0, P1, P2, R>(for closure: ((P0, P1, P2) -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+    public static func javaObject<P0, P1, P2, R>(for closure: ((P0, P1, P2) throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -259,22 +315,35 @@ public final class SwiftClosure3 {
         }
         if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
             let closure: SwiftClosure3 = ptr.pointee()!
-            return { p0, p1, p2 in closure.closure(p0, p1, p2) as! R }
+            return { p0, p1, p2 in try! closure.closure(p0, p1, p2) as! R }
         } else {
             let closure = JavaBackedClosure<R>(function, options: options)
             return { p0, p1, p2 in try! closure.invoke(p0, p1, p2) }
         }
     }
 
-    public let closure: (Any?, Any?, Any?) -> Any?
+    public static func closure<P0, P1, P2, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1, P2) throws -> R)? {
+        guard let function else {
+            return nil
+        }
+        if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
+            let closure: SwiftClosure3 = ptr.pointee()!
+            return { p0, p1, p2 in try closure.closure(p0, p1, p2) as! R }
+        } else {
+            let closure = JavaBackedClosure<R>(function, options: options)
+            return { p0, p1, p2 in try closure.invoke(p0, p1, p2) }
+        }
+    }
+
+    public let closure: (Any?, Any?, Any?) throws -> Any?
     public let p0Type: Any.Type
     public let p1Type: Any.Type
     public let p2Type: Any.Type
     public let returnType: Any.Type
     public let options: JConvertibleOptions
 
-    public init<P0, P1, P2, R>(closure: @escaping (P0, P1, P2) -> R, options: JConvertibleOptions) {
-        self.closure = { p0, p1, p2 in closure(p0 as! P0, p1 as! P1, p2 as! P2) }
+    public init<P0, P1, P2, R>(closure: @escaping (P0, P1, P2) throws -> R, options: JConvertibleOptions) {
+        self.closure = { p0, p1, p2 in try closure(p0 as! P0, p1 as! P1, p2 as! P2) }
         self.p0Type = P0.self
         self.p1Type = P1.self
         self.p2Type = P2.self
@@ -295,8 +364,7 @@ public func SwiftBackedFunction3_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_
     let p0_swift = AnyBridging.fromAnyTypeJavaObject(p0, toBaseType: value_swift.p0Type, options: value_swift.options)
     let p1_swift = AnyBridging.fromAnyTypeJavaObject(p1, toBaseType: value_swift.p1Type, options: value_swift.options)
     let p2_swift = AnyBridging.fromAnyTypeJavaObject(p2, toBaseType: value_swift.p2Type, options: value_swift.options)
-    let c_return_swift = value_swift.closure(p0_swift, p1_swift, p2_swift)
-    return value_swift.returnType == Void.self ? nil : AnyBridging.toJavaObject(c_return_swift, options: value_swift.options)
+    return SwiftBackedFunction_invoke({ try value_swift.closure(p0_swift, p1_swift, p2_swift) }, returnType: value_swift.returnType, options: value_swift.options)
 }
 
 /// A Swift reference type that wraps a 4-parameter closure.
@@ -316,14 +384,27 @@ public final class SwiftClosure4 {
         }
         if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
             let closure: SwiftClosure4 = ptr.pointee()!
-            return { p0, p1, p2, p3 in closure.closure(p0, p1, p2, p3) as! R }
+            return { p0, p1, p2, p3 in try! closure.closure(p0, p1, p2, p3) as! R }
         } else {
             let closure = JavaBackedClosure<R>(function, options: options)
             return { p0, p1, p2, p3 in try! closure.invoke(p0, p1, p2, p3) }
         }
     }
 
-    public let closure: (Any?, Any?, Any?, Any?) -> Any?
+    public static func closure<P0, P1, P2, P3, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1, P2, P3) throws -> R)? {
+        guard let function else {
+            return nil
+        }
+        if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
+            let closure: SwiftClosure4 = ptr.pointee()!
+            return { p0, p1, p2, p3 in try closure.closure(p0, p1, p2, p3) as! R }
+        } else {
+            let closure = JavaBackedClosure<R>(function, options: options)
+            return { p0, p1, p2, p3 in try closure.invoke(p0, p1, p2, p3) }
+        }
+    }
+
+    public let closure: (Any?, Any?, Any?, Any?) throws -> Any?
     public let p0Type: Any.Type
     public let p1Type: Any.Type
     public let p2Type: Any.Type
@@ -331,8 +412,8 @@ public final class SwiftClosure4 {
     public let returnType: Any.Type
     public let options: JConvertibleOptions
 
-    public init<P0, P1, P2, P3, R>(closure: @escaping (P0, P1, P2, P3) -> R, options: JConvertibleOptions) {
-        self.closure = { p0, p1, p2, p3 in closure(p0 as! P0, p1 as! P1, p2 as! P2, p3 as! P3) }
+    public init<P0, P1, P2, P3, R>(closure: @escaping (P0, P1, P2, P3) throws -> R, options: JConvertibleOptions) {
+        self.closure = { p0, p1, p2, p3 in try closure(p0 as! P0, p1 as! P1, p2 as! P2, p3 as! P3) }
         self.p0Type = P0.self
         self.p1Type = P1.self
         self.p2Type = P2.self
@@ -355,13 +436,12 @@ public func SwiftBackedFunction4_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_
     let p1_swift = AnyBridging.fromAnyTypeJavaObject(p1, toBaseType: value_swift.p1Type, options: value_swift.options)
     let p2_swift = AnyBridging.fromAnyTypeJavaObject(p2, toBaseType: value_swift.p2Type, options: value_swift.options)
     let p3_swift = AnyBridging.fromAnyTypeJavaObject(p3, toBaseType: value_swift.p3Type, options: value_swift.options)
-    let c_return_swift = value_swift.closure(p0_swift, p1_swift, p2_swift, p3_swift)
-    return value_swift.returnType == Void.self ? nil : AnyBridging.toJavaObject(c_return_swift, options: value_swift.options)
+    return SwiftBackedFunction_invoke({ try value_swift.closure(p0_swift, p1_swift, p2_swift, p3_swift) }, returnType: value_swift.returnType, options: value_swift.options)
 }
 
 /// A Swift reference type that wraps a 5-parameter closure.
 public final class SwiftClosure5 {
-    public static func javaObject<P0, P1, P2, P3, P4, R>(for closure: ((P0, P1, P2, P3, P4) -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+    public static func javaObject<P0, P1, P2, P3, P4, R>(for closure: ((P0, P1, P2, P3, P4) throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -376,14 +456,27 @@ public final class SwiftClosure5 {
         }
         if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
             let closure: SwiftClosure5 = ptr.pointee()!
-            return { p0, p1, p2, p3, p4 in closure.closure(p0, p1, p2, p3, p4) as! R }
+            return { p0, p1, p2, p3, p4 in try! closure.closure(p0, p1, p2, p3, p4) as! R }
         } else {
             let closure = JavaBackedClosure<R>(function, options: options)
             return { p0, p1, p2, p3, p4 in try! closure.invoke(p0, p1, p2, p3, p4) }
         }
     }
 
-    public let closure: (Any?, Any?, Any?, Any?, Any?) -> Any?
+    public static func closure<P0, P1, P2, P3, P4, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1, P2, P3, P4) throws -> R)? {
+        guard let function else {
+            return nil
+        }
+        if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
+            let closure: SwiftClosure5 = ptr.pointee()!
+            return { p0, p1, p2, p3, p4 in try closure.closure(p0, p1, p2, p3, p4) as! R }
+        } else {
+            let closure = JavaBackedClosure<R>(function, options: options)
+            return { p0, p1, p2, p3, p4 in try closure.invoke(p0, p1, p2, p3, p4) }
+        }
+    }
+
+    public let closure: (Any?, Any?, Any?, Any?, Any?) throws -> Any?
     public let p0Type: Any.Type
     public let p1Type: Any.Type
     public let p2Type: Any.Type
@@ -392,8 +485,8 @@ public final class SwiftClosure5 {
     public let returnType: Any.Type
     public let options: JConvertibleOptions
 
-    public init<P0, P1, P2, P3, P4, R>(closure: @escaping (P0, P1, P2, P3, P4) -> R, options: JConvertibleOptions) {
-        self.closure = { p0, p1, p2, p3, p4 in closure(p0 as! P0, p1 as! P1, p2 as! P2, p3 as! P3, p4 as! P4) }
+    public init<P0, P1, P2, P3, P4, R>(closure: @escaping (P0, P1, P2, P3, P4) throws -> R, options: JConvertibleOptions) {
+        self.closure = { p0, p1, p2, p3, p4 in try closure(p0 as! P0, p1 as! P1, p2 as! P2, p3 as! P3, p4 as! P4) }
         self.p0Type = P0.self
         self.p1Type = P1.self
         self.p2Type = P2.self
@@ -418,8 +511,7 @@ public func SwiftBackedFunction5_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_
     let p2_swift = AnyBridging.fromAnyTypeJavaObject(p2, toBaseType: value_swift.p2Type, options: value_swift.options)
     let p3_swift = AnyBridging.fromAnyTypeJavaObject(p3, toBaseType: value_swift.p3Type, options: value_swift.options)
     let p4_swift = AnyBridging.fromAnyTypeJavaObject(p4, toBaseType: value_swift.p4Type, options: value_swift.options)
-    let c_return_swift = value_swift.closure(p0_swift, p1_swift, p2_swift, p3_swift, p4_swift)
-    return value_swift.returnType == Void.self ? nil : AnyBridging.toJavaObject(c_return_swift, options: value_swift.options)
+    return SwiftBackedFunction_invoke({ try value_swift.closure(p0_swift, p1_swift, p2_swift, p3_swift, p4_swift) }, returnType: value_swift.returnType, options: value_swift.options)
 }
 
 #if SKIP
@@ -441,10 +533,15 @@ public final class SwiftBackedFunction0<R>: kotlin.jvm.functions.Function0<R>, S
     private func Swift_release(Swift_peer: SwiftObjectPointer)
 
     public override func invoke() -> R {
-        return Swift_invoke(Swift_peer) as! R
+        let (value, throwable) = Swift_invoke(Swift_peer)
+        if let throwable {
+            throw throwable
+        } else {
+            return value as! R
+        }
     }
     // SKIP EXTERN
-    private func Swift_invoke(Swift_peer: SwiftObjectPointer) -> Any?
+    private func Swift_invoke(Swift_peer: SwiftObjectPointer) -> kotlin.Pair<Any?, Throwable>
 
     override func Swift_peer() -> SwiftObjectPointer {
         return Swift_peer
@@ -468,10 +565,15 @@ public final class SwiftBackedFunction1<P0, R>: kotlin.jvm.functions.Function1<P
     private func Swift_release(Swift_peer: SwiftObjectPointer)
 
     public override func invoke(_ p0: P0) -> R {
-        return Swift_invoke(Swift_peer, p0) as! R
+        let (value, throwable) = Swift_invoke(Swift_peer, p0)
+        if let throwable {
+            throw throwable
+        } else {
+            return value as! R
+        }
     }
     // SKIP EXTERN
-    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?) -> Any?
+    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?) -> kotlin.Pair<Any?, Throwable>
 
     override func Swift_peer() -> SwiftObjectPointer {
         return Swift_peer
@@ -495,10 +597,15 @@ public final class SwiftBackedFunction2<P0, P1, R>: kotlin.jvm.functions.Functio
     private func Swift_release(Swift_peer: SwiftObjectPointer)
 
     public override func invoke(_ p0: P0, _ p1: P1) -> R {
-        return Swift_invoke(Swift_peer, p0, p1) as! R
+        let (value, throwable) = Swift_invoke(Swift_peer, p0, p1)
+        if let throwable {
+            throw throwable
+        } else {
+            return value as! R
+        }
     }
     // SKIP EXTERN
-    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?) -> Any?
+    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?) -> kotlin.Pair<Any?, Throwable>
 
     override func Swift_peer() -> SwiftObjectPointer {
         return Swift_peer
@@ -522,10 +629,15 @@ public final class SwiftBackedFunction3<P0, P1, P2, R>: kotlin.jvm.functions.Fun
     private func Swift_release(Swift_peer: SwiftObjectPointer)
 
     public override func invoke(_ p0: P0, _ p1: P1, _ p2: P2) -> R {
-        return Swift_invoke(Swift_peer, p0, p1, p2) as! R
+        let (value, throwable) = Swift_invoke(Swift_peer, p0, p1, p2)
+        if let throwable {
+            throw throwable
+        } else {
+            return value as! R
+        }
     }
     // SKIP EXTERN
-    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?, p2: Any?) -> Any?
+    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?, p2: Any?) -> kotlin.Pair<Any?, Throwable>
 
     override func Swift_peer() -> SwiftObjectPointer {
         return Swift_peer
@@ -549,10 +661,15 @@ public final class SwiftBackedFunction4<P0, P1, P2, P3, R>: kotlin.jvm.functions
     private func Swift_release(Swift_peer: SwiftObjectPointer)
 
     public override func invoke(_ p0: P0, _ p1: P1, _ p2: P2, _ p3: P3) -> R {
-        return Swift_invoke(Swift_peer, p0, p1, p2, p3) as! R
+        let (value, throwable) = Swift_invoke(Swift_peer, p0, p1, p2, p3)
+        if let throwable {
+            throw throwable
+        } else {
+            return value as! R
+        }
     }
     // SKIP EXTERN
-    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?, p2: Any?, p3: Any?) -> Any?
+    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?, p2: Any?, p3: Any?) -> kotlin.Pair<Any?, Throwable>
 
     override func Swift_peer() -> SwiftObjectPointer {
         return Swift_peer
@@ -576,10 +693,15 @@ public final class SwiftBackedFunction5<P0, P1, P2, P3, P4, R>: kotlin.jvm.funct
     private func Swift_release(Swift_peer: SwiftObjectPointer)
 
     public override func invoke(_ p0: P0, _ p1: P1, _ p2: P2, _ p3: P3, _ p4: P4) -> R {
-        return Swift_invoke(Swift_peer, p0, p1, p2, p3, p4) as! R
+        let (value, throwable) = Swift_invoke(Swift_peer, p0, p1, p2, p3, p4)
+        if let throwable {
+            throw throwable
+        } else {
+            return value as! R
+        }
     }
     // SKIP EXTERN
-    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?, p2: Any?, p3: Any?, p4: Any?) -> Any?
+    private func Swift_invoke(Swift_peer: SwiftObjectPointer, p0: Any?, p1: Any?, p2: Any?, p3: Any?, p4: Any?) -> kotlin.Pair<Any?, Throwable>
 
     override func Swift_peer() -> SwiftObjectPointer {
         return Swift_peer
