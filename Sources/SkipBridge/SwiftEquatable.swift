@@ -1,14 +1,19 @@
 // Copyright 2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
+import SwiftJNI
 
 /// Utility type used to provide an `any Equatable` equivalent to Kotlin, where the underlying type
 /// is not necessarily bridged.
-public final class SwiftEquatable: Equatable {
+public final class SwiftEquatable: Equatable, CustomStringConvertible {
     private let comparator: (Any) -> Bool
+    private let describer: () -> String
 
-    public init<T>(_ value: T) where T : Equatable {
+    public init<T>(_ value: T, description: (() -> String)? = nil) where T : Equatable {
         self.value = value
-        self.comparator = { value == $0 as! T }
+        self.comparator = {
+            value == $0 as? T
+        }
+        self.describer = description ?? { String(describing: value) }
     }
 
     public let value: Any
@@ -24,6 +29,10 @@ public final class SwiftEquatable: Equatable {
 
     public static func ==(lhs: SwiftEquatable, rhs: SwiftEquatable) -> Bool {
         return lhs.comparator(rhs.value)
+    }
+
+    public var description: String {
+        return self.describer()
     }
 }
 
@@ -55,6 +64,12 @@ public func SwiftEquatable_Swift_equals(_ Java_env: JNIEnvPointer, _ Java_target
     return equatable == other
 }
 
+@_cdecl("Java_skip_bridge_SwiftEquatable_Swift_1description")
+public func SwiftEquatable_Swift_description(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer) -> JavaString {
+    let equatable: SwiftEquatable = Swift_peer.pointee()!
+    return equatable.description.toJavaObject(options: [])!
+}
+
 @_cdecl("Java_skip_bridge_SwiftEquatable_Swift_1projectionImpl")
 public func SwiftEquatable_Swift_projectionImpl(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ options: Int32) -> JavaObjectPointer {
     let projection = SwiftEquatable.fromJavaObject(Java_target, options: JConvertibleOptions(rawValue: Int(options)))
@@ -84,13 +99,19 @@ public final class SwiftEquatable: SwiftPeerBridged, skip.lib.SwiftProjecting {
     }
 
     public override func equals(other: Any?) -> Bool {
-        if !(other is SwiftPeerBridged) {
+        if !(other is SwiftEquatable) {
             return false
         }
         return Swift_equals(Swift_peer, other.Swift_peer())
     }
     // SKIP EXTERN
     private func Swift_equals(Swift_peer: SwiftObjectPointer, other: SwiftObjectPointer) -> Bool
+
+    public override func toString() -> String {
+        return Swift_description(Swift_peer)
+    }
+    // SKIP EXTERN
+    private func Swift_description(Swift_peer: SwiftObjectPointer) -> String
 
     public override func Swift_projection(options: Int) -> () -> Any {
         return Swift_projectionImpl(options)
