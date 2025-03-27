@@ -3,14 +3,16 @@
 
 /// Utility type used to provide an `AnyHashable` equivalent to Kotlin, where the underlying type
 /// is not necessarily bridged.
-public final class SwiftHashable: Hashable {
+public final class SwiftHashable: Hashable, CustomStringConvertible {
     private let comparator: (Any) -> Bool
     private let hasher: (inout Hasher) -> Void
+    private let describer: () -> String
 
-    public init<T>(_ value: T) where T : Hashable {
+    public init<T>(_ value: T, description: (() -> String)? = nil) where T : Hashable {
         self.value = value
         self.hasher = { $0.combine(value) }
-        self.comparator = { value == $0 as! T }
+        self.comparator = { value == $0 as? T }
+        self.describer = description ?? { String(describing: value) }
     }
 
     public let value: Any
@@ -30,6 +32,10 @@ public final class SwiftHashable: Hashable {
 
     public static func ==(lhs: SwiftHashable, rhs: SwiftHashable) -> Bool {
         return lhs.comparator(rhs.value)
+    }
+
+    public var description: String {
+        return self.describer()
     }
 }
 
@@ -70,6 +76,12 @@ public func SwiftHashable_Swift_equals(_ Java_env: JNIEnvPointer, _ Java_target:
     return hashable == other
 }
 
+@_cdecl("Java_skip_bridge_SwiftHashable_Swift_1description")
+public func SwiftHashable_Swift_description(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ Swift_peer: SwiftObjectPointer) -> JavaString {
+    let hashable: SwiftHashable = Swift_peer.pointee()!
+    return hashable.description.toJavaObject(options: [])!
+}
+
 @_cdecl("Java_skip_bridge_SwiftHashable_Swift_1projectionImpl")
 public func SwiftHashable_Swift_projectionImpl(_ Java_env: JNIEnvPointer, _ Java_target: JavaObjectPointer, _ options: Int32) -> JavaObjectPointer {
     let projection = SwiftHashable.fromJavaObject(Java_target, options: JConvertibleOptions(rawValue: Int(options)))
@@ -99,7 +111,7 @@ public final class SwiftHashable: SwiftPeerBridged, skip.lib.SwiftProjecting {
     }
 
     public override func equals(other: Any?) -> Bool {
-        if !(other is SwiftPeerBridged) {
+        if !(other is SwiftHashable) {
             return false
         }
         return Swift_equals(Swift_peer, other.Swift_peer())
@@ -112,6 +124,12 @@ public final class SwiftHashable: SwiftPeerBridged, skip.lib.SwiftProjecting {
     }
     // SKIP EXTERN
     private func Swift_hashCode(Swift_peer: SwiftObjectPointer) -> Int64
+
+    public override func toString() -> String {
+        return Swift_description(Swift_peer)
+    }
+    // SKIP EXTERN
+    private func Swift_description(Swift_peer: SwiftObjectPointer) -> String
 
     public override func Swift_projection(options: Int) -> () -> Any {
         return Swift_projectionImpl(options)
