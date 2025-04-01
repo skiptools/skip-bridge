@@ -5,7 +5,7 @@ let package = Package(
     name: "skip-bridge",
     platforms: [.iOS(.v16), .macOS(.v13)],
     products: [
-        .library(name: "SkipBridge", type: .dynamic, targets: ["SkipBridge"]),
+        .library(name: "SkipBridge", targets: ["SkipBridge"]),
         .library(name: "SkipBridgeToKotlinSamples", type: .dynamic, targets: ["SkipBridgeToKotlinSamples"]),
         .library(name: "SkipBridgeToKotlinSamplesHelpers", type: .dynamic, targets: ["SkipBridgeToKotlinSamplesHelpers"]),
         .library(name: "SkipBridgeToKotlinCompatSamples", type: .dynamic, targets: ["SkipBridgeToKotlinCompatSamples"]),
@@ -17,7 +17,8 @@ let package = Package(
         .package(url: "https://source.skip.tools/skip.git", from: "1.2.22"),
         .package(url: "https://source.skip.tools/skip-lib.git", from: "1.3.2"),
         .package(url: "https://source.skip.tools/skip-foundation.git", from: "1.2.12"),
-        .package(url: "https://source.skip.tools/swift-jni.git", "0.0.0"..<"2.0.0"),
+        //.package(url: "https://source.skip.tools/swift-jni.git", "0.0.0"..<"2.0.0"),
+        .package(url: "https://source.skip.tools/swift-jni.git", branch: "no-dynamic"),
     ],
     targets: [
         .target(name: "SkipBridge",
