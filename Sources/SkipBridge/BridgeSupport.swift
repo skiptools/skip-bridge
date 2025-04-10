@@ -92,10 +92,16 @@ private struct UncheckedSendableBox<T> : @unchecked Sendable {
     let wrappedValue: T
 }
 
+#if compiler(>=6.0) // needed for MainActor.assumeIsolated
 /// Forwards to `MainActor.assumeIsolated` with a wrapper that assumes `Sendable`
 public func assumeMainActorUnchecked<T>(_ operation: @MainActor () throws -> T, file: StaticString = #fileID, line: UInt = #line) rethrows -> T {
     try MainActor.assumeIsolated({ UncheckedSendableBox(wrappedValue: try operation() )}, file: file, line: line).wrappedValue
 }
+#else
+public func assumeMainActorUnchecked<T>(_ operation: () throws -> T, file: StaticString = #fileID, line: UInt = #line) rethrows -> T {
+    try operation()
+}
+#endif
 
 /// The Java class name of the given object.
 public func Java_className(of object: JavaObjectPointer, options: JConvertibleOptions) -> String {
