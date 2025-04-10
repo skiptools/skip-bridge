@@ -85,6 +85,18 @@ public protocol TypeErasedConvertible {
     func toTypeErased() -> AnyObject
 }
 
+/// A wrapper that assumes the underlying value is Sendable without checking.
+///
+/// Used for types like `JavaObjectPointer` which cannot themselves be Sendable.
+private struct UncheckedSendableBox<T> : @unchecked Sendable {
+    let wrappedValue: T
+}
+
+/// Forwards to `MainActor.assumeIsolated` with a wrapper that assumes `Sendable`
+public func assumeMainActorUnchecked<T>(_ operation: @MainActor () throws -> T, file: StaticString = #fileID, line: UInt = #line) rethrows -> T {
+    try MainActor.assumeIsolated({ UncheckedSendableBox(wrappedValue: try operation() )}, file: file, line: line).wrappedValue
+}
+
 /// The Java class name of the given object.
 public func Java_className(of object: JavaObjectPointer, options: JConvertibleOptions) -> String {
     let object_java = object.toJavaParameter(options: options)
