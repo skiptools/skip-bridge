@@ -3,7 +3,7 @@
 import SwiftJNI
 
 /// A Swift object that is backed by a Java closure in the form of a `kotlin.jvm.functions.FunctionN` object.
-public final class JavaBackedClosure<R>: JObject {
+public final class JavaBackedClosure<R>: JObject, @unchecked Sendable {
     private let options: JConvertibleOptions
 
     public init(_ ptr: JavaObjectPointer, options: JConvertibleOptions) {
@@ -119,7 +119,7 @@ public final class SwiftClosure0 {
         return try! Java_SwiftBackedFunction0_class.create(ctor: Java_SwiftBackedFunction0_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
     }
 
-    public static func closure<R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (() -> R)? {
+    public static func closure<R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable () -> R)? {
         guard let function else {
             return nil
         }
@@ -132,7 +132,7 @@ public final class SwiftClosure0 {
         }
     }
 
-    public static func closure<R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (() throws -> R)? {
+    public static func closure<R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable () throws -> R)? {
         guard let function else {
             return nil
         }
@@ -180,7 +180,7 @@ public final class SwiftClosure1 {
         return try! Java_SwiftBackedFunction1_class.create(ctor: Java_SwiftBackedFunction1_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
     }
 
-    public static func closure<P0, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0) -> R)? {
+    public static func closure<P0, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0) -> R)? {
         guard let function else {
             return nil
         }
@@ -193,7 +193,7 @@ public final class SwiftClosure1 {
         }
     }
 
-    public static func closure<P0, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0) throws -> R)? {
+    public static func closure<P0, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0) throws -> R)? {
         guard let function else {
             return nil
         }
@@ -243,7 +243,7 @@ public final class SwiftClosure2 {
         return try! Java_SwiftBackedFunction2_class.create(ctor: Java_SwiftBackedFunction2_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
     }
 
-    public static func closure<P0, P1, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1) -> R)? {
+    public static func closure<P0, P1, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1) -> R)? {
         guard let function else {
             return nil
         }
@@ -256,7 +256,7 @@ public final class SwiftClosure2 {
         }
     }
 
-    public static func closure<P0, P1, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1) throws -> R)? {
+    public static func closure<P0, P1, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1) throws -> R)? {
         guard let function else {
             return nil
         }
@@ -309,7 +309,7 @@ public final class SwiftClosure3 {
         return try! Java_SwiftBackedFunction3_class.create(ctor: Java_SwiftBackedFunction3_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
     }
 
-    public static func closure<P0, P1, P2, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1, P2) -> R)? {
+    public static func closure<P0, P1, P2, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1, P2) -> R)? {
         guard let function else {
             return nil
         }
@@ -322,7 +322,7 @@ public final class SwiftClosure3 {
         }
     }
 
-    public static func closure<P0, P1, P2, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1, P2) throws -> R)? {
+    public static func closure<P0, P1, P2, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1, P2) throws -> R)? {
         guard let function else {
             return nil
         }
@@ -378,7 +378,7 @@ public final class SwiftClosure4 {
         return try! Java_SwiftBackedFunction4_class.create(ctor: Java_SwiftBackedFunction4_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
     }
 
-    public static func closure<P0, P1, P2, P3, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1, P2, P3) -> R)? {
+    public static func closure<P0, P1, P2, P3, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1, P2, P3) -> R)? {
         guard let function else {
             return nil
         }
@@ -391,7 +391,7 @@ public final class SwiftClosure4 {
         }
     }
 
-    public static func closure<P0, P1, P2, P3, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1, P2, P3) throws -> R)? {
+    public static func closure<P0, P1, P2, P3, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1, P2, P3) throws -> R)? {
         guard let function else {
             return nil
         }
@@ -450,7 +450,7 @@ public final class SwiftClosure5 {
         return try! Java_SwiftBackedFunction5_class.create(ctor: Java_SwiftBackedFunction5_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
     }
 
-    public static func closure<P0, P1, P2, P3, P4, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1, P2, P3, P4) -> R)? {
+    public static func closure<P0, P1, P2, P3, P4, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1, P2, P3, P4) -> R)? {
         guard let function else {
             return nil
         }
@@ -463,7 +463,7 @@ public final class SwiftClosure5 {
         }
     }
 
-    public static func closure<P0, P1, P2, P3, P4, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> ((P0, P1, P2, P3, P4) throws -> R)? {
+    public static func closure<P0, P1, P2, P3, P4, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1, P2, P3, P4) throws -> R)? {
         guard let function else {
             return nil
         }
