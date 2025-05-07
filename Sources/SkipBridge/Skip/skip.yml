@@ -2,10 +2,10 @@ skip:
   mode: 'native'
 build:
   contents:
+    - 'val skipConfig = System.getenv("CONFIGURATION") ?: "Debug"'
     # the location of the skipstone derived Swift package
-    - 'val skipCommand = System.getenv("SKIP_COMMAND_OVERRIDE") ?: ((System.getenv("__XCODE_BUILT_PRODUCTS_DIR_PATHS") ?: System.getenv("BUILT_PRODUCTS_DIR")) + "/../Debug/skip")'
+    - 'val skipCommand = System.getenv("SKIP_COMMAND_OVERRIDE") ?: ((System.getenv("__XCODE_BUILT_PRODUCTS_DIR_PATHS") ?: System.getenv("BUILT_PRODUCTS_DIR")) + "/../${skipConfig}/skip")'
     - 'val skipcmd = if(file(skipCommand).exists()) skipCommand else "skip"'
-    - 'var swiftBuildConfig = "debug"'
     - 'fun swiftSourceFolder(): String { return layout.projectDirectory.dir("src/main/swift").asFile.absolutePath }'
     - 'fun swiftBuildFolder(): String { return layout.buildDirectory.get().asFile.absolutePath }'
 
@@ -34,14 +34,6 @@ build:
                 # note that this only needs to be enabled if we are using multiple JNI output folders,
                 # which we currently avoif using the SKIP_BRIDGE_ANDROID_BUILT semaphore
                 #- 'pickFirsts.add("**/*.so")'
-        - block: 'buildTypes'
-          contents:
-            - block: 'release'
-              contents:
-                - 'swiftBuildConfig = "release"'
-            - block: 'debug'
-              contents:
-                - 'swiftBuildConfig = "debug"'
         # the SKIP_BRIDGE_MODULES is included in the AndroidManifest.xml app metadata and is used by SkipBridge to load the root module on app startup
         - block: 'defaultConfig'
           contents:
@@ -52,27 +44,33 @@ build:
         # When building the APK, depend on the skip android toolchain build of the root bridge module
         - block: 'if ((name == "mergeDebugJniLibFolders" || name == "mergeReleaseJniLibFolders") && (System.getenv("SKIP_BRIDGE_ANDROID_BUILD_DISABLED") != "1") && (isRootBridgeModule() == true))'
           contents:
-            - 'dependsOn("buildAndroidSwiftPackage")'
+            - 'dependsOn(if (name == "mergeDebugJniLibFolders") "buildAndroidSwiftPackageDebug" else "buildAndroidSwiftPackageRelease")'
 
-    - block: 'tasks.register("buildAndroidSwiftPackage")'
+    - block: 'tasks.register("buildAndroidSwiftPackageDebug")'
       contents:
-        - block: 'doLast'
+        - 'doLast { buildAndroidSwiftPackageDebug("debug") }'
+
+    - block: 'tasks.register("buildAndroidSwiftPackageRelease")'
+      contents:
+        - 'doLast { buildAndroidSwiftPackageDebug("release") }'
+
+    - block: 'fun buildAndroidSwiftPackageDebug(mode: String)'
+      contents:
+        #- 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
+        - '@Suppress("DEPRECATION")'
+        - block: 'project.exec'
           contents:
-            #- 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
-            - block: 'project.exec'
-              contents:
-                # the -module-cache-path and -no-clang-module-breadcrumbs flag is needed to avoid this sort of error with `skip export`:
-                # <unknown>:0: error: PCH was compiled with module cache path '/opt/src/github/skiptools/skip-bridge/.build/plugins/outputs/skip-bridge/SkipBridgeToSwiftSamples/destination/skipstone/SkipBridgeToSwiftSamplesHelpers/build/swift/aarch64-unknown-linux-android24/debug/ModuleCache/336QL0GS3Q4T0', but the path is currently '/opt/src/github/skiptools/skip-bridge/.build/plugins/outputs/skip-bridge/SkipBridgeToSwiftSamplesTestsSupport/destination/skipstone/SkipBridgeToSwiftSamplesHelpers/build/swift/aarch64-unknown-linux-android24/debug/ModuleCache/336QL0GS3Q4T0'
-                - 'workingDir(layout.projectDirectory)'
-                ### FIXME: remove patchelf libc++_shared.so
-                # need to add log or else: java.lang.UnsatisfiedLinkError: dlopen failed: cannot locate symbol "__android_log_print" referenced by "/data/app/~~JPhKFQv8tRivw49s0gKvYg==/skip.integ.demo.test-VvgNyXBxSCwAYbCiPaPtCA==/base.apk!/lib/arm64-v8a/libSkipIntegDemo.so"...
-                #- 'commandLine("sh", "-cx", "${skipcmd} android build -d ${swiftBuildFolder()}/jni-libs --package-path ${swiftSourceFolder()} --configuration ${swiftBuildConfig} --product ${project.name} --scratch-path ${swiftBuildFolder()}/swift --aggregate --arch automatic -Xcc -fPIC -Xswiftc -DSKIP_BRIDGE -Xswiftc -DTARGET_OS_ANDROID -Xswiftc -Xfrontend -Xswiftc -no-clang-module-breadcrumbs -Xswiftc -Xfrontend -Xswiftc -module-cache-path -Xswiftc -Xfrontend -Xswiftc ${swiftBuildFolder()}/swift/module-cache/${project.name} && patchelf --add-needed libc++_shared.so --add-needed liblog.so ${swiftBuildFolder()}/jni-libs/*/lib${project.name}.so")'
-                - 'commandLine("sh", "-cx", "${skipcmd} android build -d ${swiftBuildFolder()}/jni-libs --package-path ${swiftSourceFolder()} --configuration ${swiftBuildConfig} --product ${project.name} --scratch-path ${swiftBuildFolder()}/swift --arch automatic -Xcc -fPIC -Xswiftc -DSKIP_BRIDGE -Xswiftc -DTARGET_OS_ANDROID -Xswiftc -Xfrontend -Xswiftc -no-clang-module-breadcrumbs -Xswiftc -Xfrontend -Xswiftc -module-cache-path -Xswiftc -Xfrontend -Xswiftc ${swiftBuildFolder()}/swift/module-cache/${project.name}")'
-                - 'environment("SKIP_BRIDGE", "1")'
-                - 'environment("TARGET_OS_ANDROID", "1")'
-                # for local transpiler development, we need to ensure that the tool we are using is the locally-built skip, and not the one that is downloaded from the binary package
-                # TODO: figure out how to implement this for swiftpm command-line builds
-                - 'if (file(skipCommand).exists()) { environment("SKIP_COMMAND_OVERRIDE", skipCommand) }'
+            # the -module-cache-path and -no-clang-module-breadcrumbs flag is needed to avoid this sort of error with `skip export`:
+            # <unknown>:0: error: PCH was compiled with module cache path '/opt/src/github/skiptools/skip-bridge/.build/plugins/outputs/skip-bridge/SkipBridgeToSwiftSamples/destination/skipstone/SkipBridgeToSwiftSamplesHelpers/build/swift/aarch64-unknown-linux-android24/debug/ModuleCache/336QL0GS3Q4T0', but the path is currently '/opt/src/github/skiptools/skip-bridge/.build/plugins/outputs/skip-bridge/SkipBridgeToSwiftSamplesTestsSupport/destination/skipstone/SkipBridgeToSwiftSamplesHelpers/build/swift/aarch64-unknown-linux-android24/debug/ModuleCache/336QL0GS3Q4T0'
+            - 'workingDir(layout.projectDirectory)'
+
+            # invoke the Android build
+            - 'commandLine("sh", "-cx", "${skipcmd} android build -d ${swiftBuildFolder()}/jni-libs --package-path ${swiftSourceFolder()} --configuration ${mode} --product ${project.name} --scratch-path ${swiftBuildFolder()}/swift --arch automatic -Xcc -fPIC -Xswiftc -DSKIP_BRIDGE -Xswiftc -DTARGET_OS_ANDROID -Xswiftc -Xfrontend -Xswiftc -no-clang-module-breadcrumbs -Xswiftc -Xfrontend -Xswiftc -module-cache-path -Xswiftc -Xfrontend -Xswiftc ${swiftBuildFolder()}/swift/module-cache/${project.name}")'
+
+            - 'environment("SKIP_BRIDGE", "1")'
+            - 'environment("TARGET_OS_ANDROID", "1")'
+            # for local transpiler development, we need to ensure that the tool we are using is the locally-built skip, and not the one that is downloaded from the binary package
+            - 'if (file(skipCommand).exists()) { environment("SKIP_COMMAND_OVERRIDE", skipCommand) }'
 
     # For test cases, we compile locally with `swift build` against the derived Swift project
     - block: 'tasks.withType<Test>'
@@ -92,11 +90,12 @@ build:
           contents:
             # Output the environment (for debugging)
             - 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
+            - '@Suppress("DEPRECATION")'
             - block: 'project.exec'
               contents:
                 # build for local macOS in order to run tests
                 - 'workingDir(layout.projectDirectory)'
-                - 'commandLine("sh", "-cx", "swift build --package-path ${swiftSourceFolder()} --configuration ${swiftBuildConfig} --product ${project.name} --scratch-path ${swiftBuildFolder()}/swift -Xcc -fPIC -Xswiftc -DSKIP_BRIDGE -Xswiftc -DROBOLECTRIC")'
+                - 'commandLine("sh", "-cx", "swift build --package-path ${swiftSourceFolder()} --configuration debug --product ${project.name} --scratch-path ${swiftBuildFolder()}/swift -Xcc -fPIC -Xswiftc -DSKIP_BRIDGE -Xswiftc -DROBOLECTRIC")'
                 - 'environment("SKIP_BRIDGE", "1")'
                 # for local transpiler development, we need to ensure that the tool we are using is the locally-built skip, and not the one that is downloaded from the binary package
                 # TODO: figure out how to implement this for swiftpm command-line builds
