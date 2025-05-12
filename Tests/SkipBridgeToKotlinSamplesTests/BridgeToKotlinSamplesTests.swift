@@ -467,6 +467,14 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(e.stringValue(), ".b")
     }
 
+    public func testAsyncProtocol() async throws {
+        let protocolImpl = SwiftAsyncProtocolImpl()
+        let intValue = await protocolImpl.intValue
+        XCTAssertEqual(intValue, 99)
+        var stringValue = try await protocolImpl.stringValue()
+        XCTAssertEqual(stringValue, "string")
+    }
+
     public func testClosure0Var() {
         swiftClosure0Var()
         swiftClosure0Var = { print("reassigned") }
@@ -766,4 +774,15 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertNotEqual(try testSupport_dynamicCodeGenSkipDateTime(), 0.0)
     }
     #endif
+}
+
+class SwiftAsyncProtocolImpl : SwiftAsyncProtocol {
+    var intValue: Int {
+        get async {
+            return 99
+        }
+    }
+    func stringValue() async throws -> String {
+        return "string"
+    }
 }

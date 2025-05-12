@@ -199,6 +199,11 @@ public protocol SwiftGenericProtocol {
     func genericProtocolFunc(p: T) -> T
 }
 
+public protocol SwiftAsyncProtocol {
+    var intValue: Int { get async }
+    func stringValue() async throws -> String
+}
+
 extension SwiftProtocol {
     public func stringValue() -> String {
         return "<default>"
