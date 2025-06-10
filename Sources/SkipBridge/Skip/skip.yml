@@ -69,6 +69,8 @@ build:
 
             - 'environment("SKIP_BRIDGE", "1")'
             - 'environment("TARGET_OS_ANDROID", "1")'
+            # DEVELOPER_DIR should not inheit from Xcode, because it may point to an incompatible version of
+            - 'environment("DEVELOPER_DIR", "")'
             # for local transpiler development, we need to ensure that the tool we are using is the locally-built skip, and not the one that is downloaded from the binary package
             - 'if (file(skipCommand).exists()) { environment("SKIP_COMMAND_OVERRIDE", skipCommand) }'
 
