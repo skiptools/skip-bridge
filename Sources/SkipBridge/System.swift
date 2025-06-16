@@ -80,7 +80,7 @@ public func loadPeerLibrary(packageName: String, moduleName libName: String) thr
     let osArch = System.getProperty("os.arch")
     let libext: String
     let arch: String
-    if osName.toLowerCase().contains("linux") {
+    if osName.lowercase().contains("linux") {
         libext = "so"
         arch = osArch == "aarch64" ? "aarch64-unknown-linux-gnu" : "x86_64-unknown-linux-gnu"
     } else {
