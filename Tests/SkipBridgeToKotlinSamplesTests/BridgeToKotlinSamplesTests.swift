@@ -25,6 +25,14 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftStringConstant, "s")
     }
 
+    func testUnsignedConstants() {
+        XCTAssertEqual(swiftUnsignedInt8Constant, UInt8(200))
+        XCTAssertEqual(swiftUnsignedInt16Constant, UInt16(40_000))
+        XCTAssertEqual(swiftUnsignedInt32Constant, UInt32(3_000_000_000))
+        XCTAssertEqual(swiftUnsignedInt64Constant, UInt64(3_000_000_000))
+        XCTAssertEqual(swiftUnsignedIntConstant, UInt(3_000_000_000))
+    }
+
     func testSwiftClassConstant() {
         XCTAssertEqual(swiftClassConstant.stringVar, "s")
     }
@@ -43,6 +51,14 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftOptionalInt64Constant, Int64(5))
         XCTAssertEqual(swiftOptionalIntConstant, 6)
         XCTAssertEqual(swiftOptionalStringConstant, "s")
+    }
+
+    func testUnsignedOptionalConstants() {
+        XCTAssertEqual(swiftOptionalUnsignedInt8Constant, UInt8(200))
+        XCTAssertEqual(swiftOptionalUnsignedInt16Constant, UInt16(40_000))
+        XCTAssertEqual(swiftOptionalUnsignedInt32Constant, UInt32(3_000_000_000))
+        XCTAssertEqual(swiftOptionalUnsignedInt64Constant, UInt64(3_000_000_000))
+        XCTAssertEqual(swiftOptionalUnsignedIntConstant, UInt(3_000_000_000))
     }
 
     func testSimpleVars() {
@@ -64,6 +80,19 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftIntVar, 107)
         swiftStringVar = "ss"
         XCTAssertEqual(swiftStringVar, "ss")
+    }
+
+    func testUnsignedVars() {
+        swiftUnsignedInt8Var = UInt8(201)
+        XCTAssertEqual(swiftUnsignedInt8Var, UInt8(201))
+        swiftUnsignedInt16Var = UInt16(40_001)
+        XCTAssertEqual(swiftUnsignedInt16Var, UInt16(40_001))
+        swiftUnsignedInt32Var = UInt32(3_000_000_001)
+        XCTAssertEqual(swiftUnsignedInt32Var, UInt32(3_000_000_001))
+        swiftUnsignedInt64Var = UInt64(3_000_000_001)
+        XCTAssertEqual(swiftUnsignedInt64Var, UInt64(3_000_000_001))
+        swiftUnsignedIntVar = UInt(3_000_000_001)
+        XCTAssertEqual(swiftUnsignedIntVar, UInt(3_000_000_001))
     }
 
     func testSwiftClassVar() {
@@ -161,6 +190,29 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftOptionalStringVar, "ss")
         swiftOptionalStringVar = nil
         XCTAssertNil(swiftOptionalStringVar)
+    }
+
+    func testOptionalUnsignedVars() {
+        swiftOptionalUnsignedInt8Var = UInt8(201)
+        XCTAssertEqual(swiftOptionalUnsignedInt8Var, UInt8(201))
+        swiftOptionalUnsignedInt8Var = nil
+        XCTAssertNil(swiftOptionalUnsignedInt8Var)
+        swiftOptionalUnsignedInt16Var = UInt16(40_001)
+        XCTAssertEqual(swiftOptionalUnsignedInt16Var, UInt16(40_001))
+        swiftOptionalUnsignedInt16Var = nil
+        XCTAssertNil(swiftOptionalUnsignedInt16Var)
+        swiftOptionalUnsignedInt32Var = UInt32(3_000_000_001)
+        XCTAssertEqual(swiftOptionalUnsignedInt32Var, UInt32(3_000_000_001))
+        swiftOptionalUnsignedInt32Var = nil
+        XCTAssertNil(swiftOptionalUnsignedInt32Var)
+        swiftOptionalUnsignedInt64Var = UInt64(3_000_000_001)
+        XCTAssertEqual(swiftOptionalUnsignedInt64Var, UInt64(3_000_000_001))
+        swiftOptionalUnsignedInt64Var = nil
+        XCTAssertNil(swiftOptionalUnsignedInt64Var)
+        swiftOptionalUnsignedIntVar = UInt(3_000_000_001)
+        XCTAssertEqual(swiftOptionalUnsignedIntVar, UInt(3_000_000_001))
+        swiftOptionalUnsignedIntVar = nil
+        XCTAssertNil(swiftOptionalUnsignedIntVar)
     }
 
     func testOptionalSwiftClassVar() {
@@ -620,6 +672,10 @@ final class BridgeToKotlinTests: XCTestCase {
         } catch {
             XCTFail("Wrong error type: \(error)")
         }
+    }
+
+    func testUnsignedParametersFunction() {
+        XCTAssertEqual(swiftUnsignedParametersFunction(p0: UInt(3_000_000_000), p1: nil), UInt(3_000_000_000))
     }
 
     func testAsyncThrowsVar() async throws {

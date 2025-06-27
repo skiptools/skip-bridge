@@ -24,6 +24,14 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(testSupport_kotlinStringConstant(), "s")
     }
 
+    func testUnsignedConstants() {
+        XCTAssertEqual(testSupport_kotlinUnsignedInt8Constant(), UInt8(200))
+        XCTAssertEqual(testSupport_kotlinUnsignedInt16Constant(), UInt16(40_000))
+        XCTAssertEqual(testSupport_kotlinUnsignedInt32Constant(), UInt32(3_000_000_000))
+        XCTAssertEqual(testSupport_kotlinUnsignedInt64Constant(), UInt64(3_000_000_000))
+        XCTAssertEqual(testSupport_kotlinUnsignedIntConstant(), UInt(3_000_000_000))
+    }
+
     func testKotlinClassConstant() {
         XCTAssertEqual(testSupport_kotlinClassConstant_stringVar(), "s")
     }
@@ -44,6 +52,14 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(testSupport_kotlinOptionalStringConstant(), "s")
     }
 
+    func testUnsignedOptionalConstants() {
+        XCTAssertEqual(testSupport_kotlinOptionalUnsignedInt8Constant(), UInt8(200))
+        XCTAssertEqual(testSupport_kotlinOptionalUnsignedInt16Constant(), UInt16(40_000))
+        XCTAssertEqual(testSupport_kotlinOptionalUnsignedInt32Constant(), UInt32(3_000_000_000))
+        XCTAssertEqual(testSupport_kotlinOptionalUnsignedInt64Constant(), UInt64(3_000_000_000))
+        XCTAssertEqual(testSupport_kotlinOptionalUnsignedIntConstant(), UInt(3_000_000_000))
+    }
+
     func testSimpleVars() {
         XCTAssertEqual(testSupport_kotlinBoolVar(value: false), false)
         XCTAssertEqual(testSupport_kotlinDoubleVar(value: 101.0), 101.0)
@@ -54,6 +70,14 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(testSupport_kotlinInt64Var(value: Int64(106)), Int64(106))
         XCTAssertEqual(testSupport_kotlinIntVar(value: 107), 107)
         XCTAssertEqual(testSupport_kotlinStringVar(value: "ss"), "ss")
+    }
+
+    func testUnsignedVars() {
+        XCTAssertEqual(testSupport_kotlinUnsignedInt8Var(value: UInt8(201)), UInt8(201))
+        XCTAssertEqual(testSupport_kotlinUnsignedInt16Var(value: UInt16(40_001)), UInt16(40_001))
+        XCTAssertEqual(testSupport_kotlinUnsignedInt32Var(value: UInt32(3_000_000_001)), UInt32(3_000_000_001))
+        XCTAssertEqual(testSupport_kotlinUnsignedInt64Var(value: UInt64(3_000_000_001)), UInt64(3_000_000_001))
+        XCTAssertEqual(testSupport_kotlinUnsignedIntVar(value: UInt(3_000_000_001)), UInt(3_000_000_001))
     }
 
     func testKotlinClassVar() {
@@ -116,6 +140,19 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertNil(testSupport_kotlinOptionalIntVar(value: nil))
         XCTAssertEqual(testSupport_kotlinOptionalStringVar(value: "ss"), "ss")
         XCTAssertNil(testSupport_kotlinOptionalStringVar(value: nil))
+    }
+
+    func testOptionalUnsignedVars() {
+        XCTAssertEqual(testSupport_kotlinOptionalUnsignedInt8Var(value: UInt8(201)), UInt8(201))
+        XCTAssertNil(testSupport_kotlinOptionalUnsignedInt8Var(value: nil))
+        XCTAssertEqual(testSupport_kotlinOptionalUnsignedInt16Var(value: UInt16(40_001)), UInt16(40_001))
+        XCTAssertNil(testSupport_kotlinOptionalUnsignedInt16Var(value: nil))
+        XCTAssertEqual(testSupport_kotlinOptionalUnsignedInt32Var(value: UInt32(3_000_000_001)), UInt32(3_000_000_001))
+        XCTAssertNil(testSupport_kotlinOptionalUnsignedInt32Var(value: nil))
+        XCTAssertEqual(testSupport_kotlinOptionalUnsignedInt64Var(value: UInt64(3_000_000_001)), UInt64(3_000_000_001))
+        XCTAssertNil(testSupport_kotlinOptionalUnsignedInt64Var(value: nil))
+        XCTAssertEqual(testSupport_kotlinOptionalUnsignedIntVar(value: UInt(3_000_000_001)), UInt(3_000_000_001))
+        XCTAssertNil(testSupport_kotlinOptionalUnsignedIntVar(value: nil))
     }
 
     func testOptionalKotlinClassVar() {
@@ -304,6 +341,10 @@ final class BridgeToSwiftTests: XCTestCase {
 
     func testThrowingBridgedEnumFunction() {
         XCTAssertTrue(testSupport_callKotlinThrowingBridgedEnumErrorFunction())
+    }
+
+    func testUnsignedParametersFunction() {
+        XCTAssertEqual(testSupport_callKotlinUnsignedParametersFunction(with: UInt(3_000_000_000)), UInt(3_000_000_000))
     }
 
     func testAsyncThrowsVar() async throws {

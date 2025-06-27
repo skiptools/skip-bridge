@@ -39,6 +39,26 @@ public func testSupport_kotlinIntConstant() -> Int {
     return kotlinIntConstant
 }
 
+public func testSupport_kotlinUnsignedInt8Constant() -> UInt8 {
+    return kotlinUnsignedInt8Constant
+}
+
+public func testSupport_kotlinUnsignedInt16Constant() -> UInt16 {
+    return kotlinUnsignedInt16Constant
+}
+
+public func testSupport_kotlinUnsignedInt32Constant() -> UInt32 {
+    return kotlinUnsignedInt32Constant
+}
+
+public func testSupport_kotlinUnsignedInt64Constant() -> UInt64 {
+    return kotlinUnsignedInt64Constant
+}
+
+public func testSupport_kotlinUnsignedIntConstant() -> UInt {
+    return kotlinUnsignedIntConstant
+}
+
 public func testSupport_kotlinStringConstant() -> String {
     return kotlinStringConstant
 }
@@ -87,6 +107,26 @@ public func testSupport_kotlinOptionalStringConstant() -> String? {
     return kotlinOptionalStringConstant
 }
 
+public func testSupport_kotlinOptionalUnsignedInt8Constant() -> UInt8? {
+    return kotlinOptionalUnsignedInt8Constant
+}
+
+public func testSupport_kotlinOptionalUnsignedInt16Constant() -> UInt16? {
+    return kotlinOptionalUnsignedInt16Constant
+}
+
+public func testSupport_kotlinOptionalUnsignedInt32Constant() -> UInt32? {
+    return kotlinOptionalUnsignedInt32Constant
+}
+
+public func testSupport_kotlinOptionalUnsignedInt64Constant() -> UInt64? {
+    return kotlinOptionalUnsignedInt64Constant
+}
+
+public func testSupport_kotlinOptionalUnsignedIntConstant() -> UInt? {
+    return kotlinOptionalUnsignedIntConstant
+}
+
 public func testSupport_kotlinBoolVar(value: Bool) -> Bool {
     kotlinBoolVar = value
     return kotlinBoolVar
@@ -130,6 +170,32 @@ public func testSupport_kotlinIntVar(value: Int) -> Int {
 public func testSupport_kotlinStringVar(value: String) -> String {
     kotlinStringVar = value
     return kotlinStringVar
+}
+
+public func testSupport_kotlinUnsignedInt8Var(value: UInt8) -> UInt8 {
+    kotlinUnsignedInt8Var = value
+    return kotlinUnsignedInt8Var
+}
+
+public func testSupport_kotlinUnsignedInt16Var(value: UInt16) -> UInt16 {
+//    kotlinUnsignedInt16Var = value
+//    return kotlinUnsignedInt16Var
+    return value
+}
+
+public func testSupport_kotlinUnsignedInt32Var(value: UInt32) -> UInt32 {
+    kotlinUnsignedInt32Var = value
+    return kotlinUnsignedInt32Var
+}
+
+public func testSupport_kotlinUnsignedInt64Var(value: UInt64) -> UInt64 {
+    kotlinUnsignedInt64Var = value
+    return kotlinUnsignedInt64Var
+}
+
+public func testSupport_kotlinUnsignedIntVar(value: UInt) -> UInt {
+    kotlinUnsignedIntVar = value
+    return kotlinUnsignedIntVar
 }
 
 public func testSupport_kotlinClassVar_stringVar(value: String) -> String {
@@ -215,6 +281,31 @@ public func testSupport_kotlinOptionalInt64Var(value: Int64?) -> Int64? {
 public func testSupport_kotlinOptionalIntVar(value: Int?) -> Int? {
     kotlinOptionalIntVar = value
     return kotlinOptionalIntVar
+}
+
+public func testSupport_kotlinOptionalUnsignedInt8Var(value: UInt8?) -> UInt8? {
+    kotlinOptionalUnsignedInt8Var = value
+    return kotlinOptionalUnsignedInt8Var
+}
+
+public func testSupport_kotlinOptionalUnsignedInt16Var(value: UInt16?) -> UInt16? {
+    kotlinOptionalUnsignedInt16Var = value
+    return kotlinOptionalUnsignedInt16Var
+}
+
+public func testSupport_kotlinOptionalUnsignedInt32Var(value: UInt32?) -> UInt32? {
+    kotlinOptionalUnsignedInt32Var = value
+    return kotlinOptionalUnsignedInt32Var
+}
+
+public func testSupport_kotlinOptionalUnsignedInt64Var(value: UInt64?) -> UInt64? {
+    kotlinOptionalUnsignedInt64Var = value
+    return kotlinOptionalUnsignedInt64Var
+}
+
+public func testSupport_kotlinOptionalUnsignedIntVar(value: UInt?) -> UInt? {
+    kotlinOptionalUnsignedIntVar = value
+    return kotlinOptionalUnsignedIntVar
 }
 
 public func testSupport_kotlinOptionalStringVar(value: String?) -> String? {
@@ -785,6 +876,10 @@ public func testSupport_callKotlinThrowingBridgedEnumErrorFunction() -> Bool {
     } catch {
         return false
     }
+}
+
+public func testSupport_callKotlinUnsignedParametersFunction(with value: UInt) -> UInt {
+    return kotlinUnsignedParametersFunction(p0: value, p1: nil)
 }
 
 public func testSupport_kotlinAsyncThrowsVar() async throws -> Int {
