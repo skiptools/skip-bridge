@@ -15,7 +15,11 @@ public let swiftInt16Constant: Int16 = 4
 public let swiftInt32Constant: Int32 = 5
 public let swiftInt64Constant: Int64 = 6
 public let swiftIntConstant = 7
-// TODO: Unsigned values
+public let swiftUnsignedInt8Constant = UInt8(200)
+public let swiftUnsignedInt16Constant = UInt16(40_000)
+public let swiftUnsignedInt32Constant = UInt32(3_000_000_000)
+public let swiftUnsignedInt64Constant = UInt64(3_000_000_000)
+public let swiftUnsignedIntConstant = UInt(3_000_000_000)
 public let swiftStringConstant = "s"
 public let swiftClassConstant = SwiftHelperClass()
 public let swiftKotlinClassConstant = KotlinHelperClass()
@@ -31,7 +35,11 @@ public let swiftOptionalInt16Constant: Int16? = 3
 public let swiftOptionalInt32Constant: Int32? = 4
 public let swiftOptionalInt64Constant: Int64? = 5
 public let swiftOptionalIntConstant: Int? = 6
-// TODO: Unsigned values
+public let swiftOptionalUnsignedInt8Constant: UInt8? = UInt8(200)
+public let swiftOptionalUnsignedInt16Constant: UInt16? = UInt16(40_000)
+public let swiftOptionalUnsignedInt32Constant: UInt32? = UInt32(3_000_000_000)
+public let swiftOptionalUnsignedInt64Constant: UInt64? = UInt64(3_000_000_000)
+public let swiftOptionalUnsignedIntConstant: UInt? = UInt(3_000_000_000)
 public let swiftOptionalStringConstant: String? = "s"
 public let swiftOptionalClassConstant: SwiftHelperClass? = SwiftHelperClass()
 public let swiftOptionalKotlinClassConstant: KotlinHelperClass? = KotlinHelperClass()
@@ -47,7 +55,11 @@ public var swiftInt16Var: Int16 = 4
 public var swiftInt32Var: Int32 = 5
 public var swiftInt64Var: Int64 = 6
 public var swiftIntVar = 7
-// TODO: Unsigned values
+public var swiftUnsignedInt8Var = UInt8(200)
+public var swiftUnsignedInt16Var = UInt16(40_000)
+public var swiftUnsignedInt32Var = UInt32(3_000_000_000)
+public var swiftUnsignedInt64Var = UInt64(3_000_000_000)
+public var swiftUnsignedIntVar = UInt(3_000_000_000)
 public var swiftStringVar = "s"
 public var swiftClassVar = SwiftHelperClass()
 public var swiftBaseClassVar = SwiftClass()
@@ -67,7 +79,11 @@ public var swiftOptionalInt16Var: Int16? = 3
 public var swiftOptionalInt32Var: Int32? = 4
 public var swiftOptionalInt64Var: Int64? = 5
 public var swiftOptionalIntVar: Int? = 6
-// TODO: Unsigned values
+public var swiftOptionalUnsignedInt8Var: UInt8? = UInt8(200)
+public var swiftOptionalUnsignedInt16Var: UInt16? = UInt16(40_000)
+public var swiftOptionalUnsignedInt32Var: UInt32? = UInt32(3_000_000_000)
+public var swiftOptionalUnsignedInt64Var: UInt64? = UInt64(3_000_000_000)
+public var swiftOptionalUnsignedIntVar: UInt? = UInt(3_000_000_000)
 public var swiftOptionalStringVar: String? = "s"
 public var swiftOptionalClassVar: SwiftHelperClass? = SwiftHelperClass()
 public var swiftOptionalKotlinClassVar: KotlinHelperClass? = KotlinHelperClass()
@@ -418,6 +434,10 @@ public func swiftThrowingBridgedEnumErrorFunction(throw value: Int?) throws {
     if let value {
         throw SwiftEnumError.intError(value)
     }
+}
+
+public func swiftUnsignedParametersFunction(p0: UInt, p1: UInt?) -> UInt {
+    return p0
 }
 
 // MARK: Async
