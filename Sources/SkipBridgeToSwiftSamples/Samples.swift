@@ -62,6 +62,7 @@ public var kotlinUnsignedInt32Var = UInt32(3_000_000_000)
 public var kotlinUnsignedInt64Var = UInt64(3_000_000_000)
 public var kotlinUnsignedIntVar = UInt(3_000_000_000)
 public var kotlinStringVar = "s"
+public var kotlinNSNumberVar = NSNumber(value: 100)
 public var kotlinClassVar = KotlinHelperClass()
 public var kotlinBaseClassVar = KotlinClass()
 public var kotlinInnerClassVar = KotlinHelperClass.Inner()
@@ -159,7 +160,7 @@ public final class KotlinSubclass: KotlinClass {
     }
 }
 
-public final class KotlinHelperClass: KotlinProtocol, KotlinGenericProtocol, Comparable, Identifiable {
+public final class KotlinHelperClass: KotlinProtocol, KotlinGenericProtocol, KotlinUnsignedProtocol, Comparable, Identifiable {
     public var id: String {
         return stringVar
     }
@@ -174,6 +175,10 @@ public final class KotlinHelperClass: KotlinProtocol, KotlinGenericProtocol, Com
 
     public func genericProtocolFunc(p: Int) -> Int {
         return p + 1
+    }
+
+    public func unsignedParameterProtocolFunc(p: UInt) -> UInt {
+        return p
     }
 
     public static func ==(lhs: KotlinHelperClass, rhs: KotlinHelperClass) -> Bool {
@@ -203,6 +208,10 @@ public protocol KotlinProtocol: Hashable {
 public protocol KotlinGenericProtocol {
     associatedtype T
     func genericProtocolFunc(p: T) -> T
+}
+
+public protocol KotlinUnsignedProtocol {
+    func unsignedParameterProtocolFunc(p: UInt) -> UInt
 }
 
 extension KotlinProtocol {

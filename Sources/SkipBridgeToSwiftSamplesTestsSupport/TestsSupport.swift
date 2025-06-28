@@ -172,15 +172,19 @@ public func testSupport_kotlinStringVar(value: String) -> String {
     return kotlinStringVar
 }
 
+public func testSupport_kotlinNSNumberVar(value: NSNumber) -> NSNumber {
+    kotlinNSNumberVar = value
+    return kotlinNSNumberVar
+}
+
 public func testSupport_kotlinUnsignedInt8Var(value: UInt8) -> UInt8 {
     kotlinUnsignedInt8Var = value
     return kotlinUnsignedInt8Var
 }
 
 public func testSupport_kotlinUnsignedInt16Var(value: UInt16) -> UInt16 {
-//    kotlinUnsignedInt16Var = value
-//    return kotlinUnsignedInt16Var
-    return value
+    kotlinUnsignedInt16Var = value
+    return kotlinUnsignedInt16Var
 }
 
 public func testSupport_kotlinUnsignedInt32Var(value: UInt32) -> UInt32 {
@@ -465,6 +469,19 @@ public func testSupport_kotlinProtocolMember() -> String? {
     }
     guard obj.optionalKotlinProtocolVar?.hashValue == helper.hashValue else {
         return "obj.optionalKotlinProtocolVar?.hashValue == helper.hashValue"
+    }
+    return nil
+}
+
+public func testSupport_kotlinUnsignedProtocolMember() -> String? {
+    let helper = KotlinHelperClass()
+    return testSupport_kotlinUnsignedProtocolMember(p: helper)
+}
+
+private func testSupport_kotlinUnsignedProtocolMember(p: any KotlinUnsignedProtocol) -> String? {
+    let result = p.unsignedParameterProtocolFunc(p: UInt(3_000_000_000))
+    guard result == UInt(3_000_000_000) else {
+        return "3_000_000_000 expected, but got: \(result)"
     }
     return nil
 }
