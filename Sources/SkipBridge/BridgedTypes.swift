@@ -1,10 +1,6 @@
 // Copyright 2024–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
-#if canImport(FoundationEssentials)
-import FoundationEssentials
-#else
 import Foundation
-#endif
 
 //
 // NOTE:
@@ -29,6 +25,7 @@ public enum BridgedTypes: String {
     case list
     case locale
     case map
+    case number
     case result
     case set
     case throwable
@@ -70,6 +67,7 @@ public enum BridgedTypes {
     case list
     case locale
     case map
+    case number
     case result
     case set
     case throwable
@@ -130,6 +128,8 @@ public func bridgedTypeOf(_ object: Any) -> BridgedTypes {
         return .locale
     } else if object is kotlin.collections.Map<Any, Any> {
         return .map
+    } else if object is java.lang.Number {
+        return .number
     } else if object is kotlin.Result<Any> {
         return .result
     } else if object is kotlin.collections.Set<Any> {
@@ -256,6 +256,8 @@ public struct AnyBridging {
             return Locale.fromJavaObject(ptr, options: options)
         case .map:
             return Dictionary<AnyHashable, Any>.fromJavaObject(ptr, options: options)
+        case .number:
+            return NSNumber.fromJavaObject(ptr, options: options)
         case .result:
             return Result<Any, Error>.fromJavaObject(ptr, options: options)
         case .set:
@@ -317,11 +319,11 @@ public struct AnyBridging {
         let closure: (() -> Any)? = SwiftClosure0.closure(forJavaObject: closure_java, options: options)
         return closure?()
     }
+}
 
-    private static func bridgedTypeString(of ptr: JavaObjectPointer, options: JConvertibleOptions) -> String {
-        let ptr_java = ptr.toJavaParameter(options: options)
-        return try! Java_fileClass.callStatic(method: Java_bridgedTypeString_methodID, options: options, args: [ptr_java])
-    }
+private func bridgedTypeString(of ptr: JavaObjectPointer, options: JConvertibleOptions) -> String {
+    let ptr_java = ptr.toJavaParameter(options: options)
+    return try! Java_fileClass.callStatic(method: Java_bridgedTypeString_methodID, options: options, args: [ptr_java])
 }
 
 private let Java_fileClass = try! JClass(name: "skip/bridge/BridgeSupportKt")
@@ -758,6 +760,43 @@ private let Java_SkipLocale_identifier_methodID = Java_SkipLocale.getMethodID(na
 private let Java_Locale = try! JClass(name: "java/util/Locale")
 private let Java_Locale_forLanguageTag_methodID = Java_Locale.getStaticMethodID(name: "forLanguageTag", sig: "(Ljava/lang/String;)Ljava/util/Locale;")!
 private let Java_Locale_toLanguageTag_methodID = Java_Locale.getMethodID(name: "toLanguageTag", sig: "()Ljava/lang/String;")!
+
+// MARK: NSNumber
+
+extension NSNumber: JObjectConvertible {
+    public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Self {
+        let bridgedTypeString = bridgedTypeString(of: obj!, options: options)
+        let bridgedType = BridgedTypes(rawValue: bridgedTypeString) ?? .other
+        switch bridgedType {
+        case .boolean_:
+            return Bool.fromJavaObject(obj, options: options) as NSNumber as! Self
+        case .byte_:
+            return Int8.fromJavaObject(obj, options: options) as NSNumber as! Self
+        case .double_:
+            return Double.fromJavaObject(obj, options: options) as NSNumber as! Self
+        case .float_:
+            return Float.fromJavaObject(obj, options: options) as NSNumber as! Self
+        case .int_:
+            return Int.fromJavaObject(obj, options: options) as NSNumber as! Self
+        case .long_:
+            return Int64.fromJavaObject(obj, options: options) as NSNumber as! Self
+        case .short_:
+            return Int16.fromJavaObject(obj, options: options) as NSNumber as! Self
+        default:
+            return 0 as NSNumber as! Self
+        }
+    }
+
+    public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
+        let doubleValue = self.doubleValue
+        let longValue = Int64(doubleValue)
+        if doubleValue == Double(longValue) {
+            return longValue.toJavaObject(options: options)
+        } else {
+            return doubleValue.toJavaObject(options: options)
+        }
+    }
+}
 
 // MARK: Result
 
