@@ -70,6 +70,7 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(testSupport_kotlinInt64Var(value: Int64(106)), Int64(106))
         XCTAssertEqual(testSupport_kotlinIntVar(value: 107), 107)
         XCTAssertEqual(testSupport_kotlinStringVar(value: "ss"), "ss")
+        XCTAssertEqual(testSupport_kotlinNSNumberVar(value: NSNumber(value: 10.5)), NSNumber(value: 10.5))
     }
 
     func testUnsignedVars() {
@@ -235,6 +236,10 @@ final class BridgeToSwiftTests: XCTestCase {
 
     func testSwiftProtocolMember() {
         XCTAssertNil(testSupport_swiftProtocolMember())
+    }
+
+    func testKotlinUnsignedProtocolMember() {
+        XCTAssertNil(testSupport_kotlinUnsignedProtocolMember())
     }
 
     public func testStruct() {

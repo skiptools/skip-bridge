@@ -61,6 +61,7 @@ public var swiftUnsignedInt32Var = UInt32(3_000_000_000)
 public var swiftUnsignedInt64Var = UInt64(3_000_000_000)
 public var swiftUnsignedIntVar = UInt(3_000_000_000)
 public var swiftStringVar = "s"
+public var swiftNSNumberVar = NSNumber(value: 100)
 public var swiftClassVar = SwiftHelperClass()
 public var swiftBaseClassVar = SwiftClass()
 public var swiftInnerClassVar = SwiftHelperClass.Inner()

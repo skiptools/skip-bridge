@@ -80,6 +80,8 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftIntVar, 107)
         swiftStringVar = "ss"
         XCTAssertEqual(swiftStringVar, "ss")
+        swiftNSNumberVar = NSNumber(value: 10.5)
+        XCTAssertEqual(swiftNSNumberVar, NSNumber(value: 10.5))
     }
 
     func testUnsignedVars() {
@@ -523,7 +525,7 @@ final class BridgeToKotlinTests: XCTestCase {
         let protocolImpl = SwiftAsyncProtocolImpl()
         let intValue = await protocolImpl.intValue
         XCTAssertEqual(intValue, 99)
-        var stringValue = try await protocolImpl.stringValue()
+        let stringValue = try await protocolImpl.stringValue()
         XCTAssertEqual(stringValue, "string")
     }
 
