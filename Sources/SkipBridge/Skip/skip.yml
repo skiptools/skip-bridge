@@ -15,6 +15,9 @@ build:
     - 'fun rootBridgeModule(): String? { val bridgeModules: List<String>? by gradle.extra; return bridgeModules?.first() }'
     - 'fun isRootBridgeModule(): Boolean { return rootBridgeModule() == "${project.name}" }'
 
+    # https://github.com/gradle/gradle/issues/34483
+    - 'interface SkipBridgeExecOps { @get:Inject val execOps: ExecOperations }'
+
     - block: 'android'
       contents:
         - block: 'sourceSets'
@@ -57,7 +60,7 @@ build:
     - block: 'fun buildAndroidSwiftPackageDebug(mode: String)'
       contents:
         #- 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
-        - block: 'providers.exec'
+        - block: 'project.objects.newInstance<SkipBridgeExecOps>().execOps.exec'
           contents:
             # the -module-cache-path and -no-clang-module-breadcrumbs flag is needed to avoid this sort of error with `skip export`:
             # <unknown>:0: error: PCH was compiled with module cache path '/opt/src/github/skiptools/skip-bridge/.build/plugins/outputs/skip-bridge/SkipBridgeToSwiftSamples/destination/skipstone/SkipBridgeToSwiftSamplesHelpers/build/swift/aarch64-unknown-linux-android24/debug/ModuleCache/336QL0GS3Q4T0', but the path is currently '/opt/src/github/skiptools/skip-bridge/.build/plugins/outputs/skip-bridge/SkipBridgeToSwiftSamplesTestsSupport/destination/skipstone/SkipBridgeToSwiftSamplesHelpers/build/swift/aarch64-unknown-linux-android24/debug/ModuleCache/336QL0GS3Q4T0'
@@ -72,7 +75,6 @@ build:
             - 'environment("DEVELOPER_DIR", "")'
             # for local transpiler development, we need to ensure that the tool we are using is the locally-built skip, and not the one that is downloaded from the binary package
             - 'if (file(skipCommand).exists()) { environment("SKIP_COMMAND_OVERRIDE", skipCommand) }'
-        - '.result.get()'
 
     # For test cases, we compile locally with `swift build` against the derived Swift project
     - block: 'tasks.withType<Test>'
@@ -92,7 +94,7 @@ build:
           contents:
             # Output the environment (for debugging)
             - 'System.getenv().toSortedMap().forEach { key, value -> println("${key}=\"${value}\"") }'
-            - block: 'providers.exec'
+            - block: 'project.objects.newInstance<SkipBridgeExecOps>().execOps.exec'
               contents:
                 # build for local macOS in order to run tests
                 - 'workingDir(layout.projectDirectory)'
@@ -101,4 +103,3 @@ build:
                 # for local transpiler development, we need to ensure that the tool we are using is the locally-built skip, and not the one that is downloaded from the binary package
                 # TODO: figure out how to implement this for swiftpm command-line builds
                 - 'if (file(skipCommand).exists()) { environment("SKIP_COMMAND_OVERRIDE", skipCommand) }'
-            - '.result.get()'
