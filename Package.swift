@@ -14,10 +14,10 @@ let package = Package(
         .library(name: "SkipBridgeToSwiftSamplesTestsSupport", type: .dynamic, targets: ["SkipBridgeToSwiftSamplesTestsSupport"]),
     ],
     dependencies: [
-        .package(url: "https://source.skip.tools/skip.git", from: "1.6.0"),
+        .package(url: "https://source.skip.tools/skip.git", from: "1.6.8"),
         .package(url: "https://source.skip.tools/skip-lib.git", from: "1.3.7"),
-        .package(url: "https://source.skip.tools/skip-foundation.git", from: "1.3.7"),
-        .package(url: "https://source.skip.tools/swift-jni.git", "0.2.1"..<"2.0.0"),
+        .package(url: "https://source.skip.tools/skip-foundation.git", from: "1.3.9"),
+        .package(url: "https://source.skip.tools/swift-jni.git", "0.3.0"..<"2.0.0"),
     ],
     targets: [
         .target(name: "SkipBridge",
