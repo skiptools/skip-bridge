@@ -219,7 +219,7 @@ open class AnyDynamicObject: JObjectProtocol, JConvertible {
     }
 }
 
-private let Java_reflectorClass = try! JClass(name: "tools.skip.bridge.Reflector")
+private let Java_reflectorClass = try! JClass(name: "skip.bridge.Reflector")
 private let Java_reflectorConstructor = Java_reflectorClass.getMethodID(name: "<init>", sig: "(Ljava/lang/Object;)V")!
 private let Java_reflectorClassNameConstructor = Java_reflectorClass.getMethodID(name: "<init>", sig: "(Ljava/lang/String;Ljava/util/List;)V")!
 private let Java_reflectorStaticsOfClassNameConstructor = Java_reflectorClass.getMethodID(name: "<init>", sig: "(Ljava/lang/String;)V")!
