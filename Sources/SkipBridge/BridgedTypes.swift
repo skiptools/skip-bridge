@@ -341,7 +341,13 @@ public typealias JObjectConvertible = JObjectProtocol & JConvertible
 
 // MARK: Array
 
-extension Array: JObjectConvertible {
+#if compiler(>=6)
+extension Array: @retroactive JObjectConvertible { }
+#else
+extension Array: JObjectConvertible { }
+#endif
+
+extension Array {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Array<Element> {
         let isKotlincompatContainer = options.contains(.kotlincompatContainer)
         let options = options.subtracting(.kotlincompatContainer)
@@ -401,7 +407,13 @@ private let Java_List_get_methodID = Java_List.getMethodID(name: "get", sig: "(I
 
 // MARK: AsyncStream
 
-extension AsyncStream: JObjectConvertible {
+#if compiler(>=6)
+extension AsyncStream: @retroactive JObjectConvertible { }
+#else
+extension AsyncStream: JObjectConvertible { }
+#endif
+
+extension AsyncStream {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> AsyncStream<Element> {
         let bridgingDataSourceConstructorMethodID: JavaMethodID
         if options.contains(.kotlincompat) {
@@ -457,7 +469,13 @@ extension AsyncStream: JObjectConvertible {
     }
 }
 
-extension AsyncThrowingStream: JObjectConvertible where Failure == Error {
+#if compiler(>=6)
+extension AsyncThrowingStream: @retroactive JObjectConvertible where Failure == Error { }
+#else
+extension AsyncThrowingStream: JObjectConvertible where Failure == Error { }
+#endif
+
+extension AsyncThrowingStream where Failure == Error {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> AsyncThrowingStream<Element, Failure> {
         let bridgingDataSourceConstructorMethodID: JavaMethodID
         if options.contains(.kotlincompat) {
@@ -590,7 +608,13 @@ private let Java_SkipAsyncThrowingStreamSwiftDataSource_asFlow_methodID = Java_S
 
 // MARK: Data
 
-extension Data: JObjectConvertible {
+#if compiler(>=6)
+extension Data: @retroactive JObjectConvertible { }
+#else
+extension Data: JObjectConvertible { }
+#endif
+
+extension Data {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Data {
         let kotlinByteArray: JavaObjectPointer
         if options.contains(.kotlincompat) {
@@ -624,7 +648,13 @@ private let Java_SkipData_kotlin_methodID = Java_SkipData.getMethodID(name: "kot
 
 // MARK: Date
 
-extension Date: JObjectConvertible {
+#if compiler(>=6)
+extension Date: @retroactive JObjectConvertible { }
+#else
+extension Date: JObjectConvertible { }
+#endif
+
+extension Date {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Date {
         let timeInterval: Double
         if options.contains(.kotlincompat) {
@@ -656,7 +686,13 @@ private let Java_Date_getTime_methodID = Java_Date.getMethodID(name: "getTime", 
 
 // MARK: Dictionary
 
-extension Dictionary: JObjectConvertible {
+#if compiler(>=6)
+extension Dictionary: @retroactive JObjectConvertible { }
+#else
+extension Dictionary: JObjectConvertible { }
+#endif
+
+extension Dictionary {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Dictionary<Key, Value> {
         let isKotlincompatContainer = options.contains(.kotlincompatContainer)
         let options = options.subtracting(.kotlincompatContainer)
@@ -733,7 +769,13 @@ private let Java_Iterator_next_methodID = Java_Iterator.getMethodID(name: "next"
 
 // MARK: Locale
 
-extension Locale: JObjectConvertible {
+#if compiler(>=6)
+extension Locale: @retroactive JObjectConvertible { }
+#else
+extension Locale: JObjectConvertible { }
+#endif
+
+extension Locale {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Locale {
         let identifier: String
         if options.contains(.kotlincompat) {
@@ -763,7 +805,13 @@ private let Java_Locale_toLanguageTag_methodID = Java_Locale.getMethodID(name: "
 
 // MARK: NSNumber
 
-extension NSNumber: JObjectConvertible {
+#if compiler(>=6)
+extension NSNumber: @retroactive JObjectConvertible { }
+#else
+extension NSNumber: JObjectConvertible { }
+#endif
+
+extension NSNumber {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Self {
         let bridgedTypeString = bridgedTypeString(of: obj!, options: options)
         let bridgedType = BridgedTypes(rawValue: bridgedTypeString) ?? .other
@@ -800,7 +848,13 @@ extension NSNumber: JObjectConvertible {
 
 // MARK: Result
 
-extension Result: JObjectConvertible {
+#if compiler(>=6)
+extension Result: @retroactive JObjectConvertible { }
+#else
+extension Result: JObjectConvertible { }
+#endif
+
+extension Result {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Result<Success, Failure> {
         // let result = res.kotlin(nocopy: true)
         let pair_java: JavaObjectPointer
@@ -849,7 +903,13 @@ private let Java_Pair_second_methodID = Java_Pair.getMethodID(name: "getSecond",
 
 // MARK: Set
 
-extension Set: JObjectConvertible {
+#if compiler(>=6)
+extension Set: @retroactive JObjectConvertible { }
+#else
+extension Set: JObjectConvertible { }
+#endif
+
+extension Set {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> Set<Element> {
         let isKotlincompatContainer = options.contains(.kotlincompatContainer)
         let options = options.subtracting(.kotlincompatContainer)
@@ -908,7 +968,13 @@ private let Java_LinkedHashSet_add_methodID = Java_LinkedHashSet.getMethodID(nam
 
 // MARK: UUID
 
-extension UUID: JObjectConvertible {
+#if compiler(>=6)
+extension UUID: @retroactive JObjectConvertible { }
+#else
+extension UUID: JObjectConvertible { }
+#endif
+
+extension UUID {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> UUID {
         let uuidString: String
         if options.contains(.kotlincompat) {
@@ -938,7 +1004,13 @@ private let Java_UUID_toString_methodID = Java_UUID.getMethodID(name: "toString"
 
 // MARK: URL
 
-extension URL: JObjectConvertible {
+#if compiler(>=6)
+extension URL: @retroactive JObjectConvertible { }
+#else
+extension URL: JObjectConvertible { }
+#endif
+
+extension URL {
     public static func fromJavaObject(_ obj: JavaObjectPointer?, options: JConvertibleOptions) -> URL {
         let absoluteString: String
         if options.contains(.kotlincompat) {
