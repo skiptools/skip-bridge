@@ -22,6 +22,6 @@ jobs:
       #runs-on: "['macos-13', 'ubuntu-24.04']"
       runs-on: "['ubuntu-24.04']"
       # disable export because there are currently problems with shared PCH module cache files with multi-module native export
-      run-export: false
+      #run-export: false
       #run-local-tests: false
 
