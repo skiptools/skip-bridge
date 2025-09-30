@@ -35,8 +35,8 @@ build:
                 - 'keepDebugSymbols.add("**/*.so")'
                 # pickFirsts needed to prevent errors like: 2 files found with path 'lib/arm64-v8a/libSkipAndroidBridge.so' from inputs
                 # note that this only needs to be enabled if we are using multiple JNI output folders,
-                # which we currently avoif using the SKIP_BRIDGE_ANDROID_BUILT semaphore
-                #- 'pickFirsts.add("**/*.so")'
+                # which we currently avoid using the SKIP_BRIDGE_ANDROID_BUILT semaphore
+                - 'pickFirsts.add("**/*.so")'
         # the SKIP_BRIDGE_MODULES is included in the AndroidManifest.xml app metadata and is used by SkipBridge to load the root module on app startup
         - block: 'defaultConfig'
           contents:
