@@ -1,7 +1,6 @@
 // Copyright 2024–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
 import Foundation
-import Observation
 
 public class Compat {
     public let id: UUID
@@ -64,7 +63,6 @@ public struct CompatCallbacks: @unchecked Sendable {
     }
 }
 
-@Observable
 @MainActor
 open class CompatMainActor: Identifiable {
     public nonisolated let id: String
