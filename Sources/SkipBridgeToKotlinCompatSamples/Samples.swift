@@ -1,6 +1,7 @@
 // Copyright 2024–2025 Skip
 // SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
 import Foundation
+import Observation
 
 public class Compat {
     public let id: UUID
@@ -78,3 +79,23 @@ open class CompatMainActor: Identifiable {
     public func setup() {
     }
 }
+
+public struct CompatMutableStruct {
+    public var str: String
+    public init(_ str: String) {
+        self.str = str
+    }
+
+    public mutating func mutableFunc(_ str: String) {
+        self.str = str
+    }
+}
+
+//public enum CompatMutableEnum {
+//    case a
+//    case b(String)
+//
+//    public mutating func mutableFunc(_ update: String) {
+//        self = .b(update)
+//    }
+//}

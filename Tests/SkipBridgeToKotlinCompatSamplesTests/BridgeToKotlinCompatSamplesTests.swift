@@ -108,4 +108,11 @@ final class BridgeToKotlinCompatTests: XCTestCase {
         await compatMain.setup()
         #endif
     }
+
+    func testCompatMutableStruct() async {
+        #if SKIP
+        var compatStruct = CompatMutableStruct("ABC")
+        compatStruct.mutableFunc("XYZ")
+        #endif
+    }
 }
