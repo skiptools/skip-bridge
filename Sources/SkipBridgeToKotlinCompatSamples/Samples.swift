@@ -33,3 +33,48 @@ public class Compat {
 
 public struct CompatError: Error {
 }
+
+public struct CompatCallbacks: @unchecked Sendable {
+    // TODO: https://github.com/skiptools/skip/issues/534
+    //public typealias AsyncCallback = () async -> ()
+    public typealias AsyncCallback = () -> ()
+    public typealias Callback = () -> ()
+    public typealias URLCallback = (URL) -> ()
+
+    // `- error: invalid conversion from 'async' function of type '() async -> ()' to synchronous function type '() throws -> ()'
+    public let didLogin: AsyncCallback
+    public let didCancel: AsyncCallback
+    public let didSelectEmail: Callback
+    public let didSelectSettings: Callback
+    public let onURLSelected: URLCallback
+
+    public init(
+        didLogin: @escaping AsyncCallback = {},
+        didCancel: @escaping AsyncCallback = {},
+        didSelectEmail: @escaping Callback = {},
+        didSelectSettings: @escaping Callback = {},
+        onURLSelected: @escaping URLCallback = { _ in }
+    ) {
+        self.didLogin = didLogin
+        self.didCancel = didCancel
+        self.didSelectEmail = didSelectEmail
+        self.didSelectSettings = didSelectSettings
+        self.onURLSelected = onURLSelected
+    }
+}
+
+@Observable
+@MainActor
+open class CompatMainActor: Identifiable {
+    public nonisolated let id: String
+    public let scene: Int
+
+    public init(scene: Int, id: String? = nil) {
+        self.id = id ?? ""
+        self.scene = scene
+        setup()
+    }
+
+    public func setup() {
+    }
+}
