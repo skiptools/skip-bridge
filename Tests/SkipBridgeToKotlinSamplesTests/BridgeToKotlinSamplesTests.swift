@@ -535,6 +535,12 @@ final class BridgeToKotlinTests: XCTestCase {
         swiftClosure0Var()
     }
 
+    public func testAsyncClosure0Var() async {
+        await swiftAsyncClosure0Var()
+        swiftAsyncClosure0Var = { try? await Task.sleep(nanoseconds: 1000) }
+        await swiftAsyncClosure0Var()
+    }
+
     public func testClosure1Var() {
         let orig = swiftClosure1Var
         XCTAssertEqual(swiftClosure1Var(99), "value = 99")
@@ -544,10 +550,30 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftClosure1Var(99), "value = 99")
     }
 
+    public func testAsyncClosure1Var() async {
+        let orig = swiftAsyncClosure1Var
+        let r1 = await swiftAsyncClosure1Var(99)
+        XCTAssertEqual(r1, "value = 99")
+        swiftAsyncClosure1Var = { i in "kotlin = \(i)" }
+        let r2 = await swiftAsyncClosure1Var(99)
+        XCTAssertEqual(r2, "kotlin = 99")
+        swiftAsyncClosure1Var = orig
+        let r3 = await swiftAsyncClosure1Var(99)
+        XCTAssertEqual(r3, "value = 99")
+    }
+
     public func testClosure1PrimitivesVar() {
         XCTAssertEqual(swiftClosure1PrimitivesVar(Int64(3000)), 3)
         swiftClosure1PrimitivesVar = { l in Int(l / 500) }
         XCTAssertEqual(swiftClosure1PrimitivesVar(Int64(3000)), 6)
+    }
+
+    public func testAsyncClosure1PrimitivesVar() async {
+        let r1 = await swiftAsyncClosure1PrimitivesVar(Int64(3000))
+        XCTAssertEqual(r1, 3)
+        swiftAsyncClosure1PrimitivesVar = { l in Int(l / 500) }
+        let r2 = await swiftAsyncClosure1PrimitivesVar(Int64(3000))
+        XCTAssertEqual(r2, 6)
     }
 
     public func testClosure1OptionalsVar() {
@@ -562,6 +588,47 @@ final class BridgeToKotlinTests: XCTestCase {
         }
         XCTAssertEqual(swiftClosure1OptionalsVar("abc"), 6)
         XCTAssertNil(swiftClosure1OptionalsVar(nil))
+    }
+
+    public func testAsyncClosure1OptionalsVar() async {
+        let r1 = await swiftAsyncClosure1OptionalsVar("abc")
+        XCTAssertEqual(r1, 3)
+        let r2 = await swiftAsyncClosure1OptionalsVar(nil)
+        XCTAssertNil(r2)
+        swiftAsyncClosure1OptionalsVar = { s in
+            if let s {
+                return s.count * 2
+            } else {
+                return nil
+            }
+        }
+        let r3 = await swiftAsyncClosure1OptionalsVar("abc")
+        XCTAssertEqual(r3, 6)
+        let r4 = await swiftAsyncClosure1OptionalsVar(nil)
+        XCTAssertNil(r4)
+    }
+
+    // TODO: setting async throws closures does not work
+//    public func testAsyncClosure1ThrowsVar() async throws {
+//        let r1 = try await swiftAsyncClosure1ThrowsVar("abc")
+//        XCTAssertEqual(r1, 3)
+//        swiftAsyncClosure1ThrowsVar = { s in
+//            throw SwiftError()
+//        }
+//        do {
+//            let _ = try await swiftAsyncClosure1ThrowsVar("abc")
+//            XCTFail("closure should have thrown an error")
+//        } catch {
+//            // expected
+//        }
+//    }
+
+    public func testAsyncClosure5Var() async {
+        let r1 = await swiftAsyncClosure5Var(Int64(1), Int32(2), Int16(3), Double(4.0), Float(5.0))
+        XCTAssertEqual(r1, Double(1 + 2 + 3 + 4 + 5))
+        swiftAsyncClosure5Var = { Double($0) * Double($1) * Double($2) * Double($3) * Double($4) }
+        let r2 = await swiftAsyncClosure5Var(Int64(1), Int32(2), Int16(3), Double(4.0), Float(5.0))
+        XCTAssertEqual(r2, Double(1 * 2 * 3 * 4 * 5))
     }
 
     func testArrays() {

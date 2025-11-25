@@ -392,6 +392,17 @@ public var swiftClosure1Var: (Int) -> String = { i in "value = \(i)" }
 public var swiftClosure1PrimitivesVar: (Int64) -> Int = { l in Int(l / 1000) }
 public var swiftClosure1OptionalsVar: (String?) -> Int? = { s in s?.count }
 
+// MARK: Async Closures
+
+public var swiftAsyncClosure0Var: () async -> Void = { print("original") }
+public var swiftAsyncClosure1Var: (Int) async -> String = { i in "value = \(i)" }
+public var swiftAsyncClosure1PrimitivesVar: (Int64) async -> Int = { l in Int(l / 1000) }
+public var swiftAsyncClosure1OptionalsVar: (String?) async -> Int? = { s in s?.count }
+public var swiftAsyncClosure5Var: (Int64, Int32, Int16, Double, Float) async -> Double = { Double($0) + Double($1) + Double($2) + Double($3) + Double($4) }
+
+// TODO: setting async throws closures does not work
+//public var swiftAsyncClosure1ThrowsVar: (String) async throws -> Int = { s in s.count }
+
 // MARK: Containers
 
 public var swiftIntArrayVar = [1, 2, 3]
