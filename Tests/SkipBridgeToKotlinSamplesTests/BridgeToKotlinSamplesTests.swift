@@ -623,12 +623,38 @@ final class BridgeToKotlinTests: XCTestCase {
 //        }
 //    }
 
-    public func testAsyncClosure5Var() async {
-        let r1 = await swiftAsyncClosure5Var(Int64(1), Int32(2), Int16(3), Double(4.0), Float(5.0))
-        XCTAssertEqual(r1, Double(1 + 2 + 3 + 4 + 5))
-        swiftAsyncClosure5Var = { Double($0) * Double($1) * Double($2) * Double($3) * Double($4) }
-        let r2 = await swiftAsyncClosure5Var(Int64(1), Int32(2), Int16(3), Double(4.0), Float(5.0))
-        XCTAssertEqual(r2, Double(1 * 2 * 3 * 4 * 5))
+    public func testAsyncClosureNVar() async {
+        do {
+            let r1 = await swiftAsyncClosure2Var(Int64(1), Int32(2))
+            XCTAssertEqual(r1, Double(1 + 2))
+            swiftAsyncClosure2Var = { Double($0) * Double($1) }
+            let r2 = await swiftAsyncClosure2Var(Int64(1), Int32(2))
+            XCTAssertEqual(r2, Double(1 * 2))
+        }
+
+        do {
+            let r1 = await swiftAsyncClosure3Var(Int64(1), Int32(2), Int16(3))
+            XCTAssertEqual(r1, Double(1 + 2 + 3))
+            swiftAsyncClosure3Var = { Double($0) * Double($1) * Double($2) }
+            let r2 = await swiftAsyncClosure3Var(Int64(1), Int32(2), Int16(3))
+            XCTAssertEqual(r2, Double(1 * 2 * 3))
+        }
+
+        do {
+            let r1 = await swiftAsyncClosure4Var(Int64(1), Int32(2), Int16(3), Double(4.0))
+            XCTAssertEqual(r1, Double(1 + 2 + 3 + 4))
+            swiftAsyncClosure4Var = { Double($0) * Double($1) * Double($2) * Double($3) }
+            let r2 = await swiftAsyncClosure4Var(Int64(1), Int32(2), Int16(3), Double(4.0))
+            XCTAssertEqual(r2, Double(1 * 2 * 3 * 4))
+        }
+
+        do {
+            let r1 = await swiftAsyncClosure5Var(Int64(1), Int32(2), Int16(3), Double(4.0), Float(5.0))
+            XCTAssertEqual(r1, Double(1 + 2 + 3 + 4 + 5))
+            swiftAsyncClosure5Var = { Double($0) * Double($1) * Double($2) * Double($3) * Double($4) }
+            let r2 = await swiftAsyncClosure5Var(Int64(1), Int32(2), Int16(3), Double(4.0), Float(5.0))
+            XCTAssertEqual(r2, Double(1 * 2 * 3 * 4 * 5))
+        }
     }
 
     func testArrays() {

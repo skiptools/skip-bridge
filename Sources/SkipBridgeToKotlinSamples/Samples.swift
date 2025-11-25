@@ -398,6 +398,9 @@ public var swiftAsyncClosure0Var: () async -> Void = { print("original") }
 public var swiftAsyncClosure1Var: (Int) async -> String = { i in "value = \(i)" }
 public var swiftAsyncClosure1PrimitivesVar: (Int64) async -> Int = { l in Int(l / 1000) }
 public var swiftAsyncClosure1OptionalsVar: (String?) async -> Int? = { s in s?.count }
+public var swiftAsyncClosure2Var: (Int64, Int32) async -> Double = { Double($0) + Double($1) }
+public var swiftAsyncClosure3Var: (Int64, Int32, Int16) async -> Double = { Double($0) + Double($1) + Double($2) }
+public var swiftAsyncClosure4Var: (Int64, Int32, Int16, Double) async -> Double = { Double($0) + Double($1) + Double($2) + Double($3) }
 public var swiftAsyncClosure5Var: (Int64, Int32, Int16, Double, Float) async -> Double = { Double($0) + Double($1) + Double($2) + Double($3) + Double($4) }
 
 // TODO: setting async throws closures does not work
