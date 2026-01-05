@@ -194,6 +194,13 @@ public final class SwiftClosure0 {
         return try! Java_SwiftBackedFunction0_class.create(ctor: Java_SwiftBackedFunction0_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
     }
 
+    public static func javaObject<R>(forMainActor closure: (@MainActor () throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+        guard let closure else {
+            return nil
+        }
+        return javaObject(for: { try MainActor.assumeIsolated(closure) }, options: options)
+    }
+
     public static func closure<R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable () -> R)? {
         guard let function else {
             return nil
@@ -253,6 +260,13 @@ public final class SwiftClosure1 {
         let swiftPeer = SwiftClosure1(closure: closure, options: options)
         let swiftPeerPtr = SwiftObjectPointer.pointer(to: swiftPeer, retain: true)
         return try! Java_SwiftBackedFunction1_class.create(ctor: Java_SwiftBackedFunction1_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
+    }
+
+    public static func javaObject<P0, R>(forMainActor closure: (@MainActor (P0) throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+        guard let closure else {
+            return nil
+        }
+        return javaObject(for: { p0 in try MainActor.assumeIsolated { try closure(p0) } }, options: options)
     }
 
     public static func closure<P0, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0) -> R)? {
@@ -316,6 +330,13 @@ public final class SwiftClosure2 {
         let swiftPeer = SwiftClosure2(closure: closure, options: options)
         let swiftPeerPtr = SwiftObjectPointer.pointer(to: swiftPeer, retain: true)
         return try! Java_SwiftBackedFunction2_class.create(ctor: Java_SwiftBackedFunction2_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
+    }
+
+    public static func javaObject<P0, P1, R>(forMainActor closure: (@MainActor (P0, P1) throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+        guard let closure else {
+            return nil
+        }
+        return javaObject(for: { p0, p1 in try MainActor.assumeIsolated { try closure(p0, p1) } }, options: options)
     }
 
     public static func closure<P0, P1, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1) -> R)? {
@@ -384,6 +405,13 @@ public final class SwiftClosure3 {
         return try! Java_SwiftBackedFunction3_class.create(ctor: Java_SwiftBackedFunction3_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
     }
 
+    public static func javaObject<P0, P1, P2, R>(forMainActor closure: (@MainActor (P0, P1, P2) throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+        guard let closure else {
+            return nil
+        }
+        return javaObject(for: { p0, p1, p2 in try MainActor.assumeIsolated { try closure(p0, p1, p2) } }, options: options)
+    }
+
     public static func closure<P0, P1, P2, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1, P2) -> R)? {
         guard let function else {
             return nil
@@ -444,13 +472,20 @@ public func SwiftBackedFunction3_Swift_invoke(_ Java_env: JNIEnvPointer, _ Java_
 
 /// A Swift reference type that wraps a 4-parameter closure.
 public final class SwiftClosure4 {
-    public static func javaObject<P0, P1, P2, P3, R>(for closure: ((P0, P1, P2, P3) -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+    public static func javaObject<P0, P1, P2, P3, R>(for closure: ((P0, P1, P2, P3) throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
         let swiftPeer = SwiftClosure4(closure: closure, options: options)
         let swiftPeerPtr = SwiftObjectPointer.pointer(to: swiftPeer, retain: true)
         return try! Java_SwiftBackedFunction4_class.create(ctor: Java_SwiftBackedFunction4_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
+    }
+
+    public static func javaObject<P0, P1, P2, P3, R>(forMainActor closure: (@MainActor (P0, P1, P2, P3) throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+        guard let closure else {
+            return nil
+        }
+        return javaObject(for: { p0, p1, p2, p3 in try MainActor.assumeIsolated { try closure(p0, p1, p2, p3) } }, options: options)
     }
 
     public static func closure<P0, P1, P2, P3, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1, P2, P3) -> R)? {
@@ -523,6 +558,13 @@ public final class SwiftClosure5 {
         let swiftPeer = SwiftClosure5(closure: closure, options: options)
         let swiftPeerPtr = SwiftObjectPointer.pointer(to: swiftPeer, retain: true)
         return try! Java_SwiftBackedFunction5_class.create(ctor: Java_SwiftBackedFunction5_constructor_methodID, options: options, args: [swiftPeerPtr.toJavaParameter(options: options)])
+    }
+
+    public static func javaObject<P0, P1, P2, P3, P4, R>(forMainActor closure: (@MainActor (P0, P1, P2, P3, P4) throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+        guard let closure else {
+            return nil
+        }
+        return javaObject(for: { p0, p1, p2, p3, p4 in try MainActor.assumeIsolated { try closure(p0, p1, p2, p3, p4) } }, options: options)
     }
 
     public static func closure<P0, P1, P2, P3, P4, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1, P2, P3, P4) -> R)? {
@@ -789,7 +831,7 @@ private let Java_SwiftContinuationWrapper_class = try! JClass(name: "skip/bridge
 private let Java_SwiftContinuationWrapper_success_methodID = Java_SwiftContinuationWrapper_class.getMethodID(name: "success", sig: "(Ljava/lang/Object;)V")!
 private let Java_SwiftContinuationWrapper_failure_methodID = Java_SwiftContinuationWrapper_class.getMethodID(name: "failure", sig: "(Ljava/lang/Throwable;)V")!
 
-private func SwiftBackedSuspendFunction_invoke(_ closure: @escaping () async throws -> Any?, continuation: JavaObjectPointer?, returnType: Any.Type, options: JConvertibleOptions) {
+private func SwiftBackedSuspendFunction_invoke(_ closure: @escaping @isolated(any) () async throws -> Any?, continuation: JavaObjectPointer?, returnType: Any.Type, options: JConvertibleOptions) {
     guard let continuation else {
         fatalError("continuation parameter for suspend function was nil")
     }
@@ -797,7 +839,6 @@ private func SwiftBackedSuspendFunction_invoke(_ closure: @escaping () async thr
     // need to wrap the continuation in a global ref so it can pass between threads
     let continuationWrapper = JObject(continuation)
 
-    // TODO: which actor to run the closure on?
     Task {
         do {
             let c_return_swift = try await closure()
@@ -815,7 +856,7 @@ private func SwiftBackedSuspendFunction_invoke(_ closure: @escaping () async thr
 
 /// A Swift reference type that wraps a 0-parameters async closure.
 public final class SwiftAsyncClosure0 {
-    public static func javaObject<R>(for closure: (() async throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+    public static func javaObject<R>(for closure: (@isolated(any) () async throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -850,11 +891,11 @@ public final class SwiftAsyncClosure0 {
         }
     }
 
-    public let closure: () async throws -> Any?
+    public let closure: @isolated(any) () async throws -> Any?
     public let returnType: Any.Type
     public let options: JConvertibleOptions
 
-    public init<R>(closure: @escaping () async throws -> R, options: JConvertibleOptions) {
+    public init<R>(closure: @escaping @isolated(any) () async throws -> R, options: JConvertibleOptions) {
         self.closure = closure
         self.returnType = R.self
         self.options = options
@@ -876,7 +917,7 @@ public func SwiftBackedSuspendFunction0_Swift_invoke(_ Java_env: JNIEnvPointer, 
 
 /// A Swift reference type that wraps a 1-parameter closure.
 public final class SwiftAsyncClosure1 {
-    public static func javaObject<P0, R>(for closure: ((P0) async throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+    public static func javaObject<P0, R>(for closure: (@isolated(any) (P0) async throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -911,12 +952,12 @@ public final class SwiftAsyncClosure1 {
         }
     }
 
-    public let closure: (Any?) async throws -> Any?
+    public let closure: @isolated(any) (Any?) async throws -> Any?
     public let p0Type: Any.Type
     public let returnType: Any.Type
     public let options: JConvertibleOptions
 
-    public init<P0, R>(closure: @escaping (P0) async throws -> R, options: JConvertibleOptions) {
+    public init<P0, R>(closure: @escaping @isolated(any) (P0) async throws -> R, options: JConvertibleOptions) {
         self.closure = { p0 in try await closure(p0 as! P0) }
         self.p0Type = P0.self
         self.returnType = R.self
@@ -939,7 +980,7 @@ public func SwiftBackedSuspendFunction1_Swift_invoke(_ Java_env: JNIEnvPointer, 
 
 /// A Swift reference type that wraps a 2-parameter closure.
 public final class SwiftAsyncClosure2 {
-    public static func javaObject<P0, P1, R>(for closure: ((P0, P1) async throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+    public static func javaObject<P0, P1, R>(for closure: (@isolated(any) (P0, P1) async throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -974,13 +1015,13 @@ public final class SwiftAsyncClosure2 {
         }
     }
 
-    public let closure: (Any?, Any?) async throws -> Any?
+    public let closure: @isolated(any) (Any?, Any?) async throws -> Any?
     public let p0Type: Any.Type
     public let p1Type: Any.Type
     public let returnType: Any.Type
     public let options: JConvertibleOptions
 
-    public init<P0, P1, R>(closure: @escaping (P0, P1) async throws -> R, options: JConvertibleOptions) {
+    public init<P0, P1, R>(closure: @escaping @isolated(any) (P0, P1) async throws -> R, options: JConvertibleOptions) {
         self.closure = { p0, p1 in try await closure(p0 as! P0, p1 as! P1) }
         self.p0Type = P0.self
         self.p1Type = P1.self
@@ -1005,7 +1046,7 @@ public func SwiftBackedSuspendFunction2_Swift_invoke(_ Java_env: JNIEnvPointer, 
 
 /// A Swift reference type that wraps a 3-parameter closure.
 public final class SwiftAsyncClosure3 {
-    public static func javaObject<P0, P1, P2, R>(for closure: ((P0, P1, P2) async throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+    public static func javaObject<P0, P1, P2, R>(for closure: (@isolated(any) (P0, P1, P2) async throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -1040,14 +1081,14 @@ public final class SwiftAsyncClosure3 {
         }
     }
 
-    public let closure: (Any?, Any?, Any?) async throws -> Any?
+    public let closure: @isolated(any) (Any?, Any?, Any?) async throws -> Any?
     public let p0Type: Any.Type
     public let p1Type: Any.Type
     public let p2Type: Any.Type
     public let returnType: Any.Type
     public let options: JConvertibleOptions
 
-    public init<P0, P1, P2, R>(closure: @escaping (P0, P1, P2) async throws -> R, options: JConvertibleOptions) {
+    public init<P0, P1, P2, R>(closure: @escaping @isolated(any) (P0, P1, P2) async throws -> R, options: JConvertibleOptions) {
         self.closure = { p0, p1, p2 in try await closure(p0 as! P0, p1 as! P1, p2 as! P2) }
         self.p0Type = P0.self
         self.p1Type = P1.self
@@ -1074,7 +1115,7 @@ public func SwiftBackedSuspendFunction3_Swift_invoke(_ Java_env: JNIEnvPointer, 
 
 /// A Swift reference type that wraps a 4-parameter closure.
 public final class SwiftAsyncClosure4 {
-    public static func javaObject<P0, P1, P2, P3, R>(for closure: ((P0, P1, P2, P3) async throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+    public static func javaObject<P0, P1, P2, P3, R>(for closure: (@isolated(any) (P0, P1, P2, P3) async throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -1109,7 +1150,7 @@ public final class SwiftAsyncClosure4 {
         }
     }
 
-    public let closure: (Any?, Any?, Any?, Any?) async throws -> Any?
+    public let closure: @isolated(any) (Any?, Any?, Any?, Any?) async throws -> Any?
     public let p0Type: Any.Type
     public let p1Type: Any.Type
     public let p2Type: Any.Type
@@ -1117,7 +1158,7 @@ public final class SwiftAsyncClosure4 {
     public let returnType: Any.Type
     public let options: JConvertibleOptions
 
-    public init<P0, P1, P2, P3, R>(closure: @escaping (P0, P1, P2, P3) async throws -> R, options: JConvertibleOptions) {
+    public init<P0, P1, P2, P3, R>(closure: @escaping @isolated(any) (P0, P1, P2, P3) async throws -> R, options: JConvertibleOptions) {
         self.closure = { p0, p1, p2, p3 in try await closure(p0 as! P0, p1 as! P1, p2 as! P2, p3 as! P3) }
         self.p0Type = P0.self
         self.p1Type = P1.self
@@ -1146,7 +1187,7 @@ public func SwiftBackedSuspendFunction4_Swift_invoke(_ Java_env: JNIEnvPointer, 
 
 /// A Swift reference type that wraps a 5-parameter closure.
 public final class SwiftAsyncClosure5 {
-    public static func javaObject<P0, P1, P2, P3, P4, R>(for closure: ((P0, P1, P2, P3, P4) async throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+    public static func javaObject<P0, P1, P2, P3, P4, R>(for closure: (@isolated(any) (P0, P1, P2, P3, P4) async throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
         guard let closure else {
             return nil
         }
@@ -1181,7 +1222,7 @@ public final class SwiftAsyncClosure5 {
         }
     }
 
-    public let closure: (Any?, Any?, Any?, Any?, Any?) async throws -> Any?
+    public let closure: @isolated(any) (Any?, Any?, Any?, Any?, Any?) async throws -> Any?
     public let p0Type: Any.Type
     public let p1Type: Any.Type
     public let p2Type: Any.Type
@@ -1190,7 +1231,7 @@ public final class SwiftAsyncClosure5 {
     public let returnType: Any.Type
     public let options: JConvertibleOptions
 
-    public init<P0, P1, P2, P3, P4, R>(closure: @escaping (P0, P1, P2, P3, P4) async throws -> R, options: JConvertibleOptions) {
+    public init<P0, P1, P2, P3, P4, R>(closure: @escaping @isolated(any) (P0, P1, P2, P3, P4) async throws -> R, options: JConvertibleOptions) {
         self.closure = { p0, p1, p2, p3, p4 in try await closure(p0 as! P0, p1 as! P1, p2 as! P2, p3 as! P3, p4 as! P4) }
         self.p0Type = P0.self
         self.p1Type = P1.self
