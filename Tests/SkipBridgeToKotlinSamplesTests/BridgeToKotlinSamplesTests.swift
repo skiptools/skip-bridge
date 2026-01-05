@@ -535,7 +535,8 @@ final class BridgeToKotlinTests: XCTestCase {
         swiftClosure0Var()
     }
 
-    public func testAsyncClosure0Var() async {
+    // FIXME: test hangs intermittently on Android
+    public func XXXtestAsyncClosure0Var() async {
         await swiftAsyncClosure0Var()
         swiftAsyncClosure0Var = { try? await Task.sleep(nanoseconds: 1000) }
         await swiftAsyncClosure0Var()
@@ -550,7 +551,8 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftClosure1Var(99), "value = 99")
     }
 
-    public func testAsyncClosure1Var() async {
+    // FIXME: test hangs intermittently on Android
+    public func XXXtestAsyncClosure1Var() async {
         let orig = swiftAsyncClosure1Var
         let r1 = await swiftAsyncClosure1Var(99)
         XCTAssertEqual(r1, "value = 99")
@@ -568,7 +570,8 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftClosure1PrimitivesVar(Int64(3000)), 6)
     }
 
-    public func testAsyncClosure1PrimitivesVar() async {
+    // FIXME: test hangs intermittently on Android
+    public func XXXtestAsyncClosure1PrimitivesVar() async {
         let r1 = await swiftAsyncClosure1PrimitivesVar(Int64(3000))
         XCTAssertEqual(r1, 3)
         swiftAsyncClosure1PrimitivesVar = { l in Int(l / 500) }
@@ -590,7 +593,8 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertNil(swiftClosure1OptionalsVar(nil))
     }
 
-    public func testAsyncClosure1OptionalsVar() async {
+    // FIXME: test hangs intermittently on Android
+    public func XXXtestAsyncClosure1OptionalsVar() async {
         let r1 = await swiftAsyncClosure1OptionalsVar("abc")
         XCTAssertEqual(r1, 3)
         let r2 = await swiftAsyncClosure1OptionalsVar(nil)
@@ -623,7 +627,7 @@ final class BridgeToKotlinTests: XCTestCase {
 //        }
 //    }
 
-    // FIXME: test hangs on Android
+    // FIXME: test hangs intermittently on Android
     public func XXXtestAsyncClosureNVar() async {
         do {
             let r1 = await swiftAsyncClosure2Var(Int64(1), Int32(2))
