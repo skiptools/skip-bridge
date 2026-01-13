@@ -501,6 +501,7 @@ class Reflector {
                         else -> value
                     }
                 }
+                else -> value // e.g., CONTEXT
             }
         }
     }
