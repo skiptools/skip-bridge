@@ -1,8 +1,8 @@
 # SkipBridge
 
-Bridging between Swift and Kotlin/Java for [Skip Fuse](https://skip.tools) apps.
+Bridging between Swift and Kotlin/Java for [Skip Fuse](https://skip.dev) apps.
 
-Documentation can be found at [https://skip.tools/docs/modes/](https://skip.tools/docs/modes/).
+Documentation can be found at [https://skip.dev/docs/modes/](https://skip.dev/docs/modes/).
 
 ## License
 
