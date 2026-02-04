@@ -2,7 +2,7 @@
 
 Bridging between Swift and Kotlin/Java for [Skip Fuse](https://skip.dev) apps.
 
-Documentation can be found at [https://skip.dev/docs/modes/](https://skip.dev/docs/modes/).
+Documentation can be found at [https://skip.dev/docs/modes/](https://skip.dev/docs/bridging/).
 
 ## License
 
