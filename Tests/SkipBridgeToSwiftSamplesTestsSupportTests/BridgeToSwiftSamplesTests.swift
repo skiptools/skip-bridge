@@ -388,7 +388,7 @@ final class BridgeToSwiftTests: XCTestCase {
     }
 
     func testURL() {
-        let string = "https://skip.tools"
+        let string = "https://skip.dev"
         XCTAssertEqual(string, testSupport_kotlinMakeURL(string: string))
     }
 

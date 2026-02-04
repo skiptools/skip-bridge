@@ -109,9 +109,9 @@ public func testSupport_dynamicConverting() throws -> Bool {
         return false
     }
 
-    let url = try AnyDynamicObject(className: "java.net.URL", "https://skip.tools")
+    let url = try AnyDynamicObject(className: "java.net.URL", "https://skip.dev")
     let uri: URL = try url.toURI()! // java.net.URI converts
-    guard uri.absoluteString == "https://skip.tools" else {
+    guard uri.absoluteString == "https://skip.dev" else {
         return false
     }
 

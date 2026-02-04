@@ -21,7 +21,7 @@ final class BridgeToKotlinCompatTests: XCTestCase {
 
         let list = compat.urls
         XCTAssertEqual(list.size, 0)
-        let url = java.net.URI("https://skip.tools")
+        let url = java.net.URI("https://skip.dev")
         compat.urls = listOf(url)
         let list2 = compat.urls
         XCTAssertEqual(list2.size, 1)
@@ -40,7 +40,7 @@ final class BridgeToKotlinCompatTests: XCTestCase {
         let compat = Compat(id: uuid)
         XCTAssertEqual(uuid, compat.id)
 
-        let url = java.net.URI("https://skip.tools")
+        let url = java.net.URI("https://skip.dev")
         compat.attempts = Pair(2, url)
         XCTAssertEqual(2, compat.attempts?.first)
         XCTAssertEqual(url, compat.attempts?.second)

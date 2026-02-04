@@ -852,7 +852,7 @@ final class BridgeToKotlinTests: XCTestCase {
     }
 
     func testURL() {
-        let url = URL(string: "https://skip.tools")!
+        let url = URL(string: "https://skip.dev")!
         XCTAssertEqual(url.absoluteString, swiftMakeURL(matching: url)?.absoluteString)
     }
 
