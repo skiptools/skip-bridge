@@ -145,7 +145,32 @@ public final class JavaBackedClosure<R>: JObject, @unchecked Sendable {
         guard R.self != Void.self else {
             return () as! R
         }
-        return (R.self as! JConvertible.Type).fromJavaObject(object, options: options) as! R
+
+        if let convertibleType = R.self as? JConvertible.Type {
+            return convertibleType.fromJavaObject(object, options: options) as! R
+        }
+
+        if let bridgeImplType = protocolBridgeImplType() {
+            return bridgeImplType.fromJavaObject(object, options: options) as! R
+        }
+
+        if let value = AnyBridging.fromAnyTypeJavaObject(object, toBaseType: R.self, options: options)
+            as? R
+        {
+            return value
+        }
+
+        fatalError("Unable to bridge Java closure return to Swift type \(R.self)")
+    }
+
+    private func protocolBridgeImplType() -> BridgedFromKotlin.Type? {
+        let reflectedTypeName = String(reflecting: R.self)
+        let baseTypeName =
+            reflectedTypeName.hasPrefix("any ")
+            ? String(reflectedTypeName.dropFirst(4))
+            : reflectedTypeName
+
+        return _typeByName("\(baseTypeName)_BridgeImpl") as? BridgedFromKotlin.Type
     }
 }
 
@@ -1476,4 +1501,3 @@ public final class SwiftBackedSuspendFunction5<P0, P1, P2, P3, P4, R>: kotlin.jv
 }
 
 #endif
-
