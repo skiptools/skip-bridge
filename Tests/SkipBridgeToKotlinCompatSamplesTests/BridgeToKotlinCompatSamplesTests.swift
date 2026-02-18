@@ -92,4 +92,27 @@ final class BridgeToKotlinCompatTests: XCTestCase {
         XCTAssertEqual(collected2, listOf(100, 200))
         #endif
     }
+
+    func testCompatCallbacks() async {
+        #if SKIP
+        // TODO: make functions async to reproduce https://github.com/skiptools/skip/issues/534
+        let callbacks = CompatCallbacks(didLogin: { }, didCancel: { }, didSelectEmail: { }, didSelectSettings: { }, onURLSelected: { url in })
+        callbacks.didSelectEmail()
+        await callbacks.didLogin()
+        #endif
+    }
+
+    func testCompatMainActor() async {
+        #if SKIP
+        let compatMain = await CompatMainActor(scene: 123)
+        await compatMain.setup()
+        #endif
+    }
+
+    func testCompatMutableStruct() async {
+        #if SKIP
+        var compatStruct = CompatMutableStruct("ABC")
+        compatStruct.mutableFunc("XYZ")
+        #endif
+    }
 }
