@@ -796,6 +796,19 @@ public func testSupport_kotlinClosure0Var() {
     kotlinClosure0Var()
 }
 
+public func testSupport_kotlinClosure0ProtocolVar() -> String {
+    let first = kotlinClosure0ProtocolVar().stringValue()
+
+    kotlinClosure0ProtocolVar = {
+        let helper = KotlinHelperClass()
+        helper.stringVar = "updated"
+        return helper
+    }
+
+    let second = kotlinClosure0ProtocolVar().stringValue()
+    return "\(first)/\(second)"
+}
+
 public func testSupport_kotlinClosure1Var(value: Int) -> String {
     let s1 = kotlinClosure1Var(value)
     kotlinClosure1Var = { i in "value = \(i)" }

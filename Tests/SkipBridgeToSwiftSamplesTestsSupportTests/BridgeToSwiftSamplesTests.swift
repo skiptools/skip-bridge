@@ -287,6 +287,10 @@ final class BridgeToSwiftTests: XCTestCase {
         testSupport_kotlinClosure0Var()
     }
 
+    func testClosure0ProtocolVar() {
+        XCTAssertEqual(testSupport_kotlinClosure0ProtocolVar(), "s/updated")
+    }
+
     func testClosure1Var() {
         XCTAssertEqual(testSupport_kotlinClosure1Var(value: 100), "value = 100")
     }
