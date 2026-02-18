@@ -376,6 +376,7 @@ public enum KotlinEnumError: Error {
 // MARK: Closures
 
 public var kotlinClosure0Var: () -> Void = { print("original") }
+public var kotlinClosure0ProtocolVar: () -> any KotlinProtocol = { KotlinHelperClass() }
 public var kotlinClosure1Var: (Int) -> String = { i in "value = \(i)" }
 public var kotlinClosure1PrimitivesVar: (Int64) -> Int = { l in Int(l / 1000) }
 public var kotlinClosure1OptionalsVar: (String?) -> Int? = { s in s?.count }
