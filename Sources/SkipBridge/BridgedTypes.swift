@@ -195,7 +195,7 @@ public struct AnyBridging {
             if String(describing: value) == "nil" && Mirror(reflecting: value).displayStyle == .optional {
                 return nil
             }
-            fatalError("Unable to bridge Swift instance \(value) of type: \(type(of: value))")
+            fatalError("Unable to bridge Swift instance \(value) of type: \(type(of: value)); this is usually due to missing // SKIP @bridge or // SKIP @bridgeMembers on the Swift type")
         }
     }
 
