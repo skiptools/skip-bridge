@@ -1,5 +1,5 @@
-// Copyright 2024–2025 Skip
-// SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
+// Copyright 2024–2026 Skip
+// SPDX-License-Identifier: MPL-2.0
 @_exported import SwiftJNI
 
 /// That this needs to be manually loaded with `System.loadLibrary("SwiftJNI")` in order to have `JNI_OnLoad` called.

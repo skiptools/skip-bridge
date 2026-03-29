@@ -1,5 +1,5 @@
-// Copyright 2024–2025 Skip
-// SPDX-License-Identifier: LGPL-3.0-only WITH LGPL-3.0-linking-exception
+// Copyright 2024–2026 Skip
+// SPDX-License-Identifier: MPL-2.0
 import Foundation
 import SkipBridge
 import SkipBridgeToKotlinSamples
@@ -655,7 +655,7 @@ final class BridgeToKotlinTests: XCTestCase {
 
         do {
             let r1 = await swiftAsyncClosure5Var(Int64(1), Int32(2), Int16(3), Double(4.0), Float(5.0))
-            XCTAssertEqual(r1, Double(1 + 2 + 3 + 4 + 5))
+            XCTAssertEqual(r1, 15.0) // Double(1 + 2 + 3 + 4 + 5)) // “The compiler is unable to type-check this expression in reasonable time; try breaking up the expression into distinct sub-expressions”
             swiftAsyncClosure5Var = { Double($0) * Double($1) * Double($2) * Double($3) * Double($4) }
             let r2 = await swiftAsyncClosure5Var(Int64(1), Int32(2), Int16(3), Double(4.0), Float(5.0))
             XCTAssertEqual(r2, Double(1 * 2 * 3 * 4 * 5))
