@@ -13,8 +13,8 @@ permissions:
 
 jobs:
   call-workflow:
-    #uses: skiptools/actions/.github/workflows/skip-framework.yml@main
-    uses: skiptools/actions/.github/workflows/skip-framework.yml@v1
+    #uses: skiptools/actions/.github/workflows/skip-framework.yml@v1
+    uses: skiptools/actions/.github/workflows/skip-framework.yml@main
     with:
       runs-on: "['macos-15-intel', 'ubuntu-24.04']"
       swift-android-sdk-version: "['', 'nightly-main']"
