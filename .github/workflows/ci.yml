@@ -17,7 +17,6 @@ jobs:
     with:
       runs-on: "['macos-15-intel', 'ubuntu-24.04']"
       swift-android-sdk-version: "['', 'nightly-main']"
-      skip-source: 'build-system'
       # disable export because there are currently problems with shared PCH module cache files with multi-module native export
       run-export: false
 
