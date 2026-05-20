@@ -199,6 +199,36 @@ public struct AnyBridging {
         }
     }
 
+    /// Convert a Swift closure to its Java `kotlin.jvm.functions.Function0` form.
+    public static func toJavaObject<R>(_ value: (() throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+        SwiftClosure0.javaObject(for: value, options: options)
+    }
+
+    /// Convert a Swift closure to its Java `kotlin.jvm.functions.Function1` form.
+    public static func toJavaObject<P0, R>(_ value: ((P0) throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+        SwiftClosure1.javaObject(for: value, options: options)
+    }
+
+    /// Convert a Swift closure to its Java `kotlin.jvm.functions.Function2` form.
+    public static func toJavaObject<P0, P1, R>(_ value: ((P0, P1) throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+        SwiftClosure2.javaObject(for: value, options: options)
+    }
+
+    /// Convert a Swift closure to its Java `kotlin.jvm.functions.Function3` form.
+    public static func toJavaObject<P0, P1, P2, R>(_ value: ((P0, P1, P2) throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+        SwiftClosure3.javaObject(for: value, options: options)
+    }
+
+    /// Convert a Swift closure to its Java `kotlin.jvm.functions.Function4` form.
+    public static func toJavaObject<P0, P1, P2, P3, R>(_ value: ((P0, P1, P2, P3) throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+        SwiftClosure4.javaObject(for: value, options: options)
+    }
+
+    /// Convert a Swift closure to its Java `kotlin.jvm.functions.Function5` form.
+    public static func toJavaObject<P0, P1, P2, P3, P4, R>(_ value: ((P0, P1, P2, P3, P4) throws -> R)?, options: JConvertibleOptions) -> JavaObjectPointer? {
+        SwiftClosure5.javaObject(for: value, options: options)
+    }
+
     /// Convert a Kotlin/Java instance of a known base type to its Swift projection.
     public static func fromJavaObject<T>(_ ptr: JavaObjectPointer?, toBaseType: T.Type, options: JConvertibleOptions) -> T? {
         guard let ptr else {

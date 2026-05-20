@@ -70,7 +70,7 @@ public final class JavaBackedClosure<R>: JObject, @unchecked Sendable {
         }
     }
 
-    public func invokeJava(_ p0: JavaObjectPointer?, _ p1: JavaObjectPointer?) throws -> R {
+    func invokeJava(_ p0: JavaObjectPointer?, _ p1: JavaObjectPointer?) throws -> R {
         return try jniContext {
             let object: JavaObjectPointer? = try call(method: Java_Function2_invoke_methodID, options: options, args: [
                 p0.toJavaParameter(options: options),
@@ -399,7 +399,7 @@ public final class SwiftClosure2 {
             let closure = JavaBackedClosure<R>(function, options: options)
             return { p0, p1 in
                 let p0_java = AnyBridging.toJavaObject(p0, options: options)
-                let p1_java = SwiftClosure1.javaObject(for: p1, options: options)
+                let p1_java = AnyBridging.toJavaObject(p1, options: options)
                 return try! closure.invokeJava(p0_java, p1_java)
             }
         }
@@ -430,7 +430,7 @@ public final class SwiftClosure2 {
             let closure = JavaBackedClosure<R>(function, options: options)
             return { p0, p1 in
                 let p0_java = AnyBridging.toJavaObject(p0, options: options)
-                let p1_java = SwiftClosure1.javaObject(for: p1, options: options)
+                let p1_java = AnyBridging.toJavaObject(p1, options: options)
                 return try closure.invokeJava(p0_java, p1_java)
             }
         }
