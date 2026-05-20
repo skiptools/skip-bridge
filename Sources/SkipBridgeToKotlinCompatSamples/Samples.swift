@@ -9,6 +9,8 @@ public class Compat {
     public var result: Result<String, Error>?
     public var errorvar: Error = CompatError()
     public var locale = Locale.current
+    public var nestedURLCallback: (URL?, @escaping (URL) -> Void) -> Void = { _, _ in }
+    public var nestedURLCallbackValue: URL?
 
     public init(id: UUID) {
         self.id = id
@@ -28,6 +30,12 @@ public class Compat {
             collected.append(value)
         }
         return collected
+    }
+
+    public func invokeNestedURLCallback(with url: URL?) {
+        nestedURLCallback(url) { [weak self] updatedURL in
+            self?.nestedURLCallbackValue = updatedURL
+        }
     }
 }
 

@@ -70,6 +70,16 @@ public final class JavaBackedClosure<R>: JObject, @unchecked Sendable {
         }
     }
 
+    public func invokeJava(_ p0: JavaObjectPointer?, _ p1: JavaObjectPointer?) throws -> R {
+        return try jniContext {
+            let object: JavaObjectPointer? = try call(method: Java_Function2_invoke_methodID, options: options, args: [
+                p0.toJavaParameter(options: options),
+                p1.toJavaParameter(options: options),
+            ])
+            return returnValue(for: object)
+        }
+    }
+
     public func invokeSuspend(_ p0: Any?, _ p1: Any?) async throws -> R {
         return try await invokeSuspendContinuation { continuation in
             let p0_java = AnyBridging.toJavaObject(p0, options: options).toJavaParameter(options: options)
@@ -364,6 +374,7 @@ public final class SwiftClosure2 {
         return javaObject(for: { p0, p1 in try MainActor.assumeIsolated { try closure(p0, p1) } }, options: options)
     }
 
+    @_disfavoredOverload
     public static func closure<P0, P1, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1) -> R)? {
         guard let function else {
             return nil
@@ -377,6 +388,24 @@ public final class SwiftClosure2 {
         }
     }
 
+    public static func closure<P0, C0, CR, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, @escaping (C0) -> CR) -> R)? {
+        guard let function else {
+            return nil
+        }
+        if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
+            let closure: SwiftClosure2 = ptr.pointee()!
+            return { p0, p1 in try! closure.closure(p0, p1) as! R }
+        } else {
+            let closure = JavaBackedClosure<R>(function, options: options)
+            return { p0, p1 in
+                let p0_java = AnyBridging.toJavaObject(p0, options: options)
+                let p1_java = SwiftClosure1.javaObject(for: p1, options: options)
+                return try! closure.invokeJava(p0_java, p1_java)
+            }
+        }
+    }
+
+    @_disfavoredOverload
     public static func closure<P0, P1, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1) throws -> R)? {
         guard let function else {
             return nil
@@ -387,6 +416,23 @@ public final class SwiftClosure2 {
         } else {
             let closure = JavaBackedClosure<R>(function, options: options)
             return { p0, p1 in try closure.invoke(p0, p1) }
+        }
+    }
+
+    public static func closure<P0, C0, CR, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, @escaping (C0) -> CR) throws -> R)? {
+        guard let function else {
+            return nil
+        }
+        if let ptr = SwiftObjectPointer.tryPeer(of: function, options: options) {
+            let closure: SwiftClosure2 = ptr.pointee()!
+            return { p0, p1 in try closure.closure(p0, p1) as! R }
+        } else {
+            let closure = JavaBackedClosure<R>(function, options: options)
+            return { p0, p1 in
+                let p0_java = AnyBridging.toJavaObject(p0, options: options)
+                let p1_java = SwiftClosure1.javaObject(for: p1, options: options)
+                return try closure.invokeJava(p0_java, p1_java)
+            }
         }
     }
 

@@ -92,4 +92,23 @@ final class BridgeToKotlinCompatTests: XCTestCase {
         XCTAssertEqual(collected2, listOf(100, 200))
         #endif
     }
+
+    func testCompatNestedClosureCallback() {
+        #if SKIP
+        let compat = Compat(id: java.util.UUID.randomUUID())
+        let originalURL = java.net.URI("https://skip.dev/original")
+        let updatedURL = java.net.URI("https://skip.dev/updated")
+        var receivedURL: java.net.URI?
+
+        compat.nestedURLCallback = { currentURL, completion in
+            receivedURL = currentURL
+            completion(updatedURL)
+        }
+
+        compat.invokeNestedURLCallback(with: originalURL)
+
+        XCTAssertEqual(receivedURL, originalURL)
+        XCTAssertEqual(compat.nestedURLCallbackValue, updatedURL)
+        #endif
+    }
 }
