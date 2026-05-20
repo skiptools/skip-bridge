@@ -15,6 +15,9 @@ jobs:
   call-workflow:
     uses: skiptools/actions/.github/workflows/skip-framework.yml@v1
     with:
+      # TODO: remove
+      # local build of skipstone with 'bridge-closure-arg' branch
+      skip-source: 'bridge-closure-arg'
       runs-on: "['macos-15-intel', 'ubuntu-24.04']"
       swift-android-sdk-version: "['', 'nightly-main']"
       # disable export because there are currently problems with shared PCH module cache files with multi-module native export
