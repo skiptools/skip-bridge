@@ -17,7 +17,7 @@ jobs:
     with:
       # TODO: remove
       # local build of skipstone with 'bridge-closure-arg' branch
-      skip-source: 'bridge-closure-arg'
+      skip-source: 'main'
       runs-on: "['macos-15-intel', 'ubuntu-24.04']"
       swift-android-sdk-version: "['', 'nightly-main']"
       # disable export because there are currently problems with shared PCH module cache files with multi-module native export
