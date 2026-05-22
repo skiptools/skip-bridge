@@ -22,7 +22,8 @@ let package = Package(
         .package(url: "https://source.skip.tools/skip.git", from: "1.8.17"),
         .package(url: "https://source.skip.tools/skip-lib.git", from: "1.4.0"),
         .package(url: "https://source.skip.tools/skip-foundation.git", from: "1.4.0"),
-        .package(url: "https://source.skip.tools/swift-jni.git", "0.5.0"..<"2.0.0"),
+        .package(url: "https://source.skip.tools/swift-jni.git", branch: "main"), // FIXME
+        //.package(url: "https://source.skip.tools/swift-jni.git", "0.5.0"..<"2.0.0"),
     ],
     targets: [
         .target(name: "SkipBridge",

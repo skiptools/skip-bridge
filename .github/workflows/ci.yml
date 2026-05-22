@@ -28,8 +28,6 @@ jobs:
       env: SWIFT_JAVA_JNI_CORE=1
       runs-on: "['macos-15-intel', 'ubuntu-24.04']"
       swift-android-sdk-version: "['', 'nightly-main']"
-      # TODO: investigate test hangs
-      run-local-tests: false
       # disable export because there are currently problems with shared PCH module cache files with multi-module native export
       run-export: false
 
