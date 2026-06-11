@@ -285,7 +285,7 @@ public final class SwiftClosure0 {
         guard let closure else {
             return nil
         }
-        return javaObject(for: { try MainActor.assumeIsolated(closure) }, options: options)
+        return javaObject(for: { try assumeMainActorUnchecked(closure) }, options: options)
     }
 
     public static func closure<R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable () -> R)? {
@@ -353,7 +353,7 @@ public final class SwiftClosure1 {
         guard let closure else {
             return nil
         }
-        return javaObject(for: { p0 in try MainActor.assumeIsolated { try closure(p0) } }, options: options)
+        return javaObject(for: { p0 in try assumeMainActorUnchecked { try closure(p0) } }, options: options)
     }
 
     public static func closure<P0, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0) -> R)? {
@@ -449,7 +449,7 @@ public final class SwiftClosure2 {
         guard let closure else {
             return nil
         }
-        return javaObject(for: { p0, p1 in try MainActor.assumeIsolated { try closure(p0, p1) } }, options: options)
+        return javaObject(for: { p0, p1 in try assumeMainActorUnchecked { try closure(p0, p1) } }, options: options)
     }
 
     public static func closure<P0, P1, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1) -> R)? {
@@ -548,7 +548,7 @@ public final class SwiftClosure3 {
         guard let closure else {
             return nil
         }
-        return javaObject(for: { p0, p1, p2 in try MainActor.assumeIsolated { try closure(p0, p1, p2) } }, options: options)
+        return javaObject(for: { p0, p1, p2 in try assumeMainActorUnchecked { try closure(p0, p1, p2) } }, options: options)
     }
 
     public static func closure<P0, P1, P2, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1, P2) -> R)? {
@@ -650,7 +650,7 @@ public final class SwiftClosure4 {
         guard let closure else {
             return nil
         }
-        return javaObject(for: { p0, p1, p2, p3 in try MainActor.assumeIsolated { try closure(p0, p1, p2, p3) } }, options: options)
+        return javaObject(for: { p0, p1, p2, p3 in try assumeMainActorUnchecked { try closure(p0, p1, p2, p3) } }, options: options)
     }
 
     public static func closure<P0, P1, P2, P3, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1, P2, P3) -> R)? {
@@ -755,7 +755,7 @@ public final class SwiftClosure5 {
         guard let closure else {
             return nil
         }
-        return javaObject(for: { p0, p1, p2, p3, p4 in try MainActor.assumeIsolated { try closure(p0, p1, p2, p3, p4) } }, options: options)
+        return javaObject(for: { p0, p1, p2, p3, p4 in try assumeMainActorUnchecked { try closure(p0, p1, p2, p3, p4) } }, options: options)
     }
 
     public static func closure<P0, P1, P2, P3, P4, R>(forJavaObject function: JavaObjectPointer?, options: JConvertibleOptions) -> (@Sendable (P0, P1, P2, P3, P4) -> R)? {

@@ -1,6 +1,13 @@
 // Copyright 2024–2026 Skip
 // SPDX-License-Identifier: MPL-2.0
 @_exported import SwiftJNI
+#if canImport(Darwin)
+import Darwin
+#elseif canImport(Glibc)
+import Glibc
+#elseif canImport(Android)
+import Android
+#endif
 
 /// That this needs to be manually loaded with `System.loadLibrary("SwiftJNI")` in order to have `JNI_OnLoad` called.
 ///
@@ -16,8 +23,52 @@ public func JNI_OnLoad(jvm: UnsafeMutablePointer<JavaVM?>, reserved: UnsafeMutab
 
     AnyBridging.initJThrowableErrorConverter()
 
+    #if !os(Android)
+    // Being loaded by a JVM on a development OS means we are hosted by a test JVM
+    // (Robolectric unit tests or an embedded test JVM), where bridged main-actor API is
+    // called from JVM test threads that can never satisfy the Darwin main-queue assertion.
+    isJVMHostedEnvironment = true
+    installJVMHostedCheckIsolatedHook()
+    #endif
+
     return JavaInt(0x00010006) // JNI_VERSION_1_6
 }
+
+#if !os(Android)
+/// Whether this library was loaded by a JVM on a development OS (Robolectric unit tests or
+/// an embedded test JVM) rather than running on Android. Set by `JNI_OnLoad`, before any
+/// bridged call can execute. Read by `assumeMainActorUnchecked` to relax main-actor
+/// assumptions that JVM test threads can never satisfy.
+nonisolated(unsafe) var isJVMHostedEnvironment = false
+
+/// Relax `MainActor.assumeIsolated` for JVM-hosted test environments.
+///
+/// On Android the main looper drains the dispatch main queue, so the main-actor assumptions
+/// made by bridged calls hold on the UI thread. A JVM hosted on macOS or Linux has no such
+/// integration: Robolectric runs everything on a JVM test thread, which is never the platform
+/// main dispatch queue, so the last-resort `checkIsolated` runtime check would trap on the
+/// first bridged call into `@MainActor` API. Installing a no-op
+/// `swift_task_checkIsolated_hook` makes the runtime treat that check as satisfied.
+/// Robolectric tests are effectively single-threaded, so the assumption is sound in practice.
+///
+/// On host runtimes that predate the hook (macOS 14 and earlier), this is a no-op; the
+/// `isJVMHostedEnvironment` bypass in `assumeMainActorUnchecked` covers those.
+private func installJVMHostedCheckIsolatedHook() {
+    #if canImport(Darwin)
+    let defaultHandle = UnsafeMutableRawPointer(bitPattern: -2) // RTLD_DEFAULT
+    #else
+    let defaultHandle: UnsafeMutableRawPointer? = nil // RTLD_DEFAULT
+    #endif
+    guard let hook = dlsym(defaultHandle, "swift_task_checkIsolated_hook") else {
+        return
+    }
+    // The hook is `SWIFT_CC(swift) (SerialExecutorRef, original) -> Void`: two register words
+    // plus the original-function pointer, all ignored by the no-op, so a C-convention
+    // function with matching register usage is ABI-compatible.
+    let noop: @convention(c) (UnsafeRawPointer?, UnsafeRawPointer?, UnsafeRawPointer?) -> Void = { _, _, _ in }
+    hook.assumingMemoryBound(to: UnsafeRawPointer?.self).pointee = unsafeBitCast(noop, to: UnsafeRawPointer?.self)
+}
+#endif
 
 extension JNI {
     /// In order to use JNI to access the Swift side of the bridge, we need to first manually load the library.

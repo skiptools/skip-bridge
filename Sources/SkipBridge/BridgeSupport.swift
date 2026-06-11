@@ -99,7 +99,23 @@ public struct UncheckedSendableBox<T> : @unchecked Sendable {
 #if compiler(>=6.0) // needed for MainActor.assumeIsolated
 /// Forwards to `MainActor.assumeIsolated` with a wrapper that assumes `Sendable`
 public func assumeMainActorUnchecked<T>(_ operation: @MainActor () throws -> T, file: StaticString = #fileID, line: UInt = #line) rethrows -> T {
-    try MainActor.assumeIsolated({ UncheckedSendableBox(try operation()) }, file: file, line: line).wrappedValue
+    #if !os(Android)
+    if isJVMHostedEnvironment {
+        // A JVM hosted on a development OS (Robolectric unit tests or an embedded test JVM)
+        // calls bridged main-actor API from JVM test threads, which can never satisfy the
+        // Darwin main-queue assertion — and the host OS runtime may predate the
+        // `swift_task_checkIsolated_hook` relaxation — so `MainActor.assumeIsolated` would
+        // trap. Tests are effectively single-threaded; invoke directly with the same cast
+        // `MainActor.assumeIsolated` performs after its executor check.
+        typealias YesActor = @MainActor () throws -> T
+        typealias NoActor = () throws -> T
+        return try withoutActuallyEscaping(operation) { (fn: @escaping YesActor) throws -> T in
+            let rawFn = unsafeBitCast(fn, to: NoActor.self)
+            return try rawFn()
+        }
+    }
+    #endif
+    return try MainActor.assumeIsolated({ UncheckedSendableBox(try operation()) }, file: file, line: line).wrappedValue
 }
 #else
 public func assumeMainActorUnchecked<T>(_ operation: () throws -> T, file: StaticString = #fileID, line: UInt = #line) rethrows -> T {
