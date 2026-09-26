@@ -131,15 +131,20 @@ public func loadPeerLibrary(packageName: String, moduleName libName: String) thr
     let osArch = System.getProperty("os.arch")
     let libext: String
     let arch: String
+    let swiftBuildProducts: String
     if osName.lowercase().contains("linux") {
         libext = "so"
         arch = osArch == "aarch64" ? "aarch64-unknown-linux-gnu" : "x86_64-unknown-linux-gnu"
+        swiftBuildProducts = osArch == "aarch64" ? "Debug-linux-aarch64" : "Debug-linux-x86_64"
     } else {
         libext = "dylib"
         arch = osArch == "aarch64" ? "arm64-apple-macosx" : "x86_64-apple-macosx"
+        swiftBuildProducts = "Debug"
     }
     let sharedObject = "lib\(libName).\(libext)"
     let libPath = ".build/\(libName)/swift/\(arch)/debug/\(sharedObject)"
+    // swiftbuild, SwiftPM's default build system from Swift 6.4, writes products to out/Products/<configuration> rather than <triple>/debug
+    let swiftBuildLibPath = ".build/\(libName)/swift/out/Products/\(swiftBuildProducts)/\(sharedObject)"
 
     let cwd = System.getProperty("user.dir")
 
@@ -153,6 +158,10 @@ public func loadPeerLibrary(packageName: String, moduleName libName: String) thr
 
         // cwd from swiftPM CLI: /opt/src/github/skiptools/skip-bridge/.build/plugins/outputs/skip-bridge/SkipBridgeSamplesTests/destination/skipstone/SkipBridgeSamples
         libraryPath = cwd + "/" + libPath
+    }
+    // swiftbuild's output wins: a native-engine library left behind from before an upgrade must not shadow it
+    if java.io.File(cwd + "/" + swiftBuildLibPath).isFile() {
+        libraryPath = cwd + "/" + swiftBuildLibPath
     }
 
     if loadedLibraries.contains(libraryPath) {

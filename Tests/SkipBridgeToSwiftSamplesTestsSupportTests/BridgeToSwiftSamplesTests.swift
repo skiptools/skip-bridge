@@ -378,6 +378,16 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(result, 1)
     }
 
+    func testAsyncCancellation() async throws {
+        guard testSupport_bridgePropagatesCancellation() else {
+            throw XCTSkip("Needs a skip release that includes skiptools/skipstone#281")
+        }
+        let parkedFailure = await testSupport_cancelParkedKotlinAsyncFunction()
+        XCTAssertNil(parkedFailure)
+        let beforeStartFailure = await testSupport_cancelKotlinAsyncFunctionBeforeStart()
+        XCTAssertNil(beforeStartFailure)
+    }
+
     func testAsyncStream() async {
         let result = await testSupport_kotlinAsyncStream(content: [100, 200])
         XCTAssertTrue(result)
