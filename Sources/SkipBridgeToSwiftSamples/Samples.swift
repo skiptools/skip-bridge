@@ -453,6 +453,30 @@ public func kotlinAsyncThrowingVoidFunction(shouldThrow: Bool) async throws {
     }
 }
 
+/// Whether `kotlinAsyncParkingFunction` is suspended, so a caller knows when to cancel it.
+public var kotlinAsyncParkingFunctionIsParked = false
+/// Whether the coroutine running `kotlinAsyncParkingFunction` observed its cancellation.
+public var kotlinAsyncParkingFunctionObservedCancellation = false
+
+/// Parks until the awaiting Swift task is cancelled, like an implementation waiting on a platform callback.
+public func kotlinAsyncParkingFunction() async throws -> Int {
+    #if SKIP
+    return kotlinx.coroutines.suspendCancellableCoroutine { continuation in
+        continuation.invokeOnCancellation { _ in
+            kotlinAsyncParkingFunctionObservedCancellation = true
+        }
+        kotlinAsyncParkingFunctionIsParked = true
+    }
+    #else
+    kotlinAsyncParkingFunctionIsParked = true
+    while !Task.isCancelled {
+        try? await Task.sleep(nanoseconds: 1_000_000)
+    }
+    kotlinAsyncParkingFunctionObservedCancellation = true
+    throw CancellationError()
+    #endif
+}
+
 public func kotlinMakeAsyncStream() -> AsyncStream<Int> {
     let (stream, continuation) = AsyncStream.makeStream(of: Int.self)
     continuation.yield(100)

@@ -1,6 +1,9 @@
 // Copyright 2024–2026 Skip
 // SPDX-License-Identifier: MPL-2.0
 import Foundation
+#if SKIP_BRIDGE
+import SkipBridge
+#endif
 import SkipBridgeToSwiftSamples
 import SkipBridgeToSwiftSamplesHelpers
 
@@ -932,6 +935,71 @@ public func testSupport_callKotlinAsyncThrowingVoidFunction(shouldThrow: Bool) a
     try await kotlinAsyncThrowingVoidFunction(shouldThrow: shouldThrow)
 }
 
+/// Whether the bridge was generated with cancellation propagation: the Kotlin `callback_` function
+/// of a throwing async API then returns the coroutine `Job` instead of `Unit`.
+public func testSupport_bridgePropagatesCancellation() -> Bool {
+    #if SKIP_BRIDGE
+    return jniContext {
+        let samples = try? JClass(name: "skip/bridge/to/swift/samples/SamplesKt")
+        return samples?.getStaticMethodID(name: "callback_kotlinAsyncParkingFunction", sig: "(Lkotlin/jvm/functions/Function2;)Lkotlinx/coroutines/Job;") != nil
+    }
+    #else
+    return true
+    #endif
+}
+
+/// Cancels the Swift task once the Kotlin coroutine is parked; nil on success, else what went wrong.
+public func testSupport_cancelParkedKotlinAsyncFunction() async -> String? {
+    kotlinAsyncParkingFunctionIsParked = false
+    kotlinAsyncParkingFunctionObservedCancellation = false
+    let task = Task { try await kotlinAsyncParkingFunction() }
+    let deadline = ContinuousClock.now + .seconds(10)
+    while !kotlinAsyncParkingFunctionIsParked {
+        guard ContinuousClock.now < deadline else {
+            task.cancel()
+            return "The Kotlin coroutine never parked"
+        }
+        try? await Task.sleep(for: .milliseconds(10))
+    }
+    task.cancel()
+    return await failureDescription(of: task, expectObservedCancellation: true)
+}
+
+/// Cancels the Swift task before it can reach Kotlin; nil on success, else what went wrong.
+public func testSupport_cancelKotlinAsyncFunctionBeforeStart() async -> String? {
+    kotlinAsyncParkingFunctionIsParked = false
+    kotlinAsyncParkingFunctionObservedCancellation = false
+    let task = Task { try await kotlinAsyncParkingFunction() }
+    task.cancel()
+    return await failureDescription(of: task, expectObservedCancellation: false)
+}
+
+private func failureDescription(of task: Task<Int, Error>, expectObservedCancellation: Bool) async -> String? {
+    // A bridge that does not propagate the cancellation leaves the await parked forever, so wait
+    // for the result on the side with a deadline rather than awaiting the task directly
+    let outcome = TaskOutcome()
+    Task { outcome.set(await task.result) }
+    let deadline = ContinuousClock.now + .seconds(5)
+    while outcome.get() == nil && ContinuousClock.now < deadline {
+        try? await Task.sleep(for: .milliseconds(10))
+    }
+    guard let result = outcome.get() else {
+        return "The await did not resume within 5 s of the cancellation"
+    }
+    switch result {
+    case .success(let value):
+        return "Returned \(value) instead of throwing"
+    case .failure(let error):
+        guard error is CancellationError else {
+            return "Threw \(error) instead of CancellationError"
+        }
+        if expectObservedCancellation && !kotlinAsyncParkingFunctionObservedCancellation {
+            return "The Kotlin coroutine did not observe the cancellation"
+        }
+        return nil
+    }
+}
+
 public func testSupport_kotlinAsyncStream(content: [Int]) async -> Bool {
     let stream = kotlinMakeAsyncStream()
     var i = 0
@@ -1009,4 +1077,21 @@ public func testSupport_kotlinMakeData(string: String) -> String {
 public func testSupport_kotlinMakeDate(timeIntervalSinceReferenceDate: Double) -> Double {
     let date = kotlinMakeDate(matching: Date(timeIntervalSinceReferenceDate: timeIntervalSinceReferenceDate))
     return date.timeIntervalSinceReferenceDate
+}
+
+private final class TaskOutcome: @unchecked Sendable {
+    private let lock = NSLock()
+    private var result: Result<Int, Error>?
+
+    func set(_ result: Result<Int, Error>) {
+        lock.lock()
+        self.result = result
+        lock.unlock()
+    }
+
+    func get() -> Result<Int, Error>? {
+        lock.lock()
+        defer { lock.unlock() }
+        return result
+    }
 }
