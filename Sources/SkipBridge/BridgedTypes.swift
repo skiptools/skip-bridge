@@ -375,16 +375,19 @@ extension Array {
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
         let isKotlincompatContainer = options.contains(.kotlincompatContainer)
         let options = options.subtracting(.kotlincompatContainer)
-        // let list = ArrayList(count)
-        let list_java = try! Java_ArrayList.create(ctor: Java_ArrayList_constructor_methodID, options: options, args: [Int32(self.count).toJavaParameter(options: options)])
-        for element in self {
-            // list.add(element)
-            let element_java = AnyBridging.toJavaObject(element, options: options)
-            let _ = try! Bool.call(Java_ArrayList_add_methodID, on: list_java, options: options, args: [element_java.toJavaParameter(options: options)])
-            if let element_java {
-                JNI.jni.deleteLocalRef(element_java)
+        // let list = ArrayList(Arrays.asList(elements))
+        let elements_java = JNI.jni.withEnv { $0.NewObjectArray($1, Int32(self.count), Java_Object_class, nil) }!
+        if let elementType = Element.self as? JConvertible.Type {
+            storeJavaElements(elementType, into: elements_java, options: options)
+        } else {
+            for (index, element) in self.enumerated() {
+                storeJavaElement(AnyBridging.toJavaObject(element, options: options), at: index, into: elements_java)
             }
         }
+        let elementsList_java: JavaObjectPointer = try! Java_Arrays.callStatic(method: Java_Arrays_asList_methodID, options: options, args: [elements_java.toJavaParameter(options: options)])
+        let list_java = try! Java_ArrayList.create(ctor: Java_ArrayList_collectionConstructor_methodID, options: options, args: [elementsList_java.toJavaParameter(options: options)])
+        JNI.jni.deleteLocalRef(elementsList_java)
+        JNI.jni.deleteLocalRef(elements_java)
         if isKotlincompatContainer || options.contains(.kotlincompat) {
             return list_java
         } else {
@@ -399,8 +402,35 @@ private let Java_SkipArray = try! JClass(name: "skip/lib/Array")
 private let Java_SkipArray_constructor_methodID = Java_SkipArray.getMethodID(name: "<init>", sig: "(Ljava/lang/Iterable;ZZ)V")!
 private let Java_SkipArray_kotlin_methodID = Java_SkipArray.getMethodID(name: "kotlin", sig: "(Z)Ljava/util/List;")!
 private let Java_ArrayList = try! JClass(name: "java/util/ArrayList")
-private let Java_ArrayList_constructor_methodID = Java_ArrayList.getMethodID(name: "<init>", sig: "(I)V")!
-private let Java_ArrayList_add_methodID = Java_ArrayList.getMethodID(name: "add", sig: "(Ljava/lang/Object;)Z")!
+private let Java_ArrayList_collectionConstructor_methodID = Java_ArrayList.getMethodID(name: "<init>", sig: "(Ljava/util/Collection;)V")!
+private let Java_Arrays = try! JClass(name: "java/util/Arrays")
+private let Java_Arrays_asList_methodID = Java_Arrays.getStaticMethodID(name: "asList", sig: "([Ljava/lang/Object;)Ljava/util/List;")!
+private let Java_Object_class: JavaClassPointer = JNI.jni.withEnv { jni, env in
+    let cls = jni.FindClass(env, "java/lang/Object")!
+    defer { jni.DeleteLocalRef(env, cls) }
+    return jni.NewGlobalRef(env, cls)!
+}
+
+extension Array {
+    /// Converts every element through `E`'s own `toJavaObject`, opening the `JConvertible` existential once per array instead of casting each element.
+    fileprivate func storeJavaElements<E: JConvertible>(_ elementType: E.Type, into elements_java: JavaObjectPointer, options: JConvertibleOptions) {
+        self.withUnsafeBufferPointer { buffer in
+            buffer.withMemoryRebound(to: E.self) { elements in
+                for index in elements.indices {
+                    storeJavaElement(elements[index].toJavaObject(options: options), at: index, into: elements_java)
+                }
+            }
+        }
+    }
+}
+
+private func storeJavaElement(_ element_java: JavaObjectPointer?, at index: Int, into elements_java: JavaObjectPointer) {
+    JNI.jni.withEnv { $0.SetObjectArrayElement($1, elements_java, Int32(index), element_java) }
+    if let element_java {
+        JNI.jni.deleteLocalRef(element_java)
+    }
+}
+
 private let Java_List = try! JClass(name: "java/util/List")
 private let Java_List_size_methodID = Java_List.getMethodID(name: "size", sig: "()I")!
 private let Java_List_get_methodID = Java_List.getMethodID(name: "get", sig: "(I)Ljava/lang/Object;")!
