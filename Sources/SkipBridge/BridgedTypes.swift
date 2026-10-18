@@ -212,6 +212,17 @@ public struct AnyBridging {
         }
     }
 
+    /// Convert a Kotlin/Java container element of a known base type to its Swift projection, mapping `null` to `nil` for optional types.
+    static func fromJavaElement<T>(_ ptr: JavaObjectPointer?, toBaseType: T.Type, options: JConvertibleOptions) -> T {
+        guard let ptr else {
+            guard let nilType = T.self as? ExpressibleByNilLiteral.Type else {
+                fatalError("Unable to bridge null Kotlin/Java element to non-optional Swift type \(T.self)")
+            }
+            return nilType.init(nilLiteral: ()) as! T
+        }
+        return fromJavaObject(ptr, toBaseType: T.self, options: options)!
+    }
+
     /// Convert an unknown Kotlin/Java instance to its Swift projection.
     public static func fromJavaObject(_ ptr: JavaObjectPointer?, options: JConvertibleOptions, fallback: (() -> Any)? = nil) -> Any? {
         guard let ptr else {
@@ -363,7 +374,7 @@ extension Array {
         for i in 0..<count {
             // arr.append(list.get(i))
             let element_java = try! JavaObjectPointer?.call(Java_List_get_methodID, on: list_java, options: options, args: [i.toJavaParameter(options: options)])
-            let element = AnyBridging.fromJavaObject(element_java, toBaseType: Element.self, options: options)!
+            let element = AnyBridging.fromJavaElement(element_java, toBaseType: Element.self, options: options)
             arr.append(element)
             if let element_java {
                 JNI.jni.deleteLocalRef(element_java)
@@ -712,8 +723,8 @@ extension Dictionary {
             // let key = itr.next(); let value = map.get(key)
             let key_java = try! JavaObjectPointer?.call(Java_Iterator_next_methodID, on: iterator_java, options: options, args: [])
             let value_java = try! JavaObjectPointer?.call(Java_Map_get_methodID, on: map_java, options: options, args: [key_java.toJavaParameter(options: options)])
-            let key = AnyBridging.fromJavaObject(key_java, toBaseType: Key.self, options: options)!
-            let value = AnyBridging.fromJavaObject(value_java, toBaseType: Value.self, options: options)!
+            let key = AnyBridging.fromJavaElement(key_java, toBaseType: Key.self, options: options)
+            let value = AnyBridging.fromJavaElement(value_java, toBaseType: Value.self, options: options)
             dict[key] = value
             if let key_java {
                 JNI.jni.deleteLocalRef(key_java)
@@ -869,7 +880,7 @@ extension Result {
             return .failure(error)
         } else {
             let success_java: JavaObjectPointer? = try! pair_java.call(method: Java_Pair_first_methodID, options: options, args: [])
-            let success = AnyBridging.fromJavaObject(success_java, toBaseType: Success.self, options: options)!
+            let success = AnyBridging.fromJavaElement(success_java, toBaseType: Success.self, options: options)
             return .success(success)
         }
     }
@@ -926,7 +937,7 @@ extension Set {
         for _ in 0..<size {
             // set.insert(itr.next())
             let element_java = try! JavaObjectPointer?.call(Java_Iterator_next_methodID, on: iterator_java, options: options, args: [])
-            let element = AnyBridging.fromJavaObject(element_java, toBaseType: Element.self, options: options)!
+            let element = AnyBridging.fromJavaElement(element_java, toBaseType: Element.self, options: options)
             set.insert(element)
             if let element_java {
                 JNI.jni.deleteLocalRef(element_java)
