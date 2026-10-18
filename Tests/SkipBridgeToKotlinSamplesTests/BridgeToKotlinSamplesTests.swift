@@ -673,6 +673,12 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftIntArrayVar, [99])
     }
 
+    func testArraysWithNilElements() {
+        XCTAssertEqual(swiftOptionalStringArrayVar, ["a", nil, "c"])
+        swiftOptionalStringArrayVar = [nil, "e", nil]
+        XCTAssertEqual(swiftOptionalStringArrayVar, [nil, "e", nil])
+    }
+
     func testSets() {
         XCTAssertEqual(swiftStringSetVar, Set(["a", "b", "c"]))
         XCTAssertEqual(swiftStringSetVar.count, 3)
@@ -686,6 +692,12 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftStringSetVar, Set(["x"]))
     }
 
+    func testSetsWithNilElements() {
+        XCTAssertEqual(swiftOptionalStringSetVar, Set(["a", nil]))
+        swiftOptionalStringSetVar = [nil, "e"]
+        XCTAssertEqual(swiftOptionalStringSetVar, Set([nil, "e"]))
+    }
+
     func testDictionaries() {
         XCTAssertEqual(swiftIntStringDictionaryVar, [1: "a", 2: "b", 3: "c"])
         XCTAssertEqual(swiftIntStringDictionaryVar[2], "b")
@@ -694,6 +706,12 @@ final class BridgeToKotlinTests: XCTestCase {
         XCTAssertEqual(swiftIntStringDictionaryVar[5], "e")
         swiftIntStringDictionaryVar = [:]
         XCTAssertEqual(swiftIntStringDictionaryVar, Dictionary<Int, String>())
+    }
+
+    func testDictionariesWithNilValues() {
+        XCTAssertEqual(swiftIntOptionalStringDictionaryVar, [1: "a", 2: nil])
+        swiftIntOptionalStringDictionaryVar = [3: nil, 4: "d"]
+        XCTAssertEqual(swiftIntOptionalStringDictionaryVar, [3: nil, 4: "d"])
     }
 
     func testTuples() {
