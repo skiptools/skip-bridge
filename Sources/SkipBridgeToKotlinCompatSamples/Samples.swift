@@ -15,6 +15,9 @@ public class Compat {
     public var nestedURLCallback3: (URL?, @escaping (Int, Int, URL) -> URL) -> Void = { _, _ in }
     public var nestedURLCallback4: (URL?, @escaping (Int, Int, Int, URL) -> URL) -> Void = { _, _ in }
     public var nestedURLCallback5: (URL?, @escaping (Int, Int, Int, Int, URL) -> URL) -> Void = { _, _ in }
+    public var onDeposit: @MainActor (@escaping @MainActor () -> Void) -> Void = { completion in completion() }
+    public var nestedReturnCallback: (Int, @escaping (Int) -> String) -> String = { i, transform in transform(i * 2) }
+    public var optionalNestedCallback: ((@escaping (Int) -> Void) -> Void)? = { completion in completion(7) }
     public var nestedURLCallback0Value: URL?
     public var nestedURLCallbackValue: URL?
     public var nestedURLCallback2Value: URL?
@@ -40,6 +43,12 @@ public class Compat {
             collected.append(value)
         }
         return collected
+    }
+
+    @MainActor public func invokeOnDeposit() -> Bool {
+        var deposited = false
+        onDeposit { deposited = true }
+        return deposited
     }
 
     public func invokeNestedURLCallback(with url: URL?) {

@@ -112,6 +112,34 @@ final class BridgeToKotlinCompatTests: XCTestCase {
         #endif
     }
 
+    func testCompatNestedClosureSetFromKotlin() {
+        #if SKIP
+        let compat = Compat(id: java.util.UUID.randomUUID())
+        var kotlinOnDepositCalled = false
+        compat.onDeposit = { completion in
+            kotlinOnDepositCalled = true
+            completion()
+        }
+        XCTAssertTrue(compat.invokeOnDeposit())
+        XCTAssertTrue(kotlinOnDepositCalled)
+        #endif
+    }
+
+    func testCompatNestedClosureCalledFromKotlin() {
+        #if SKIP
+        let compat = Compat(id: java.util.UUID.randomUUID())
+        var deposited = false
+        compat.onDeposit({ deposited = true })
+        XCTAssertTrue(deposited)
+
+        XCTAssertEqual(compat.nestedReturnCallback(21, { i in "kotlin \(i)" }), "kotlin 42")
+
+        var received: Int? = nil
+        compat.optionalNestedCallback?({ i in received = i })
+        XCTAssertEqual(received, 7)
+        #endif
+    }
+
     func testCompatNestedClosureCallbackArities() {
         #if SKIP
         let compat = Compat(id: java.util.UUID.randomUUID())
