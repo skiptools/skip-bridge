@@ -833,6 +833,15 @@ public func testSupport_kotlinClosure1OptionalsVar(value: String?) -> Int? {
     return i1 == i2 ? i1 : (i1 ?? 0) * 10000 + (i2 ?? 0)
 }
 
+public func testSupport_kotlinNestedClosureVar(value: Int) -> String {
+    // Kotlin closure called from Swift with a Swift closure argument
+    let s1 = kotlinNestedClosureVar(value) { i in "swift \(i)" }
+    // Swift closure called from Kotlin with a Kotlin closure argument
+    kotlinNestedClosureVar = { i, transform in transform(i + 1) }
+    let s2 = kotlinInvokeNestedClosureVar(value: value)
+    return s1 + "/" + s2
+}
+
 public func testSupport_kotlinClosure1Parameter(value: (Int) -> String) {
     // We're only testing that using a closure as a parameter compiles cleanly
 }

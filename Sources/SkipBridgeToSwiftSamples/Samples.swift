@@ -380,6 +380,11 @@ public var kotlinClosure0ProtocolVar: () -> any KotlinProtocol = { KotlinHelperC
 public var kotlinClosure1Var: (Int) -> String = { i in "value = \(i)" }
 public var kotlinClosure1PrimitivesVar: (Int64) -> Int = { l in Int(l / 1000) }
 public var kotlinClosure1OptionalsVar: (String?) -> Int? = { s in s?.count }
+public var kotlinNestedClosureVar: (Int, @escaping (Int) -> String) -> String = { i, transform in transform(i * 2) }
+
+public func kotlinInvokeNestedClosureVar(value: Int) -> String {
+    return kotlinNestedClosureVar(value) { i in "kotlin \(i)" }
+}
 
 // MARK: Containers
 

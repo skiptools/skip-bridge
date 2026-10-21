@@ -295,6 +295,10 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(testSupport_kotlinClosure1Var(value: 100), "value = 100")
     }
 
+    func testNestedClosureVar() {
+        XCTAssertEqual(testSupport_kotlinNestedClosureVar(value: 20), "swift 40/kotlin 21")
+    }
+
     func testClosure1PrimitivesVar() {
         XCTAssertEqual(testSupport_kotlinClosure1PrimitivesVar(value: Int64(3000)), 3)
     }
