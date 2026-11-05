@@ -1,5 +1,4 @@
 // Copyright 2024–2026 Skip
-// SPDX-License-Identifier: MPL-2.0
 import SwiftJNI
 
 /// A Swift object that is backed by a Java closure in the form of a `kotlin.jvm.functions.FunctionN` object.

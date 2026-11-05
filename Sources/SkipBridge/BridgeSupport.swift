@@ -1,5 +1,4 @@
 // Copyright 2024–2026 Skip
-// SPDX-License-Identifier: MPL-2.0
 
 /// Protocol added to compiled Swift types that are bridged to Kotlin.
 public protocol BridgedToKotlin: JObjectProtocol, JConvertible {

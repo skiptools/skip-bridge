@@ -71,8 +71,3 @@ skip:
 
 - [swift-jni](https://github.com/skiptools/swift-jni) — JNI C headers and Swift JNI wrapper
 - [SkipLib](https://github.com/skiptools/skip-lib) — Swift standard library extensions for Skip
-
-## License
-
-This software is licensed under the
-[Mozilla Public License 2.0](https://www.mozilla.org/MPL/).

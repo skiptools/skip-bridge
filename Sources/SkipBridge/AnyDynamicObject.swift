@@ -1,5 +1,4 @@
 // Copyright 2024–2026 Skip
-// SPDX-License-Identifier: MPL-2.0
 
 /// A dynamic object is able to represent any Kotlin object using dynamic member lookups
 /// in Swift and reflection in Kotlin.

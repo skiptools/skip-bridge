@@ -1,5 +1,4 @@
 // Copyright 2025–2026 Skip
-// SPDX-License-Identifier: MPL-2.0
 import SwiftJNI
 
 /// Utility type used to provide an `any Equatable` equivalent to Kotlin, where the underlying type

@@ -1,5 +1,4 @@
 // Copyright 2025–2026 Skip
-// SPDX-License-Identifier: MPL-2.0
 
 /// Utility type used to provide an `AnyHashable` equivalent to Kotlin, where the underlying type
 /// is not necessarily bridged.
