@@ -1021,12 +1021,41 @@ extension URL {
     }
 
     public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
-        let absoluteString = self.absoluteString
-        if options.contains(.kotlincompat) {
-            return try! Java_URI.create(ctor: Java_URI_constructor_methodID, options: options, args: [absoluteString.toJavaParameter(options: options)])
-        } else {
-            return try! Java_SkipURL.create(ctor: Java_SkipURL_constructor_methodID, options: options, args: [absoluteString.toJavaParameter(options: options), (nil as JavaObjectPointer?).toJavaParameter(options: options)])
+        guard let obj = toRepresentableJavaObject(options: options) else {
+            fatalError("Unable to bridge URL '\(absoluteString)': java.net.URI cannot represent it. Bridge it as an optional URL to receive nil instead.")
         }
+        return obj
+    }
+
+    /// Converts this URL to its Java representation, or returns nil when `java.net.URI` cannot represent it.
+    ///
+    /// Swift's URL parser accepts some URLs that `java.net.URI` rejects, such as a scheme with an empty
+    /// scheme-specific part (`https:`) or an empty authority (`http://`).
+    fileprivate func toRepresentableJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
+        let absoluteString = self.absoluteString
+        // The Java constructors throw for strings java.net.URI rejects; the pending Java exception is cleared before the Swift error is thrown
+        do {
+            if options.contains(.kotlincompat) {
+                return try Java_URI.create(ctor: Java_URI_constructor_methodID, options: options, args: [absoluteString.toJavaParameter(options: options)])
+            } else {
+                return try Java_SkipURL.create(ctor: Java_SkipURL_constructor_methodID, options: options, args: [absoluteString.toJavaParameter(options: options), (nil as JavaObjectPointer?).toJavaParameter(options: options)])
+            }
+        } catch {
+            return nil
+        }
+    }
+}
+
+extension Optional where Wrapped == URL {
+    /// Converts an optional URL to its Java representation.
+    ///
+    /// A URL that `java.net.URI` cannot represent, such as `https:` or `http://`, is converted to `nil`
+    /// rather than terminating the process, so an optional URL parameter or return value receives `nil` in Kotlin.
+    ///
+    /// This overload is selected when the static type is `URL?`, which is how generated bridging code converts
+    /// optional URLs. Conversions made through generic `JConvertible` code still use `URL.toJavaObject(options:)`.
+    public func toJavaObject(options: JConvertibleOptions) -> JavaObjectPointer? {
+        return self?.toRepresentableJavaObject(options: options)
     }
 }
 

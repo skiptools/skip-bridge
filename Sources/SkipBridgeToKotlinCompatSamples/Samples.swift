@@ -25,6 +25,11 @@ public class Compat {
         self.id = id
     }
 
+    /// Parses the string with Swift's URL parser and returns the result to Kotlin as an optional URL.
+    public func makeOptionalURL(string: String) -> URL? {
+        return URL(string: string)
+    }
+
     public func makeAsyncStream() -> AsyncStream<Int> {
         let (stream, continuation) = AsyncStream.makeStream(of: Int.self)
         continuation.yield(100)

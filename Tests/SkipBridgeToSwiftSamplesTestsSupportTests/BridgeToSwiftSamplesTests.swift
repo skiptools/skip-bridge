@@ -405,6 +405,20 @@ final class BridgeToSwiftTests: XCTestCase {
         XCTAssertEqual(string, testSupport_kotlinMakeURL(string: string))
     }
 
+    func testUnrepresentableOptionalURL() {
+        // Swift accepts URLs with an empty scheme-specific part or an empty authority, which java.net.URI rejects.
+        // Bridging them as an optional parameter must not trap; Kotlin receives nil instead.
+        #if SKIP
+        XCTAssertNil(testSupport_kotlinOptionalURLAbsoluteString(string: "https:"))
+        XCTAssertNil(testSupport_kotlinOptionalURLAbsoluteString(string: "http://"))
+        #else
+        XCTAssertEqual("https:", testSupport_kotlinOptionalURLAbsoluteString(string: "https:"))
+        XCTAssertEqual("http://", testSupport_kotlinOptionalURLAbsoluteString(string: "http://"))
+        #endif
+        // Representable URLs, including percent-encoded ones, are bridged unchanged
+        XCTAssertEqual("https://skip.dev/a%7Cb", testSupport_kotlinOptionalURLAbsoluteString(string: "https://skip.dev/a%7Cb"))
+    }
+
     func testUUID() {
         let string = UUID().uuidString
         XCTAssertEqual(string, testSupport_kotlinMakeUUID(string: string))

@@ -33,6 +33,18 @@ final class BridgeToKotlinCompatTests: XCTestCase {
         #endif
     }
 
+    func testCompatUnrepresentableOptionalURL() {
+        #if SKIP
+        // Swift accepts URLs with an empty scheme-specific part or an empty authority, which java.net.URI rejects.
+        // Returning them to Kotlin as an optional java.net.URI must not trap; Kotlin receives nil instead.
+        let compat = Compat(id: java.util.UUID.randomUUID())
+        XCTAssertNil(compat.makeOptionalURL(string: "https:"))
+        XCTAssertNil(compat.makeOptionalURL(string: "http://"))
+        // Representable URLs, including percent-encoded ones, are bridged unchanged
+        XCTAssertEqual(java.net.URI("https://skip.dev/a%7Cb"), compat.makeOptionalURL(string: "https://skip.dev/a%7Cb"))
+        #endif
+    }
+
     func testCompatTuplePair() {
         #if SKIP
         let uuid = java.util.UUID.randomUUID()
