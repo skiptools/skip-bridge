@@ -15,7 +15,8 @@ jobs:
   call-workflow:
     uses: skiptools/actions/.github/workflows/skip-framework.yml@v1
     with:
-      runs-on: "['macos-15-intel', 'ubuntu-24.04']"
+      # arm macOS runs iOS and Robolectric; the emulator step is skipped there (no nested virtualization) and runs on Ubuntu
+      runs-on: "['macos-26', 'ubuntu-24.04']"
       swift-android-sdk-version: "['', 'nightly-main']"
       # disable export because there are currently problems with shared PCH module cache files with multi-module native export
       run-export: false
