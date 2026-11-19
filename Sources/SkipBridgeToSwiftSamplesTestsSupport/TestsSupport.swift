@@ -1063,6 +1063,11 @@ public func testSupport_kotlinMakeURL(string: String) -> String {
     return url!.absoluteString
 }
 
+/// Passes a Swift-parsed URL to Kotlin as an optional parameter and returns the absolute string Kotlin received.
+public func testSupport_kotlinOptionalURLAbsoluteString(string: String) -> String? {
+    return kotlinOptionalURLAbsoluteString(URL(string: string)!)
+}
+
 public func testSupport_kotlinMakeUUID(string: String) -> String {
     let uuid = kotlinMakeUUID(matching: UUID(uuidString: string)!)
     return uuid!.uuidString

@@ -521,6 +521,11 @@ public func swiftMakeURL(matching url: URL) -> URL? {
     return URL(string: url.absoluteString)
 }
 
+/// Parses the string with Swift's URL parser and returns the result to Kotlin as an optional URL.
+public func swiftMakeOptionalURL(string: String) -> URL? {
+    return URL(string: string)
+}
+
 public func swiftMakeUUID(matching uuid: UUID) -> UUID? {
     return UUID(uuidString: uuid.uuidString)
 }

@@ -506,6 +506,11 @@ public func kotlinMakeURL(matching url: URL) -> URL? {
     return URL(string: url.absoluteString)
 }
 
+/// Returns the absolute string of the optional URL received from Swift, or nil when no URL was received.
+public func kotlinOptionalURLAbsoluteString(_ url: URL?) -> String? {
+    return url?.absoluteString
+}
+
 public func kotlinMakeUUID(matching uuid: UUID) -> UUID? {
     return UUID(uuidString: uuid.uuidString)
 }
